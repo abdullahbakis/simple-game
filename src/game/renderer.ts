@@ -1,16 +1,12 @@
 import { GAME, CANDY_RGB } from './constants';
+import type { RenderContext } from './constants';
 import type { Spawner } from './spawner';
 import type { DrawingState } from './drawing';
 import type { Bucket } from './bucket';
 import type { ObstacleState } from './obstacles';
+import type { HazardState } from './hazards';
 import type { VfxState } from './vfx';
-
-export interface RenderContext {
-  ctx: CanvasRenderingContext2D;
-  width: number;
-  height: number;
-  now: number;
-}
+import { renderHazards } from './hazards-renderer';
 
 export function renderFrame(
   rc: RenderContext,
@@ -18,6 +14,7 @@ export function renderFrame(
   drawing: DrawingState,
   bucket: Bucket,
   obstacles: ObstacleState,
+  hazards: HazardState,
   vfx: VfxState
 ) {
   const { ctx, width, height } = rc;
@@ -29,6 +26,7 @@ export function renderFrame(
   renderStaticBars(rc, obstacles);
   renderSpinners(rc, obstacles);
   renderMovingPlatforms(rc, obstacles);
+  renderHazards(rc, hazards);
   renderFunnelCollector(rc, bucket);
   renderCandyRibbons(ctx, drawing, rc.now);
   renderCandyBalls(ctx, spawner, rc.now);

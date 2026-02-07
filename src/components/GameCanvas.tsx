@@ -17,7 +17,16 @@ import {
 } from '../game/drawing';
 import { createBucket, addBucketToWorld, updateBucketPulse } from '../game/bucket';
 import { createObstacles, addObstaclesToWorld, updateObstacles, applyWindForces } from '../game/obstacles';
-import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, updateVfx } from '../game/vfx';
+import {
+  createHazards,
+  addHazardsToWorld,
+  updateHazards,
+  applyHazardForces,
+  applyTeleporters,
+  findHazardKills,
+  cleanupTeleporterCooldowns,
+} from '../game/hazards';
+import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, spawnHazardKillSparks, updateVfx } from '../game/vfx';
 import { renderFrame, renderCountdown } from '../game/renderer';
 import { GAME, getLevelConfig } from '../game/constants';
 import type { LevelConfig } from '../game/constants';
@@ -25,6 +34,7 @@ import type { Spawner } from '../game/spawner';
 import type { DrawingState } from '../game/drawing';
 import type { Bucket } from '../game/bucket';
 import type { ObstacleState } from '../game/obstacles';
+import type { HazardState } from '../game/hazards';
 import type { VfxState } from '../game/vfx';
 
 export interface GameStats {
@@ -59,6 +69,7 @@ export default function GameCanvas({
     drawing: DrawingState;
     bucket: Bucket;
     obstacles: ObstacleState;
+    hazards: HazardState;
     vfx: VfxState;
     levelConfig: LevelConfig;
     score: number;
@@ -108,6 +119,14 @@ export default function GameCanvas({
       bucket.y
     );
     addObstaclesToWorld(obstacles, world);
+    const hazards = createHazards(
+      levelConfig,
+      width,
+      height,
+      bucket.x + GAME.bucketWidth / 2,
+      bucket.y
+    );
+    addHazardsToWorld(hazards, world);
     const vfx = createVfxState();
 
     const state = {
@@ -117,6 +136,7 @@ export default function GameCanvas({
       drawing,
       bucket,
       obstacles,
+      hazards,
       vfx,
       levelConfig,
       score: 0,
@@ -214,6 +234,7 @@ export default function GameCanvas({
           state.drawing,
           state.bucket,
           state.obstacles,
+          state.hazards,
           state.vfx
         );
         return;
@@ -233,6 +254,28 @@ export default function GameCanvas({
       updateBucketPulse(state.bucket, delta);
       updateObstacles(state.obstacles, timestamp, delta);
       applyWindForces(state.obstacles, state.spawner.particles);
+
+      updateHazards(state.hazards, timestamp, delta, width, height);
+      applyHazardForces(state.hazards, state.spawner.particles);
+      applyTeleporters(state.hazards, state.spawner.particles, timestamp);
+
+      const hazardKills = findHazardKills(state.hazards, state.spawner.particles);
+      for (const p of hazardKills) {
+        if (!state.collectedBodies.has(p.body.id)) {
+          state.totalMissed++;
+          const pos = p.body.position;
+          spawnHazardKillSparks(state.vfx, pos.x, pos.y, 255, 80, 40);
+        }
+        removeParticle(state.spawner, state.world, p);
+      }
+      if (hazardKills.length > 0) {
+        pushStats();
+        checkFailure();
+      }
+
+      const activeIds = new Set(state.spawner.particles.map(p => p.body.id));
+      cleanupTeleporterCooldowns(state.hazards, activeIds);
+
       updateVfx(state.vfx, delta);
 
       const missed = findMissedParticles(state.spawner, height);
@@ -253,6 +296,7 @@ export default function GameCanvas({
         state.drawing,
         state.bucket,
         state.obstacles,
+        state.hazards,
         state.vfx
       );
 

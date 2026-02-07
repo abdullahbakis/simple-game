@@ -1,3 +1,5 @@
+export const MAX_LEVEL = 50;
+
 export const CANDY_PALETTE = ['#FF6B9D', '#00D4FF', '#7FFF00', '#FFD93D', '#FF8C42', '#FF6B6B'] as const;
 
 export const CANDY_RGB: readonly [number, number, number][] = [
@@ -28,30 +30,50 @@ export const GAME = {
   countdownDuration: 3000,
 };
 
+export interface RenderContext {
+  ctx: CanvasRenderingContext2D;
+  width: number;
+  height: number;
+  now: number;
+}
+
 export function getLevelConfig(level: number) {
-  const baseTarget = 50;
-  const targetIncrease = 30;
-  const target = baseTarget + (level - 1) * targetIncrease;
+  const l = Math.min(level, MAX_LEVEL);
 
-  const baseInterval = 180;
-  const minInterval = 40;
-  const spawnInterval = Math.max(minInterval, baseInterval - (level - 1) * 16);
+  const target = 40 + (l - 1) * 6;
+  const spawnInterval = Math.max(50, Math.round(180 - (l - 1) * 2.6));
+  const gravityScale = 1 + (l - 1) * 0.02;
 
-  const gravityScale = 1 + (level - 1) * 0.05;
+  const staticBarCount = l >= 2 ? Math.min(Math.ceil((l - 1) / 2), 3) : 0;
+  const windZoneCount = l >= 4 ? Math.min(Math.ceil((l - 3) / 3), 2) : 0;
+  const spinnerCount = l >= 6 ? Math.min(Math.ceil((l - 5) / 2), 3) : 0;
+  const movingPlatformCount = l >= 9 ? Math.min(Math.ceil((l - 8) / 2), 3) : 0;
 
-  const staticBarCount = level >= 2 ? Math.min(level - 1, 2) : 0;
-  const windZoneCount = level >= 4 ? Math.min(level - 3, 2) : 0;
-  const spinnerCount = level >= 6 ? Math.min(level - 5, 3) : 0;
-  const movingPlatformCount = level >= 9 ? Math.min(level - 8, 4) : 0;
+  const blackHoleCount = l >= 12 ? Math.min(Math.ceil((l - 11) / 4), 2) : 0;
+  const lavaPoolCount = l >= 16 ? Math.min(Math.ceil((l - 15) / 4), 2) : 0;
+  const iceZoneCount = l >= 20 ? Math.min(Math.ceil((l - 19) / 4), 2) : 0;
+  const teleporterCount = l >= 25 ? Math.min(Math.ceil((l - 24) / 5), 2) : 0;
+  const empPulseCount = l >= 30 ? Math.min(Math.ceil((l - 29) / 4), 2) : 0;
+  const gravityFlipperCount = l >= 35 ? Math.min(Math.ceil((l - 34) / 4), 2) : 0;
+  const laserGateCount = l >= 40 ? Math.min(Math.ceil((l - 39) / 4), 2) : 0;
+  const asteroidCount = l >= 45 ? Math.min(l - 44, 3) : 0;
 
   const hazards: string[] = [];
   if (staticBarCount > 0) hazards.push('DEFLECTOR BARS');
   if (windZoneCount > 0) hazards.push('WIND ZONES');
   if (spinnerCount > 0) hazards.push('SPINNERS');
   if (movingPlatformCount > 0) hazards.push('MOVING PLATFORMS');
+  if (blackHoleCount > 0) hazards.push('BLACK HOLES');
+  if (lavaPoolCount > 0) hazards.push('LAVA POOLS');
+  if (iceZoneCount > 0) hazards.push('ICE ZONES');
+  if (teleporterCount > 0) hazards.push('TELEPORTERS');
+  if (empPulseCount > 0) hazards.push('EMP PULSES');
+  if (gravityFlipperCount > 0) hazards.push('GRAVITY FLIPPERS');
+  if (laserGateCount > 0) hazards.push('LASER GATES');
+  if (asteroidCount > 0) hazards.push('ASTEROIDS');
 
   return {
-    level,
+    level: l,
     target,
     spawnInterval,
     gravityScale,
@@ -59,6 +81,14 @@ export function getLevelConfig(level: number) {
     windZoneCount,
     spinnerCount,
     movingPlatformCount,
+    blackHoleCount,
+    lavaPoolCount,
+    iceZoneCount,
+    teleporterCount,
+    empPulseCount,
+    gravityFlipperCount,
+    laserGateCount,
+    asteroidCount,
     hazards,
   };
 }

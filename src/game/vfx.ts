@@ -43,6 +43,24 @@ export function spawnCollectionSparks(state: VfxState, x: number, y: number) {
   }
 }
 
+export function spawnHazardKillSparks(state: VfxState, x: number, y: number, r: number, g: number, b: number) {
+  const count = 6;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 1 + Math.random() * 2.5;
+    const life = 300 + Math.random() * 200;
+    state.particles.push({
+      x, y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed - 1.5,
+      life,
+      maxLife: life,
+      size: 2 + Math.random() * 2.5,
+      r, g, b,
+    });
+  }
+}
+
 export function spawnDrawingSparks(state: VfxState, x: number, y: number) {
   const count = 1 + Math.floor(Math.random() * 2);
   for (let i = 0; i < count; i++) {

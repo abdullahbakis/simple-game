@@ -115,7 +115,7 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
           </h1>
 
           <p className="text-cyan-300/70 text-sm sm:text-base tracking-[0.25em] uppercase font-semibold">
-            Draw lines -- Guide the candies!
+            50 Levels -- Draw lines -- Guide the candies!
           </p>
         </div>
 
