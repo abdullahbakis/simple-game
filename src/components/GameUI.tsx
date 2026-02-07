@@ -1,3 +1,4 @@
+import { Volume2, VolumeX } from 'lucide-react';
 import { getLevelConfig, MAX_LEVEL } from '../game/constants';
 import type { GameStats } from './GameCanvas';
 
@@ -10,6 +11,8 @@ interface GameUIProps {
   countdown: number;
   onNextLevel: () => void;
   onRetry: () => void;
+  musicOn: boolean;
+  onToggleMusic: () => void;
 }
 
 const HAZARD_STYLES: Record<string, string> = {
@@ -34,10 +37,12 @@ export default function GameUI({
   countdown,
   onNextLevel,
   onRetry,
+  musicOn,
+  onToggleMusic,
 }: GameUIProps) {
   const config = getLevelConfig(level);
   const stabilityPct = Math.max(0, stats.stability * 100);
-  const stabilityDanger = stabilityPct <= 90;
+  const stabilityDanger = stabilityPct <= 92;
   const progressPct = Math.min((stats.score / config.target) * 100, 100);
   const isVictory = level >= MAX_LEVEL && gameState === 'levelComplete';
 
@@ -84,34 +89,47 @@ export default function GameUI({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
-            <span
-              className={`text-xs uppercase tracking-wider font-bold ${
-                stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
-              }`}
-            >
-              HP
-            </span>
-            <div className="w-20 h-2.5 bg-white/10 rounded-full overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  stabilityDanger ? 'bg-red-400' : 'bg-green-400'
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+              <span
+                className={`text-xs uppercase tracking-wider font-bold ${
+                  stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
                 }`}
-                style={{
-                  width: `${stabilityPct}%`,
-                  boxShadow: stabilityDanger
-                    ? '0 0 8px rgba(248,113,113,0.5)'
-                    : '0 0 8px rgba(74,222,128,0.5)',
-                }}
-              />
+              >
+                HP
+              </span>
+              <div className="w-20 h-2.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all duration-300 ${
+                    stabilityDanger ? 'bg-red-400' : 'bg-green-400'
+                  }`}
+                  style={{
+                    width: `${stabilityPct}%`,
+                    boxShadow: stabilityDanger
+                      ? '0 0 8px rgba(248,113,113,0.5)'
+                      : '0 0 8px rgba(74,222,128,0.5)',
+                  }}
+                />
+              </div>
+              <span
+                className={`font-extrabold text-sm tabular-nums ${
+                  stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'
+                }`}
+              >
+                {stabilityPct.toFixed(0)}%
+              </span>
             </div>
-            <span
-              className={`font-extrabold text-sm tabular-nums ${
-                stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'
-              }`}
+
+            <button
+              onClick={onToggleMusic}
+              className="pointer-events-auto p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/20 transition-colors"
             >
-              {stabilityPct.toFixed(0)}%
-            </span>
+              {musicOn ? (
+                <Volume2 className="w-4 h-4 text-cyan-300" />
+              ) : (
+                <VolumeX className="w-4 h-4 text-white/40" />
+              )}
+            </button>
           </div>
         </div>
 

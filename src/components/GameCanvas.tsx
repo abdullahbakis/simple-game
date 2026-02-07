@@ -29,6 +29,7 @@ import {
 import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, spawnHazardKillSparks, updateVfx } from '../game/vfx';
 import { renderFrame, renderCountdown } from '../game/renderer';
 import { GAME, getLevelConfig } from '../game/constants';
+import { playCollect, playMiss, playHazardKill, playCountdownTick, playCountdownGo, playDraw, resumeAudio } from '../game/audio';
 import type { LevelConfig } from '../game/constants';
 import type { Spawner } from '../game/spawner';
 import type { DrawingState } from '../game/drawing';
@@ -171,6 +172,7 @@ export default function GameCanvas({
           const pos = collected.position;
           spawnCollectionSparks(state.vfx, pos.x, pos.y);
           state.bucket.collectPulse = 1;
+          playCollect();
 
           const p = state.spawner.particles.find((pp) => pp.body.id === collected!.id);
           if (p) removeParticle(state.spawner, state.world, p);
@@ -221,10 +223,12 @@ export default function GameCanvas({
         if (sec !== lastCountdownSecond) {
           lastCountdownSecond = sec;
           onCountdownTick(sec);
+          playCountdownTick();
         }
       } else if (!state.spawningStarted) {
         state.spawningStarted = true;
         onCountdownTick(0);
+        playCountdownGo();
       }
 
       if (state.ended) {
@@ -265,6 +269,7 @@ export default function GameCanvas({
           state.totalMissed++;
           const pos = p.body.position;
           spawnHazardKillSparks(state.vfx, pos.x, pos.y, 255, 80, 40);
+          playHazardKill();
         }
         removeParticle(state.spawner, state.world, p);
       }
@@ -282,6 +287,7 @@ export default function GameCanvas({
       for (const p of missed) {
         if (!state.collectedBodies.has(p.body.id)) {
           state.totalMissed++;
+          playMiss();
         }
         removeParticle(state.spawner, state.world, p);
       }
@@ -319,7 +325,8 @@ export default function GameCanvas({
       window.removeEventListener('resize', handleResize);
       cleanup();
     };
-  }, [level, paused, cleanup, onStatsChange, onLevelComplete, onGameOver, onCountdownTick]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [level, cleanup]);
 
   const getCanvasCoords = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -333,6 +340,7 @@ export default function GameCanvas({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      resumeAudio();
       if (paused) return;
       const { x, y } = getCanvasCoords(e);
       if (stateRef.current && !stateRef.current.ended) {
@@ -358,6 +366,7 @@ export default function GameCanvas({
         if (now - stateRef.current.lastDrawSpark > 40) {
           stateRef.current.lastDrawSpark = now;
           spawnDrawingSparks(stateRef.current.vfx, x, y);
+          playDraw();
         }
       }
     },

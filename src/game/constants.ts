@@ -12,20 +12,20 @@ export const CANDY_RGB: readonly [number, number, number][] = [
 ];
 
 export const GAME = {
-  gravity: 1.2,
+  gravity: 1.4,
   particleRadius: 4,
-  chainDecayTime: 5000,
+  chainDecayTime: 4500,
   chainSegmentLength: 12,
   chainSegmentWidth: 10,
   particleRestitution: 0.6,
   particleFriction: 0,
-  bucketWidth: 130,
-  bucketHeight: 90,
+  bucketWidth: 120,
+  bucketHeight: 85,
   bucketWallThickness: 5,
   spawnerWidth: 60,
   trailLength: 8,
   maxParticles: 400,
-  failThreshold: 0.10,
+  failThreshold: 0.08,
   gridSize: 40,
   countdownDuration: 3000,
 };
@@ -40,9 +40,9 @@ export interface RenderContext {
 export function getLevelConfig(level: number) {
   const l = Math.min(level, MAX_LEVEL);
 
-  const target = 40 + (l - 1) * 6;
-  const spawnInterval = Math.max(50, Math.round(180 - (l - 1) * 2.6));
-  const gravityScale = 1 + (l - 1) * 0.02;
+  const target = 35 + (l - 1) * 7 + Math.floor(l / 10) * 5;
+  const spawnInterval = Math.max(45, Math.round(170 - (l - 1) * 2.8));
+  const gravityScale = 1 + (l - 1) * 0.025;
 
   const staticBarCount = l >= 2 ? Math.min(Math.ceil((l - 1) / 2), 3) : 0;
   const windZoneCount = l >= 4 ? Math.min(Math.ceil((l - 3) / 3), 2) : 0;

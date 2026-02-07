@@ -1,7 +1,9 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
+import { ChevronDown, Lock, Unlock } from 'lucide-react';
+import { getUnlockedMilestones, MILESTONE_NAMES, loadProgress } from '../game/progress';
 
 interface StartMenuProps {
-  onPlay: () => void;
+  onPlay: (startLevel: number) => void;
 }
 
 const CANDY_COLORS = [
@@ -25,6 +27,10 @@ interface FloatingBlob {
 
 export default function StartMenu({ onPlay }: StartMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [showLevelSelect, setShowLevelSelect] = useState(false);
+  const [selectedLevel, setSelectedLevel] = useState(1);
+  const unlockedMilestones = getUnlockedMilestones();
+  const progress = loadProgress();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -54,6 +60,7 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
     let animId: number;
 
     function draw(time: number) {
+      if (!canvas) return;
       const w = canvas.width;
       const h = canvas.height;
 
@@ -104,6 +111,10 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
     };
   }, []);
 
+  const handlePlay = () => {
+    onPlay(selectedLevel);
+  };
+
   return (
     <div className="fixed inset-0 z-30">
       <canvas ref={canvasRef} className="absolute inset-0" />
@@ -117,14 +128,73 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
           <p className="text-cyan-300/70 text-sm sm:text-base tracking-[0.25em] uppercase font-semibold">
             50 Levels -- Draw lines -- Guide the candies!
           </p>
+
+          {progress.highestCompleted > 0 && (
+            <p className="text-white/30 text-xs tracking-wider">
+              Best: Level {progress.highestCompleted} cleared
+            </p>
+          )}
         </div>
 
-        <button
-          onClick={onPlay}
-          className="mt-4 px-14 py-4 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
-        >
-          PLAY
-        </button>
+        <div className="flex flex-col items-center gap-3 mt-2">
+          <button
+            onClick={handlePlay}
+            className="px-14 py-4 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+          >
+            {selectedLevel === 1 ? 'PLAY' : `START LVL ${selectedLevel}`}
+          </button>
+
+          {unlockedMilestones.length > 1 && (
+            <button
+              onClick={() => setShowLevelSelect(!showLevelSelect)}
+              className="flex items-center gap-2 px-4 py-2 text-cyan-300/70 hover:text-cyan-300 text-sm font-semibold tracking-wide transition-colors"
+            >
+              <span>Select Level</span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${showLevelSelect ? 'rotate-180' : ''}`} />
+            </button>
+          )}
+
+          {showLevelSelect && (
+            <div className="mt-2 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-xs">
+              <div className="grid grid-cols-3 gap-2">
+                {[1, 12, 16, 20, 25, 30, 35, 40, 45].map((lvl) => {
+                  const isUnlocked = unlockedMilestones.includes(lvl);
+                  const isSelected = selectedLevel === lvl;
+                  const name = MILESTONE_NAMES[lvl];
+
+                  return (
+                    <button
+                      key={lvl}
+                      onClick={() => isUnlocked && setSelectedLevel(lvl)}
+                      disabled={!isUnlocked}
+                      className={`
+                        relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all
+                        ${isUnlocked
+                          ? isSelected
+                            ? 'bg-cyan-500/30 border border-cyan-400/50 text-white'
+                            : 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
+                          : 'bg-white/2 border border-white/5 text-white/20 cursor-not-allowed'
+                        }
+                      `}
+                    >
+                      <div className="flex items-center gap-1">
+                        {isUnlocked ? (
+                          <Unlock className="w-3 h-3 text-green-400/70" />
+                        ) : (
+                          <Lock className="w-3 h-3 text-white/20" />
+                        )}
+                        <span className="font-bold text-sm">{lvl}</span>
+                      </div>
+                      <span className="text-[10px] opacity-60 leading-tight text-center">
+                        {name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
 
         <div className="flex items-center gap-3 mt-2">
           {CANDY_COLORS.slice(0, 5).map((c, i) => (
