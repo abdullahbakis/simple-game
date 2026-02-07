@@ -54,7 +54,7 @@ function avoidsBucket(x: number, y: number, bx: number, by: number, margin: numb
 export function createObstacles(
   levelConfig: LevelConfig,
   canvasWidth: number,
-  canvasHeight: number,
+  _canvasHeight: number,
   bucketCenterX: number,
   bucketTopY: number
 ): ObstacleState {

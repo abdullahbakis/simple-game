@@ -330,21 +330,21 @@ export default function GameCanvas({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [level, cleanup]);
 
-  const getCanvasCoords = useCallback((e: React.MouseEvent) => {
+  const getCanvasCoords = useCallback((clientX: number, clientY: number) => {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
+      x: clientX - rect.left,
+      y: clientY - rect.top,
     };
   }, []);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  const handlePointerDown = useCallback(
+    (clientX: number, clientY: number) => {
       resumeAudio();
       if (paused) return;
-      const { x, y } = getCanvasCoords(e);
+      const { x, y } = getCanvasCoords(clientX, clientY);
       if (stateRef.current && !stateRef.current.ended) {
         startFreehand(stateRef.current.drawing, x, y);
       }
@@ -352,9 +352,9 @@ export default function GameCanvas({
     [paused, getCanvasCoords]
   );
 
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
-      const { x, y } = getCanvasCoords(e);
+  const handlePointerMove = useCallback(
+    (clientX: number, clientY: number) => {
+      const { x, y } = getCanvasCoords(clientX, clientY);
       if (stateRef.current && stateRef.current.drawing.isDrawing) {
         continueFreehand(
           stateRef.current.drawing,
@@ -375,20 +375,60 @@ export default function GameCanvas({
     [getCanvasCoords]
   );
 
-  const handleMouseUp = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     if (stateRef.current) {
       stopFreehand(stateRef.current.drawing);
     }
   }, []);
 
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => handlePointerDown(e.clientX, e.clientY),
+    [handlePointerDown]
+  );
+
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => handlePointerMove(e.clientX, e.clientY),
+    [handlePointerMove]
+  );
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touch) handlePointerDown(touch.clientX, touch.clientY);
+    },
+    [handlePointerDown]
+  );
+
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touch) handlePointerMove(touch.clientX, touch.clientY);
+    },
+    [handlePointerMove]
+  );
+
+  const handleTouchEnd = useCallback(
+    (e: React.TouchEvent) => {
+      e.preventDefault();
+      handlePointerUp();
+    },
+    [handlePointerUp]
+  );
+
   return (
     <canvas
       ref={canvasRef}
-      className="block w-full h-full cursor-crosshair"
+      className="block w-full h-full cursor-crosshair touch-none"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
+      onMouseUp={handlePointerUp}
+      onMouseLeave={handlePointerUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
     />
   );
 }
