@@ -7,6 +7,7 @@ import {
   updateTrails,
   findMissedParticles,
   removeParticle,
+  clampParticleVelocities,
 } from '../game/spawner';
 import {
   createDrawingState,
@@ -262,6 +263,7 @@ export default function GameCanvas({
       updateHazards(state.hazards, timestamp, delta, width, height);
       applyHazardForces(state.hazards, state.spawner.particles);
       applyTeleporters(state.hazards, state.spawner.particles, timestamp);
+      clampParticleVelocities(state.spawner, GAME.maxParticleSpeed);
 
       const hazardKills = findHazardKills(state.hazards, state.spawner.particles);
       for (const p of hazardKills) {

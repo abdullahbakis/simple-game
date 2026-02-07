@@ -47,7 +47,7 @@ export function spawnParticle(
     {
       restitution: GAME.particleRestitution,
       friction: GAME.particleFriction,
-      frictionAir: 0.01,
+      frictionAir: 0.015,
       density: 0.002,
       label: 'particle',
       collisionFilter: {
@@ -100,4 +100,16 @@ export function findMissedParticles(
     }
   }
   return missed;
+}
+
+export function clampParticleVelocities(spawner: Spawner, maxSpeed: number) {
+  for (const p of spawner.particles) {
+    const vx = p.body.velocity.x;
+    const vy = p.body.velocity.y;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+    if (speed > maxSpeed) {
+      const scale = maxSpeed / speed;
+      Matter.Body.setVelocity(p.body, { x: vx * scale, y: vy * scale });
+    }
+  }
 }
