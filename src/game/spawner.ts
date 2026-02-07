@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import { GAME, CATEGORY, PASTEL_PALETTE } from './constants';
+import { GAME, CATEGORY, CANDY_PALETTE } from './constants';
 import type { LevelConfig } from './constants';
 
 export interface Particle {
@@ -63,7 +63,7 @@ export function spawnParticle(
     body,
     trail: [],
     createdAt: now,
-    colorIdx: Math.floor(Math.random() * PASTEL_PALETTE.length),
+    colorIdx: Math.floor(Math.random() * CANDY_PALETTE.length),
   };
 
   spawner.particles.push(particle);

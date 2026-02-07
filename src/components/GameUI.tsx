@@ -13,10 +13,10 @@ interface GameUIProps {
 }
 
 const HAZARD_STYLES: Record<string, string> = {
-  'DEFLECTOR BARS': 'text-rose-400/70 bg-rose-50 border-rose-200/60',
-  'WIND ZONES': 'text-blue-400/70 bg-blue-50 border-blue-200/60',
-  'SPINNERS': 'text-emerald-400/70 bg-emerald-50 border-emerald-200/60',
-  'MOVING PLATFORMS': 'text-violet-400/70 bg-violet-50 border-violet-200/60',
+  'DEFLECTOR BARS': 'text-pink-300 bg-pink-500/20 border-pink-400/40',
+  'WIND ZONES': 'text-cyan-300 bg-cyan-500/20 border-cyan-400/40',
+  'SPINNERS': 'text-green-300 bg-green-500/20 border-green-400/40',
+  'MOVING PLATFORMS': 'text-yellow-300 bg-yellow-500/20 border-yellow-400/40',
 };
 
 export default function GameUI({
@@ -36,15 +36,15 @@ export default function GameUI({
     <>
       {countdown > 0 && gameState === 'playing' && (
         <div className="absolute inset-x-0 top-20 z-10 pointer-events-none flex flex-col items-center gap-3">
-          <span className="text-gray-400 text-sm uppercase tracking-widest font-semibold">
-            Level {level} -- Target: {config.target} pearls
+          <span className="text-cyan-200/80 text-sm uppercase tracking-widest font-bold">
+            Level {level} -- Target: {config.target} candies
           </span>
           {config.hazards.length > 0 && (
             <div className="flex items-center gap-2">
               {config.hazards.map((hazard) => (
                 <span
                   key={hazard}
-                  className={`text-xs px-2.5 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-400/70 bg-gray-50 border-gray-200/60'}`}
+                  className={`text-xs px-2.5 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-300 bg-gray-500/20 border-gray-400/40'}`}
                 >
                   {hazard.toLowerCase()}
                 </span>
@@ -57,42 +57,47 @@ export default function GameUI({
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
         <div className="flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm rounded-full px-3.5 py-1.5 shadow-sm">
-              <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">Lvl</span>
-              <span className="text-gray-700 font-bold text-lg tabular-nums leading-none">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+              <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Lvl</span>
+              <span className="text-white font-extrabold text-lg tabular-nums leading-none">
                 {level}
               </span>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/60 backdrop-blur-sm rounded-full px-3.5 py-1.5 shadow-sm">
-              <span className="text-gray-400 text-xs uppercase tracking-wider font-semibold">Collected</span>
-              <span className="text-gray-700 font-bold text-lg tabular-nums leading-none">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+              <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Got</span>
+              <span className="text-white font-extrabold text-lg tabular-nums leading-none">
                 {stats.score}
               </span>
-              <span className="text-gray-300 text-xs">/</span>
-              <span className="text-gray-400 text-xs">{config.target}</span>
+              <span className="text-white/30 text-xs">/</span>
+              <span className="text-white/50 text-xs font-bold">{config.target}</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white/60 backdrop-blur-sm rounded-full px-3.5 py-1.5 shadow-sm">
+          <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
             <span
-              className={`text-xs uppercase tracking-wider font-semibold ${
-                stabilityDanger ? 'text-rose-400' : 'text-gray-400'
+              className={`text-xs uppercase tracking-wider font-bold ${
+                stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
               }`}
             >
-              Stability
+              HP
             </span>
-            <div className="w-20 h-2 bg-gray-200/80 rounded-full overflow-hidden">
+            <div className="w-20 h-2.5 bg-white/10 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full transition-all duration-300 ${
-                  stabilityDanger ? 'bg-rose-300' : 'bg-emerald-300'
+                  stabilityDanger ? 'bg-red-400' : 'bg-green-400'
                 }`}
-                style={{ width: `${stabilityPct}%` }}
+                style={{
+                  width: `${stabilityPct}%`,
+                  boxShadow: stabilityDanger
+                    ? '0 0 8px rgba(248,113,113,0.5)'
+                    : '0 0 8px rgba(74,222,128,0.5)',
+                }}
               />
             </div>
             <span
-              className={`font-bold text-sm tabular-nums ${
-                stabilityDanger ? 'text-rose-400 stability-flash' : 'text-gray-600'
+              className={`font-extrabold text-sm tabular-nums ${
+                stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'
               }`}
             >
               {stabilityPct.toFixed(0)}%
@@ -101,10 +106,14 @@ export default function GameUI({
         </div>
 
         <div className="flex justify-center px-5">
-          <div className="w-64 h-1 bg-gray-200/40 rounded-full overflow-hidden">
+          <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
-              className="h-full rounded-full transition-all duration-200 bg-pink-200"
-              style={{ width: `${progressPct}%` }}
+              className="h-full rounded-full transition-all duration-200"
+              style={{
+                width: `${progressPct}%`,
+                background: 'linear-gradient(90deg, #00D4FF, #FF6B9D)',
+                boxShadow: '0 0 8px rgba(0, 212, 255, 0.4)',
+              }}
             />
           </div>
         </div>
@@ -115,7 +124,7 @@ export default function GameUI({
               {config.hazards.map((hazard) => (
                 <span
                   key={hazard}
-                  className={`px-2 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-400/70 bg-gray-50 border-gray-200/60'}`}
+                  className={`px-2 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-300 bg-gray-500/20 border-gray-400/40'}`}
                 >
                   {hazard.toLowerCase()}
                 </span>
@@ -127,19 +136,21 @@ export default function GameUI({
 
       {gameState === 'levelComplete' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-white/70 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative flex flex-col items-center gap-6 overlay-enter">
             <div className="text-center">
-              <h2 className="text-4xl font-extrabold tracking-wide text-emerald-500 mb-2">
-                Level Complete
+              <h2 className="text-5xl font-extrabold tracking-wide text-green-400 mb-3"
+                style={{ textShadow: '0 0 20px rgba(74, 222, 128, 0.5)' }}
+              >
+                NICE!
               </h2>
-              <p className="text-gray-400 text-sm font-medium">
-                {stats.score} pearls collected -- Stability {stabilityPct.toFixed(0)}%
+              <p className="text-white/60 text-sm font-bold">
+                {stats.score} candies caught -- Stability {stabilityPct.toFixed(0)}%
               </p>
             </div>
             <button
               onClick={onNextLevel}
-              className="pointer-events-auto px-8 py-3 bg-emerald-50 border border-emerald-300 text-emerald-600 font-bold text-lg rounded-full hover:bg-emerald-100 hover:shadow-md transition-all duration-200"
+              className="pointer-events-auto px-10 py-3.5 bg-green-500 hover:bg-green-400 text-white font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200"
             >
               Next Level
             </button>
@@ -149,22 +160,24 @@ export default function GameUI({
 
       {gameState === 'gameOver' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative flex flex-col items-center gap-6 overlay-enter">
             <div className="text-center">
-              <h2 className="text-4xl font-extrabold tracking-wide text-rose-400 mb-2">
-                Game Over
+              <h2 className="text-5xl font-extrabold tracking-wide text-red-400 mb-3"
+                style={{ textShadow: '0 0 20px rgba(248, 113, 113, 0.5)' }}
+              >
+                OOPS!
               </h2>
-              <p className="text-gray-400 text-sm font-medium mb-1">
-                Too many pearls lost
+              <p className="text-white/60 text-sm font-bold mb-1">
+                Too many candies lost!
               </p>
-              <p className="text-gray-300 text-xs">
-                Level {level} -- {stats.score} collected -- {stats.totalMissed} missed
+              <p className="text-white/30 text-xs font-semibold">
+                Level {level} -- {stats.score} caught -- {stats.totalMissed} missed
               </p>
             </div>
             <button
               onClick={onRetry}
-              className="pointer-events-auto px-8 py-3 bg-rose-50 border border-rose-300 text-rose-500 font-bold text-lg rounded-full hover:bg-rose-100 hover:shadow-md transition-all duration-200"
+              className="pointer-events-auto px-10 py-3.5 bg-red-500 hover:bg-red-400 text-white font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all duration-200"
             >
               Try Again
             </button>

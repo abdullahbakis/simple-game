@@ -65,7 +65,7 @@ function App() {
   const paused = gameState !== 'playing';
 
   return (
-    <div className="fixed inset-0 bg-[#FFF5F7] overflow-hidden select-none">
+    <div className="fixed inset-0 bg-[#0B1628] overflow-hidden select-none">
       {gameState === 'menu' ? (
         <StartMenu onPlay={handlePlay} />
       ) : (

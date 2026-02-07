@@ -1,10 +1,12 @@
-export const PASTEL_PALETTE = ['#F8B4C8', '#B8D4F0', '#C8E6C9', '#F0D0B8'] as const;
+export const CANDY_PALETTE = ['#FF6B9D', '#00D4FF', '#7FFF00', '#FFD93D', '#FF8C42', '#FF6B6B'] as const;
 
-export const PASTEL_RGB: readonly [number, number, number][] = [
-  [248, 180, 200],
-  [184, 212, 240],
-  [200, 230, 201],
-  [240, 208, 184],
+export const CANDY_RGB: readonly [number, number, number][] = [
+  [255, 107, 157],
+  [0, 212, 255],
+  [127, 255, 0],
+  [255, 217, 61],
+  [255, 140, 66],
+  [255, 107, 107],
 ];
 
 export const GAME = {

@@ -12,7 +12,7 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #FFF5F7;
+  background: #0B1628;
   font-family: 'Nunito', sans-serif;
 }
 
@@ -21,10 +21,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.candy-title {
+  background: linear-gradient(135deg, #FF6B9D 0%, #00D4FF 35%, #7FFF00 65%, #FFD93D 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.4));
+}
+
+.candy-play-btn {
+  background: linear-gradient(135deg, #FF6B9D, #FF8C42, #FFD93D);
+  box-shadow:
+    0 4px 20px rgba(255, 107, 157, 0.4),
+    0 0 40px rgba(255, 140, 66, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
 @keyframes overlayEnter {
   0% {
     opacity: 0;
-    transform: scale(0.95) translateY(12px);
+    transform: scale(0.9) translateY(16px);
   }
   100% {
     opacity: 1;
@@ -34,12 +50,12 @@ body {
 
 @keyframes stabilityFlash {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50% { opacity: 0.3; }
 }
 
-@keyframes softFloat {
+@keyframes candyDotBounce {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-6px); }
 }
 
 .overlay-enter {
@@ -47,9 +63,9 @@ body {
 }
 
 .stability-flash {
-  animation: stabilityFlash 0.8s ease-in-out infinite;
+  animation: stabilityFlash 0.6s ease-in-out infinite;
 }
 
-.pastel-btn {
-  animation: softFloat 3s ease-in-out infinite;
+.candy-dot {
+  animation: candyDotBounce 1.2s ease-in-out infinite;
 }

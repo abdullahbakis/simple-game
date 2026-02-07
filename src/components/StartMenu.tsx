@@ -4,12 +4,24 @@ interface StartMenuProps {
   onPlay: () => void;
 }
 
-const FLOAT_CIRCLES = [
-  { x: 0.2, y: 0.3, r: 120, cr: 248, cg: 180, cb: 200, dx: 0.0002, dy: 0.00025, px: 0, py: 0 },
-  { x: 0.75, y: 0.6, r: 140, cr: 184, cg: 212, cb: 240, dx: 0.00015, dy: 0.0002, px: 1.5, py: 2 },
-  { x: 0.5, y: 0.15, r: 100, cr: 200, cg: 230, cb: 201, dx: 0.00025, dy: 0.00015, px: 3, py: 0.5 },
-  { x: 0.35, y: 0.82, r: 110, cr: 240, cg: 208, cb: 184, dx: 0.0002, dy: 0.0003, px: 2, py: 3 },
+const CANDY_COLORS = [
+  { r: 255, g: 107, b: 157 },
+  { r: 0, g: 212, b: 255 },
+  { r: 127, g: 255, b: 0 },
+  { r: 255, g: 217, b: 61 },
+  { r: 255, g: 140, b: 66 },
+  { r: 255, g: 107, b: 107 },
 ];
+
+interface FloatingBlob {
+  x: number;
+  y: number;
+  r: number;
+  color: typeof CANDY_COLORS[number];
+  vx: number;
+  vy: number;
+  phase: number;
+}
 
 export default function StartMenu({ onPlay }: StartMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,6 +38,19 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
     resize();
     window.addEventListener('resize', resize);
 
+    const blobs: FloatingBlob[] = [];
+    for (let i = 0; i < 12; i++) {
+      blobs.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: 30 + Math.random() * 80,
+        color: CANDY_COLORS[i % CANDY_COLORS.length],
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        phase: Math.random() * Math.PI * 2,
+      });
+    }
+
     let animId: number;
 
     function draw(time: number) {
@@ -33,20 +58,38 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
       const h = canvas.height;
 
       const grad = ctx.createLinearGradient(0, 0, 0, h);
-      grad.addColorStop(0, '#FFF5F7');
-      grad.addColorStop(1, '#F0F4FF');
+      grad.addColorStop(0, '#0B1628');
+      grad.addColorStop(0.5, '#152238');
+      grad.addColorStop(1, '#1A2744');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, w, h);
 
-      for (const c of FLOAT_CIRCLES) {
-        const cx = c.x * w + Math.sin(time * c.dx + c.px) * 90;
-        const cy = c.y * h + Math.cos(time * c.dy + c.py) * 70;
-        const rg = ctx.createRadialGradient(cx, cy, 0, cx, cy, c.r);
-        rg.addColorStop(0, `rgba(${c.cr},${c.cg},${c.cb},0.15)`);
+      for (const b of blobs) {
+        b.x += b.vx + Math.sin(time * 0.001 + b.phase) * 0.3;
+        b.y += b.vy + Math.cos(time * 0.0008 + b.phase) * 0.3;
+
+        if (b.x < -b.r) b.x = w + b.r;
+        if (b.x > w + b.r) b.x = -b.r;
+        if (b.y < -b.r) b.y = h + b.r;
+        if (b.y > h + b.r) b.y = -b.r;
+
+        const rg = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+        rg.addColorStop(0, `rgba(${b.color.r},${b.color.g},${b.color.b},0.2)`);
         rg.addColorStop(1, 'transparent');
         ctx.fillStyle = rg;
         ctx.beginPath();
-        ctx.arc(cx, cy, c.r, 0, Math.PI * 2);
+        ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const starCount = 60;
+      for (let i = 0; i < starCount; i++) {
+        const sx = ((i * 137.508 + time * 0.002) % w);
+        const sy = ((i * 97.3 + time * 0.001) % h);
+        const twinkle = 0.3 + 0.5 * Math.sin(time * 0.003 + i * 2.1);
+        ctx.beginPath();
+        ctx.arc(sx, sy, 0.8 + Math.sin(i) * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
         ctx.fill();
       }
 
@@ -65,33 +108,37 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
     <div className="fixed inset-0 z-30">
       <canvas ref={canvasRef} className="absolute inset-0" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-8">
-        <div className="flex flex-col items-center gap-3">
-          <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-gray-600/80 tracking-tight select-none">
-            Pearl Flow
+      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6">
+        <div className="flex flex-col items-center gap-4">
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight select-none candy-title">
+            Candy Flow
           </h1>
 
-          <div className="flex items-center gap-3 opacity-30">
-            <div className="w-12 h-px bg-gray-400" />
-            <div className="w-1.5 h-1.5 bg-gray-400 rounded-full" />
-            <div className="w-12 h-px bg-gray-400" />
-          </div>
-
-          <p className="text-sm text-gray-400 tracking-[0.2em] uppercase font-medium">
-            Pastel Dreams
+          <p className="text-cyan-300/70 text-sm sm:text-base tracking-[0.25em] uppercase font-semibold">
+            Draw lines -- Guide the candies!
           </p>
         </div>
 
         <button
           onClick={onPlay}
-          className="mt-6 px-12 py-3.5 bg-white/80 hover:bg-white text-gray-500 hover:text-gray-700 font-bold text-lg tracking-wide rounded-full shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer pastel-btn"
+          className="mt-4 px-14 py-4 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
         >
-          Play
+          PLAY
         </button>
 
-        <p className="text-xs text-gray-300 tracking-wider font-medium">
-          Draw lines to guide the pearls
-        </p>
+        <div className="flex items-center gap-3 mt-2">
+          {CANDY_COLORS.slice(0, 5).map((c, i) => (
+            <div
+              key={i}
+              className="w-3 h-3 rounded-full candy-dot"
+              style={{
+                backgroundColor: `rgb(${c.r},${c.g},${c.b})`,
+                boxShadow: `0 0 8px rgba(${c.r},${c.g},${c.b},0.6)`,
+                animationDelay: `${i * 0.15}s`,
+              }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );
