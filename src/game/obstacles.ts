@@ -77,7 +77,8 @@ export function createObstacles(
       y = safeTop + ((i + 0.5) / Math.max(levelConfig.staticBarCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, 90)) break;
     }
-    const angle = (Math.random() - 0.5) * 0.8;
+    const sign = Math.random() > 0.5 ? 1 : -1;
+    const angle = sign * (0.18 + Math.random() * 0.35);
 
     const body = Matter.Bodies.rectangle(x, y, w, h, {
       isStatic: true,
@@ -155,6 +156,22 @@ export function createObstacles(
     movingPlatforms.push({ body, originX: x, y, width: w, height: h, speed, range, phase });
   }
 
+  for (const bar of staticBars) {
+    for (const zone of windZones) {
+      const barHalfW = bar.width / 2;
+      if (
+        bar.x + barHalfW > zone.x && bar.x - barHalfW < zone.x + zone.width &&
+        bar.y > zone.y - 30 && bar.y < zone.y + zone.height + 30
+      ) {
+        const desiredSign = Math.sign(zone.forceX);
+        const absAngle = Math.max(Math.abs(bar.angle), 0.22);
+        bar.angle = desiredSign * absAngle;
+        Matter.Body.setAngle(bar.body, bar.angle);
+        break;
+      }
+    }
+  }
+
   return { staticBars, windZones, spinners, movingPlatforms };
 }
 
@@ -187,6 +204,8 @@ export function updateObstacles(obstacles: ObstacleState, now: number, delta: nu
   }
 }
 
+const MAX_WIND_SPEED = 3.5;
+
 export function applyWindForces(
   obstacles: ObstacleState,
   particles: { body: Matter.Body }[]
@@ -200,7 +219,12 @@ export function applyWindForces(
         pos.y >= zone.y &&
         pos.y <= zone.y + zone.height
       ) {
-        Matter.Body.applyForce(p.body, p.body.position, { x: zone.forceX, y: 0 });
+        const vx = p.body.velocity.x;
+        const windDir = Math.sign(zone.forceX);
+        const alignedSpeed = vx * windDir;
+        if (alignedSpeed < MAX_WIND_SPEED) {
+          Matter.Body.applyForce(p.body, p.body.position, { x: zone.forceX, y: 0.00002 });
+        }
       }
     }
   }

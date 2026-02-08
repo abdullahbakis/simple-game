@@ -7,6 +7,7 @@ export interface Particle {
   trail: { x: number; y: number }[];
   createdAt: number;
   colorIdx: number;
+  stuckSince?: number;
 }
 
 export interface Spawner {
@@ -112,4 +113,47 @@ export function clampParticleVelocities(spawner: Spawner, maxSpeed: number) {
       Matter.Body.setVelocity(p.body, { x: vx * scale, y: vy * scale });
     }
   }
+}
+
+const NUDGE_THRESHOLD = 1800;
+const REMOVE_THRESHOLD = 4000;
+const STUCK_SPEED = 0.5;
+
+export function handleStuckParticles(
+  spawner: Spawner,
+  world: Matter.World,
+  now: number
+): Particle[] {
+  const removed: Particle[] = [];
+
+  for (const p of spawner.particles) {
+    const vx = p.body.velocity.x;
+    const vy = p.body.velocity.y;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+
+    if (speed > STUCK_SPEED) {
+      p.stuckSince = undefined;
+      continue;
+    }
+
+    if (p.stuckSince === undefined) {
+      p.stuckSince = now;
+      continue;
+    }
+
+    const duration = now - p.stuckSince;
+
+    if (duration > REMOVE_THRESHOLD) {
+      removed.push(p);
+    } else if (duration > NUDGE_THRESHOLD) {
+      const angle = Math.random() * Math.PI * 2;
+      Matter.Body.applyForce(p.body, p.body.position, {
+        x: Math.cos(angle) * 0.0006,
+        y: Math.sin(angle) * 0.0004 + 0.0005,
+      });
+      p.stuckSince = now - NUDGE_THRESHOLD + 400;
+    }
+  }
+
+  return removed;
 }

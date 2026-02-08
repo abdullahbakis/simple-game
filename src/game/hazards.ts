@@ -285,9 +285,12 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const pos = p.body.position;
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
+        const dampedVx = p.body.velocity.x * ice.dampening;
+        const dampedVy = p.body.velocity.y * ice.dampening;
+        const minFall = 0.35;
         Matter.Body.setVelocity(p.body, {
-          x: p.body.velocity.x * ice.dampening,
-          y: p.body.velocity.y * ice.dampening,
+          x: dampedVx,
+          y: dampedVy > 0 ? Math.max(dampedVy, minFall) : dampedVy,
         });
       }
     }
@@ -315,7 +318,9 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const pos = p.body.position;
       if (pos.x >= gf.x && pos.x <= gf.x + gf.width &&
           pos.y >= gf.y && pos.y <= gf.y + gf.height) {
-        Matter.Body.applyForce(p.body, p.body.position, { x: 0, y: -gf.strength });
+        if (p.body.velocity.y > -4) {
+          Matter.Body.applyForce(p.body, p.body.position, { x: 0, y: -gf.strength });
+        }
       }
     }
   }

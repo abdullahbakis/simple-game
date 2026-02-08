@@ -8,6 +8,7 @@ import {
   findMissedParticles,
   removeParticle,
   clampParticleVelocities,
+  handleStuckParticles,
 } from '../game/spawner';
 import {
   createDrawingState,
@@ -278,6 +279,13 @@ export default function GameCanvas({
       if (hazardKills.length > 0) {
         pushStats();
         checkFailure();
+      }
+
+      const stuckRemoved = handleStuckParticles(state.spawner, state.world, timestamp);
+      for (const p of stuckRemoved) {
+        if (!state.collectedBodies.has(p.body.id)) {
+          removeParticle(state.spawner, state.world, p);
+        }
       }
 
       const activeIds = new Set(state.spawner.particles.map(p => p.body.id));
