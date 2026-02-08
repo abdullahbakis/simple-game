@@ -44,7 +44,7 @@ export function createGameEngine(width: number, height: number, gravityScale: nu
   return { engine, world: engine.world };
 }
 
-const FIXED_STEP = 1000 / 60;
+const FIXED_STEP = 1000 / 120;
 
 export function stepEngine(engine: Matter.Engine, delta: number) {
   let remaining = delta;
