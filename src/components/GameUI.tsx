@@ -1,4 +1,4 @@
-import { Volume2, VolumeX } from 'lucide-react';
+import { Volume2, VolumeX, ArrowDown } from 'lucide-react';
 import { GAME, getLevelConfig, MAX_LEVEL } from '../game/constants';
 import type { GameStats } from './GameCanvas';
 
@@ -50,6 +50,12 @@ export default function GameUI({
   const progressPct = Math.min((stats.score / config.target) * 100, 100);
   const isVictory = level >= MAX_LEVEL && gameState === 'levelComplete';
 
+  const gravityScale = config.gravityScale;
+  const maxGravity = 1 + (MAX_LEVEL - 1) * 0.025;
+  const gravityPct = Math.min(((gravityScale - 1) / (maxGravity - 1)) * 100, 100);
+  const gravityHigh = gravityPct > 60;
+  const gravityMed = gravityPct > 30;
+
   return (
     <>
       {countdown > 0 && gameState === 'playing' && (
@@ -90,6 +96,40 @@ export default function GameUI({
               </span>
               <span className="text-white/30 text-xs">/</span>
               <span className="text-white/50 text-xs font-bold">{config.target}</span>
+            </div>
+
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+              <ArrowDown
+                className={`w-3.5 h-3.5 ${
+                  gravityHigh ? 'text-orange-400' : gravityMed ? 'text-amber-400' : 'text-cyan-300/70'
+                }`}
+                strokeWidth={3}
+              />
+              <div className="w-10 h-2.5 bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${Math.max(gravityPct, 6)}%`,
+                    background: gravityHigh
+                      ? 'linear-gradient(90deg, #FB923C, #EF4444)'
+                      : gravityMed
+                        ? 'linear-gradient(90deg, #FBBF24, #FB923C)'
+                        : 'linear-gradient(90deg, #00D4FF, #22D3EE)',
+                    boxShadow: gravityHigh
+                      ? '0 0 6px rgba(251,146,60,0.5)'
+                      : gravityMed
+                        ? '0 0 6px rgba(251,191,36,0.4)'
+                        : '0 0 6px rgba(0,212,255,0.4)',
+                  }}
+                />
+              </div>
+              <span
+                className={`font-extrabold text-xs tabular-nums ${
+                  gravityHigh ? 'text-orange-400' : gravityMed ? 'text-amber-400' : 'text-cyan-300/70'
+                }`}
+              >
+                {gravityScale.toFixed(2)}x
+              </span>
             </div>
           </div>
 
