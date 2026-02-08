@@ -72,7 +72,7 @@ export function createObstacles(
     const h = 10;
     let x = 0;
     let y = 0;
-    for (let a = 0; a < 15; a++) {
+    for (let a = 0; a < 50; a++) {
       x = canvasWidth * 0.15 + Math.random() * canvasWidth * 0.7;
       y = safeTop + ((i + 0.5) / Math.max(levelConfig.staticBarCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, 90)) break;
@@ -106,7 +106,7 @@ export function createObstacles(
     const armWidth = 10;
     let x = 0;
     let y = 0;
-    for (let a = 0; a < 15; a++) {
+    for (let a = 0; a < 50; a++) {
       x = canvasWidth * 0.2 + ((i + 0.5) / Math.max(levelConfig.spinnerCount, 1)) * canvasWidth * 0.6;
       y = safeTop + 80 + ((i % 2) * 0.3 + 0.2) * usableHeight;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, 110)) break;

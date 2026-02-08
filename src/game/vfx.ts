@@ -83,6 +83,27 @@ export function spawnDrawingSparks(state: VfxState, x: number, y: number) {
   }
 }
 
+export function spawnMissSparks(state: VfxState, x: number, y: number) {
+  const count = 5;
+  for (let i = 0; i < count; i++) {
+    const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 0.6;
+    const speed = 1.5 + Math.random() * 2;
+    const life = 300 + Math.random() * 200;
+    state.particles.push({
+      x: x + (Math.random() - 0.5) * 10,
+      y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      life,
+      maxLife: life,
+      size: 2 + Math.random() * 2,
+      r: 255,
+      g: 60,
+      b: 60,
+    });
+  }
+}
+
 export function updateVfx(state: VfxState, delta: number) {
   for (let i = state.particles.length - 1; i >= 0; i--) {
     const p = state.particles[i];

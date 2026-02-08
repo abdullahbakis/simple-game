@@ -27,7 +27,7 @@ import {
   findHazardKills,
   cleanupTeleporterCooldowns,
 } from '../game/hazards';
-import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, spawnHazardKillSparks, updateVfx } from '../game/vfx';
+import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, spawnHazardKillSparks, spawnMissSparks, updateVfx } from '../game/vfx';
 import { renderFrame, renderCountdown } from '../game/renderer';
 import { GAME, getLevelConfig } from '../game/constants';
 import { playCollect, playMiss, playHazardKill, playCountdownTick, playCountdownGo, playDraw, resumeAudio } from '../game/audio';
@@ -289,6 +289,7 @@ export default function GameCanvas({
       for (const p of missed) {
         if (!state.collectedBodies.has(p.body.id)) {
           state.totalMissed++;
+          spawnMissSparks(state.vfx, p.body.position.x, height - 15);
           playMiss();
         }
         removeParticle(state.spawner, state.world, p);
@@ -317,14 +318,7 @@ export default function GameCanvas({
 
     state.animFrame = requestAnimationFrame(gameLoop);
 
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
     return () => {
-      window.removeEventListener('resize', handleResize);
       cleanup();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -345,7 +339,7 @@ export default function GameCanvas({
       resumeAudio();
       if (paused) return;
       const { x, y } = getCanvasCoords(clientX, clientY);
-      if (stateRef.current && !stateRef.current.ended) {
+      if (stateRef.current && !stateRef.current.ended && stateRef.current.spawningStarted) {
         startFreehand(stateRef.current.drawing, x, y);
       }
     },

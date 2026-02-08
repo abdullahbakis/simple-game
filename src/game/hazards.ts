@@ -103,7 +103,7 @@ export function createHazards(
   const blackHoles: BlackHole[] = [];
   for (let i = 0; i < config.blackHoleCount; i++) {
     let x = 0, y = 0;
-    for (let a = 0; a < 20; a++) {
+    for (let a = 0; a < 50; a++) {
       x = canvasWidth * 0.15 + Math.random() * canvasWidth * 0.7;
       y = safeTop + ((i + 0.5) / Math.max(config.blackHoleCount, 1)) * usableHeight * 0.5;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
@@ -111,7 +111,7 @@ export function createHazards(
     blackHoles.push({
       x, y,
       radius: 80 + Math.random() * 30,
-      killRadius: 12 + Math.random() * 4,
+      killRadius: 22 + Math.random() * 6,
       strength: 0.0004 + Math.random() * 0.0002,
       angle: Math.random() * Math.PI * 2,
       speed: 0.001 + Math.random() * 0.0005,
@@ -133,7 +133,7 @@ export function createHazards(
     const h = 110 + Math.random() * 70;
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.iceZoneCount, 1)) * canvasWidth * 0.7;
     const y = safeTop + 40 + i * 120;
-    iceZones.push({ x: cx - w / 2, y, width: w, height: h, dampening: 0.92 });
+    iceZones.push({ x: cx - w / 2, y, width: w, height: h, dampening: 0.975 });
   }
 
   const teleporters: TeleporterPair[] = [];
@@ -154,6 +154,9 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.empPulseCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
+    if (!avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) {
+      x = x < bucketCenterX ? canvasWidth * 0.15 : canvasWidth * 0.85;
+    }
     empPulses.push({
       x, y,
       interval: 3000 + Math.random() * 2000,
@@ -171,7 +174,7 @@ export function createHazards(
     const h = 100 + Math.random() * 60;
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.gravityFlipperCount, 1)) * canvasWidth * 0.6;
     const y = safeTop + 80 + i * 140;
-    gravityFlippers.push({ x: cx - w / 2, y, width: w, height: h, strength: 0.0008 });
+    gravityFlippers.push({ x: cx - w / 2, y, width: w, height: h, strength: 0.003 });
   }
 
   const laserGates: LaserGate[] = [];
@@ -181,6 +184,9 @@ export function createHazards(
       x = canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
       y = safeTop + ((i + 0.5) / Math.max(config.laserGateCount, 1)) * usableHeight * 0.7;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin + 20)) break;
+    }
+    if (!avoidsBucket(x, y, bucketCenterX, bucketTopY, margin + 20)) {
+      x = x < bucketCenterX ? canvasWidth * 0.15 : canvasWidth * 0.85;
     }
     laserGates.push({
       x, y,
@@ -319,13 +325,14 @@ export function applyTeleporters(hazards: HazardState, particles: Particle[], no
   for (const tp of hazards.teleporters) {
     for (const p of particles) {
       const cd = tp.cooldowns.get(p.body.id);
-      if (cd && now - cd < 600) continue;
+      if (cd && now - cd < 1500) continue;
       const pos = p.body.position;
 
       const dx1 = pos.x - tp.x1;
       const dy1 = pos.y - tp.y1;
       if (dx1 * dx1 + dy1 * dy1 < tp.radius * tp.radius) {
-        Matter.Body.setPosition(p.body, { x: tp.x2, y: tp.y2 });
+        Matter.Body.setPosition(p.body, { x: tp.x2, y: tp.y2 + tp.radius + 5 });
+        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2) });
         tp.cooldowns.set(p.body.id, now);
         continue;
       }
@@ -333,7 +340,8 @@ export function applyTeleporters(hazards: HazardState, particles: Particle[], no
       const dx2 = pos.x - tp.x2;
       const dy2 = pos.y - tp.y2;
       if (dx2 * dx2 + dy2 * dy2 < tp.radius * tp.radius) {
-        Matter.Body.setPosition(p.body, { x: tp.x1, y: tp.y1 });
+        Matter.Body.setPosition(p.body, { x: tp.x1, y: tp.y1 + tp.radius + 5 });
+        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2) });
         tp.cooldowns.set(p.body.id, now);
       }
     }

@@ -11,9 +11,9 @@ export interface Bucket {
 }
 
 export function createBucket(canvasWidth: number, canvasHeight: number): Bucket {
-  const minX = canvasWidth * 0.2;
-  const maxX = canvasWidth * 0.8 - GAME.bucketWidth;
-  const x = minX + Math.random() * (maxX - minX);
+  const centerX = (canvasWidth - GAME.bucketWidth) / 2;
+  const maxOffset = canvasWidth * 0.15;
+  const x = Math.max(canvasWidth * 0.1, Math.min(canvasWidth * 0.9 - GAME.bucketWidth, centerX + (Math.random() - 0.5) * maxOffset * 2));
   const y = canvasHeight - GAME.bucketHeight - 30;
   const w = GAME.bucketWidth;
   const h = GAME.bucketHeight;

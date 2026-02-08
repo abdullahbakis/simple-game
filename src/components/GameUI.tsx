@@ -1,5 +1,5 @@
 import { Volume2, VolumeX } from 'lucide-react';
-import { getLevelConfig, MAX_LEVEL } from '../game/constants';
+import { GAME, getLevelConfig, MAX_LEVEL } from '../game/constants';
 import type { GameStats } from './GameCanvas';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
@@ -42,7 +42,11 @@ export default function GameUI({
 }: GameUIProps) {
   const config = getLevelConfig(level);
   const stabilityPct = Math.max(0, stats.stability * 100);
-  const stabilityDanger = stabilityPct <= 92;
+  const lossPoint = 1 - GAME.failThreshold;
+  const hpPct = stats.totalSpawned >= 10
+    ? Math.max(0, Math.min(100, ((stats.stability - lossPoint) / GAME.failThreshold) * 100))
+    : 100;
+  const stabilityDanger = hpPct <= 30;
   const progressPct = Math.min((stats.score / config.target) * 100, 100);
   const isVictory = level >= MAX_LEVEL && gameState === 'levelComplete';
 
@@ -104,7 +108,7 @@ export default function GameUI({
                     stabilityDanger ? 'bg-red-400' : 'bg-green-400'
                   }`}
                   style={{
-                    width: `${stabilityPct}%`,
+                    width: `${hpPct}%`,
                     boxShadow: stabilityDanger
                       ? '0 0 8px rgba(248,113,113,0.5)'
                       : '0 0 8px rgba(74,222,128,0.5)',
@@ -116,7 +120,7 @@ export default function GameUI({
                   stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'
                 }`}
               >
-                {stabilityPct.toFixed(0)}%
+                {hpPct.toFixed(0)}%
               </span>
             </div>
 

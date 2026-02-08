@@ -16,7 +16,7 @@ export const GAME = {
   particleRadius: 4,
   chainDecayTime: 4500,
   chainSegmentLength: 12,
-  chainSegmentWidth: 16,
+  chainSegmentWidth: 8,
   maxParticleSpeed: 12,
   particleRestitution: 0.6,
   particleFriction: 0,
