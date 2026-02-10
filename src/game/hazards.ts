@@ -191,7 +191,7 @@ export function createHazards(
     }
     laserGates.push({
       x, y,
-      length: 80 + Math.random() * 60,
+      length: (80 + Math.random() * 60) * SCALE,
       angle: Math.random() * Math.PI,
       speed: 0.0006 + Math.random() * 0.0004,
       killWidth: 6,
