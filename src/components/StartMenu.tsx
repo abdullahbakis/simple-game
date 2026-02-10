@@ -125,7 +125,7 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
             Candy Flow
           </h1>
 
-          <p className="text-cyan-300/70 text-sm sm:text-base tracking-[0.25em] uppercase font-semibold">
+          <p className="text-cyan-300/70 text-xs sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw]">
             50 Levels -- Draw lines -- Guide the candies!
           </p>
 
