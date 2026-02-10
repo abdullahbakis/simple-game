@@ -139,8 +139,8 @@ export function createObstacles(
   }
 
   for (let i = 0; i < levelConfig.movingPlatformCount; i++) {
-    const w = 100 + Math.random() * 60;
-    const h = 10;
+    const w = (100 + Math.random() * 60) * SCALE;
+    const h = 10 * SCALE;
     const x = canvasWidth * 0.2 + ((i + 0.5) / Math.max(levelConfig.movingPlatformCount, 1)) * canvasWidth * 0.6;
     const y = safeTop + 60 + ((i + 0.5) / Math.max(levelConfig.movingPlatformCount, 1)) * usableHeight * 0.7;
     const speed = 0.0008 + Math.random() * 0.0006;
