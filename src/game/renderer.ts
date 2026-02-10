@@ -511,7 +511,7 @@ function renderVfx(ctx: CanvasRenderingContext2D, vfx: VfxState) {
     ctx.save();
     ctx.globalAlpha = alpha;
     ctx.shadowColor = `rgba(${p.r},${p.g},${p.b},${alpha * 0.5})`;
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 2;
     ctx.beginPath();
     ctx.arc(p.x, p.y, Math.max(size, 0.5), 0, Math.PI * 2);
     ctx.fillStyle = `rgb(${p.r},${p.g},${p.b})`;
@@ -540,7 +540,7 @@ export function renderCountdown(
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0, 212, 255, 0.5)';
-  ctx.shadowBlur = 20;
+  ctx.shadowBlur = 5;
   ctx.fillStyle = `rgba(0, 212, 255, ${alpha})`;
   ctx.fillText(String(Math.ceil(secondsLeft)), 0, 0);
   ctx.restore();
