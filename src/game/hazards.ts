@@ -200,7 +200,7 @@ export function createHazards(
 
   const asteroids: Asteroid[] = [];
   for (let i = 0; i < config.asteroidCount; i++) {
-    const radius = 18 + Math.random() * 14;
+    const radius = (18 + Math.random() * 14) * SCALE;
     const x = canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
     const y = safeTop + Math.random() * usableHeight * 0.5;
     const speed = 0.8 + Math.random() * 0.6;
