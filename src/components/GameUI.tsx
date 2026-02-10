@@ -79,7 +79,7 @@ export default function GameUI({
       )}
 
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
-        <div className="flex items-center justify-between px-5 py-3">
+        <div className="flex items-center justify-between px-2 py-2">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
               <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Lvl</span>
@@ -142,7 +142,7 @@ export default function GameUI({
               >
                 HP
               </span>
-              <div className="w-20 h-2.5 bg-white/10 rounded-full overflow-hidden">
+              <div className="w-12 h-2.5 bg-white/10 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${
                     stabilityDanger ? 'bg-red-400' : 'bg-green-400'
