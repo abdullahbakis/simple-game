@@ -134,7 +134,6 @@ export default function GameUI({
           </div>
 
           <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <span
                 className={`text-xs uppercase tracking-wider font-bold ${
                   stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
