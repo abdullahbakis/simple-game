@@ -263,7 +263,7 @@ export default function GameUI({
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div className="relative flex flex-col items-center gap-6 overlay-enter">
             <div className="text-center">
-              <h2 className="text-5xl font-extrabold tracking-wide text-red-400 mb-3"
+              <h2 className="text-3xl font-extrabold tracking-wide text-red-400 mb-3"
                 style={{ textShadow: '0 0 20px rgba(248, 113, 113, 0.5)' }}
               >
                 OOPS!
