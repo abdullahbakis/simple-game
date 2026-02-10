@@ -1,6 +1,8 @@
 import Matter from 'matter-js';
 import { CATEGORY } from './constants';
 import type { LevelConfig } from './constants';
+// Ekran ölçeğini hesapla (800px genişlik baz alınmıştır)
+const SCALE = Math.min(window.innerWidth / 800, 1);
 
 export interface StaticBar {
   body: Matter.Body;
