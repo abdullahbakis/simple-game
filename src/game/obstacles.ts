@@ -70,8 +70,8 @@ export function createObstacles(
   const usableHeight = Math.max(safeBottom - safeTop, 100);
 
   for (let i = 0; i < levelConfig.staticBarCount; i++) {
-    const w = 100 + Math.random() * 120;
-    const h = 10;
+    const w = (100 + Math.random() * 120) * SCALE;
+    const h = 10 * SCALE;
     let x = 0;
     let y = 0;
     for (let a = 0; a < 50; a++) {
