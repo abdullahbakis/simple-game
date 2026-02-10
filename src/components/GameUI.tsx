@@ -214,7 +214,7 @@ export default function GameUI({
               <>
                 <div className="text-center">
                   <h2
-                    className="text-6xl font-extrabold tracking-wide text-amber-400 mb-4"
+                    className="text-4xl font-extrabold tracking-wide text-amber-400 mb-4"
                     style={{ textShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
                   >
                     VICTORY!
@@ -237,7 +237,7 @@ export default function GameUI({
               <>
                 <div className="text-center">
                   <h2
-                    className="text-5xl font-extrabold tracking-wide text-green-400 mb-3"
+                    className="text-3xl font-extrabold tracking-wide text-green-400 mb-3"
                     style={{ textShadow: '0 0 20px rgba(74, 222, 128, 0.5)' }}
                   >
                     NICE!
