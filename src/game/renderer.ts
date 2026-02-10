@@ -109,7 +109,7 @@ function renderCandyBalls(ctx: CanvasRenderingContext2D, spawner: Spawner, now: 
 
     ctx.save();
     ctx.shadowColor = `rgba(${cr},${cg},${cb},0.6)`;
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 3;
 
     const grad = ctx.createRadialGradient(
       px - vr * 0.3, py - vr * 0.3, 0,
