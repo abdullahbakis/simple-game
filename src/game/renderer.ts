@@ -177,7 +177,7 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
     const hue = (now * 0.05 + seg.x1 * 0.5 + seg.y1 * 0.3) % 360;
 
     ctx.shadowColor = `hsla(${hue}, 100%, 65%, 0.6)`;
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 2;
     ctx.lineWidth = 6;
     ctx.strokeStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
     ctx.beginPath();
@@ -252,7 +252,7 @@ function renderFunnelCollector(rc: RenderContext, bucket: Bucket) {
   ctx.lineWidth = 3;
   ctx.lineCap = 'round';
   ctx.shadowColor = 'rgba(0, 212, 255, 0.5)';
-  ctx.shadowBlur = 6;
+  ctx.shadowBlur = 2;
   ctx.stroke();
   ctx.shadowBlur = 0;
 
@@ -329,7 +329,7 @@ function renderStaticBars(rc: RenderContext, obstacles: ObstacleState) {
     ctx.rotate(bar.angle);
 
     ctx.shadowColor = 'rgba(255, 107, 157, 0.4)';
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 2;
 
     const grad = ctx.createLinearGradient(0, -bar.height / 2, 0, bar.height / 2);
     grad.addColorStop(0, '#FF8EAF');
@@ -367,7 +367,7 @@ function renderSpinners(rc: RenderContext, obstacles: ObstacleState) {
     ctx.rotate(sp.angle);
 
     ctx.shadowColor = 'rgba(127, 255, 0, 0.4)';
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 2;
 
     const grad = ctx.createLinearGradient(-sp.armLength / 2, 0, sp.armLength / 2, 0);
     grad.addColorStop(0, '#5AE000');
@@ -399,7 +399,7 @@ function renderSpinners(rc: RenderContext, obstacles: ObstacleState) {
     ctx.translate(sp.x, sp.y);
     ctx.rotate(sp.angle + Math.PI / 2);
     ctx.shadowColor = 'rgba(127, 255, 0, 0.4)';
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 2;
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.moveTo(-w / 2 + r, -h / 2);
@@ -419,7 +419,7 @@ function renderSpinners(rc: RenderContext, obstacles: ObstacleState) {
 
     ctx.save();
     ctx.shadowColor = 'rgba(127, 255, 0, 0.6)';
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 2;
     ctx.beginPath();
     ctx.arc(sp.x, sp.y, 6, 0, Math.PI * 2);
     ctx.fillStyle = '#AAFF44';
