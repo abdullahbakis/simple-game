@@ -144,7 +144,7 @@ export function createObstacles(
     const x = canvasWidth * 0.2 + ((i + 0.5) / Math.max(levelConfig.movingPlatformCount, 1)) * canvasWidth * 0.6;
     const y = safeTop + 60 + ((i + 0.5) / Math.max(levelConfig.movingPlatformCount, 1)) * usableHeight * 0.7;
     const speed = 0.0008 + Math.random() * 0.0006;
-    const range = 80 + Math.random() * 100;
+    const range = (80 + Math.random() * 100) * SCALE;
     const phase = Math.random() * Math.PI * 2;
 
     const body = Matter.Bodies.rectangle(x, y, w, h, {
