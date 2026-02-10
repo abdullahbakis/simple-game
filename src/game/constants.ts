@@ -19,7 +19,7 @@ export const GAME = {
   particleRadius: 7 * screenScale, // Şekerleri küçült
   chainDecayTime: 4500,
   chainSegmentLength: 8,
-  chainSegmentWidth: 14 * screenScale, // Çizgileri incelt
+  chainSegmentWidth: 18 * screenScale, // Çizgileri incelt
   maxParticleSpeed: 12,
   particleRestitution: 0.6,
   particleFriction: 0,
