@@ -121,8 +121,8 @@ export function createHazards(
 
   const lavaPools: LavaPool[] = [];
   for (let i = 0; i < config.lavaPoolCount; i++) {
-    const w = 100 + Math.random() * 80;
-    const h = 18 + Math.random() * 12;
+    const w = (100 + Math.random() * 80) * SCALE;
+    const h = (18 + Math.random() * 12) * SCALE;
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.lavaPoolCount, 1)) * canvasWidth * 0.7;
     const y = safeTop + usableHeight * 0.55 + i * 50;
     lavaPools.push({ x: cx - w / 2, y, width: w, height: h });
