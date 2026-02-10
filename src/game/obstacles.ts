@@ -105,8 +105,8 @@ export function createObstacles(
   }
 
   for (let i = 0; i < levelConfig.spinnerCount; i++) {
-    const armLength = 80 + Math.random() * 40;
-    const armWidth = 10;
+    const armLength = (80 + Math.random() * 40) * SCALE;
+    const armWidth = 10 * SCALE;
     let x = 0;
     let y = 0;
     for (let a = 0; a < 50; a++) {
