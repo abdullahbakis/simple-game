@@ -16,7 +16,7 @@ const screenScale = Math.min(window.innerWidth / 800, 1);
 
 export const GAME = {
   gravity: 1.4,
-  particleRadius: 4 * screenScale, // Şekerleri küçült
+  particleRadius: 7 * screenScale, // Şekerleri küçült
   chainDecayTime: 4500,
   chainSegmentLength: 8,
   chainSegmentWidth: 14 * screenScale, // Çizgileri incelt
