@@ -15,21 +15,6 @@ interface GameUIProps {
   onToggleMusic: () => void;
 }
 
-const HAZARD_STYLES: Record<string, string> = {
-  'DEFLECTOR BARS': 'text-pink-300 bg-pink-500/20 border-pink-400/40',
-  'WIND ZONES': 'text-cyan-300 bg-cyan-500/20 border-cyan-400/40',
-  'SPINNERS': 'text-green-300 bg-green-500/20 border-green-400/40',
-  'MOVING PLATFORMS': 'text-yellow-300 bg-yellow-500/20 border-yellow-400/40',
-  'BLACK HOLES': 'text-slate-300 bg-slate-600/30 border-slate-400/40',
-  'LAVA POOLS': 'text-orange-300 bg-orange-500/20 border-orange-400/40',
-  'ICE ZONES': 'text-sky-200 bg-sky-400/20 border-sky-300/40',
-  'TELEPORTERS': 'text-teal-300 bg-teal-500/20 border-teal-400/40',
-  'EMP PULSES': 'text-amber-300 bg-amber-500/20 border-amber-400/40',
-  'GRAVITY FLIPPERS': 'text-emerald-300 bg-emerald-500/20 border-emerald-400/40',
-  'LASER GATES': 'text-red-300 bg-red-500/20 border-red-400/40',
-  'ASTEROIDS': 'text-stone-300 bg-stone-500/20 border-stone-400/40',
-};
-
 export default function GameUI({
   level,
   stats,
@@ -41,20 +26,16 @@ export default function GameUI({
   onToggleMusic,
 }: GameUIProps) {
   const config = getLevelConfig(level);
-  const stabilityPct = Math.max(0, stats.stability * 100);
   const lossPoint = 1 - GAME.failThreshold;
   const hpPct = stats.totalSpawned >= 10
     ? Math.max(0, Math.min(100, ((stats.stability - lossPoint) / GAME.failThreshold) * 100))
     : 100;
   const stabilityDanger = hpPct <= 30;
   const progressPct = Math.min((stats.score / config.target) * 100, 100);
-  const isVictory = level >= MAX_LEVEL && gameState === 'levelComplete';
-
   const gravityScale = config.gravityScale;
   const maxGravity = 1 + (MAX_LEVEL - 1) * 0.025;
   const gravityPct = Math.min(((gravityScale - 1) / (maxGravity - 1)) * 100, 100);
   const gravityHigh = gravityPct > 60;
-  const gravityMed = gravityPct > 30;
 
   return (
     <>

@@ -121,7 +121,7 @@ const STUCK_SPEED = 0.5;
 
 export function handleStuckParticles(
   spawner: Spawner,
-  world: Matter.World,
+  _world: Matter.World,
   now: number
 ): Particle[] {
   const removed: Particle[] = [];
