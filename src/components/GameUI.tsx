@@ -178,7 +178,7 @@ export default function GameUI({
         </div>
 
         <div className="flex justify-center px-5">
-          <div className="w-64 h-1.5 bg-white/10 rounded-full overflow-hidden">
+          <div className="w-[80%] h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-200"
               style={{
