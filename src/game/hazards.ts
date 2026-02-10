@@ -2,6 +2,7 @@ import Matter from 'matter-js';
 import { GAME, CATEGORY } from './constants';
 import type { LevelConfig } from './constants';
 import type { Particle } from './spawner';
+const SCALE = Math.min(window.innerWidth / 800, 1);
 
 export interface BlackHole {
   x: number;
@@ -110,8 +111,8 @@ export function createHazards(
     }
     blackHoles.push({
       x, y,
-      radius: 80 + Math.random() * 30,
-      killRadius: 22 + Math.random() * 6,
+      radius: (80 + Math.random() * 30) * SCALE,
+      killRadius: (22 + Math.random() * 6) * SCALE,
       strength: 0.0004 + Math.random() * 0.0002,
       angle: Math.random() * Math.PI * 2,
       speed: 0.001 + Math.random() * 0.0005,
