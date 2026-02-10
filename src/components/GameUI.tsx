@@ -60,226 +60,72 @@ export default function GameUI({
     <>
       {countdown > 0 && gameState === 'playing' && (
         <div className="absolute inset-x-0 top-20 z-10 pointer-events-none flex flex-col items-center gap-3">
-          <span className="text-cyan-200/80 text-sm uppercase tracking-widest font-bold">
-            Level {level} -- Target: {config.target} candies
+          <span className="text-cyan-200/80 text-xs uppercase tracking-widest font-bold text-center px-4">
+            Level {level} -- Target: {config.target}
           </span>
-          {config.hazards.length > 0 && (
-            <div className="flex items-center gap-2 flex-wrap justify-center px-4">
-              {config.hazards.map((hazard) => (
-                <span
-                  key={hazard}
-                  className={`text-xs px-2.5 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-300 bg-gray-500/20 border-gray-400/40'}`}
-                >
-                  {hazard.toLowerCase()}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       )}
 
-      <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
-        <div className="flex items-center justify-between px-1 py-2 w-full max-w-[100vw] overflow-hidden">
+      <div className="absolute inset-x-0 top-0 z-10 pointer-events-none w-full max-w-[100vw] overflow-hidden">
+        <div className="flex items-center justify-between px-1 py-2">
           <div className="flex items-center gap-1 sm:gap-2">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
-              <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Lvl</span>
-              <span className="text-white font-extrabold text-lg tabular-nums leading-none">
-                {level}
-              </span>
-              <span className="text-white/20 text-xs">/{MAX_LEVEL}</span>
+            <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
+              <span className="text-white font-extrabold text-sm tabular-nums leading-none">L{level}</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
-              <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Got</span>
-              <span className="text-white font-extrabold text-lg tabular-nums leading-none">
-                {stats.score}
-              </span>
-              <span className="text-white/30 text-xs">/</span>
-              <span className="text-white/50 text-xs font-bold">{config.target}</span>
+            <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
+              <span className="text-white font-extrabold text-sm tabular-nums leading-none">{stats.score}</span>
+              <span className="text-white/30 text-[10px]">/</span>
+              <span className="text-white/50 text-[10px] font-bold">{config.target}</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
-              <ArrowDown
-                className={`w-3.5 h-3.5 ${
-                  gravityHigh ? 'text-orange-400' : gravityMed ? 'text-amber-400' : 'text-cyan-300/70'
-                }`}
-                strokeWidth={3}
-              />
-              <div className="w-10 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{
-                    width: `${Math.max(gravityPct, 6)}%`,
-                    background: gravityHigh
-                      ? 'linear-gradient(90deg, #FB923C, #EF4444)'
-                      : gravityMed
-                        ? 'linear-gradient(90deg, #FBBF24, #FB923C)'
-                        : 'linear-gradient(90deg, #00D4FF, #22D3EE)',
-                    boxShadow: gravityHigh
-                      ? '0 0 6px rgba(251,146,60,0.5)'
-                      : gravityMed
-                        ? '0 0 6px rgba(251,191,36,0.4)'
-                        : '0 0 6px rgba(0,212,255,0.4)',
-                  }}
-                />
-              </div>
-              <span
-                className={`font-extrabold text-xs tabular-nums ${
-                  gravityHigh ? 'text-orange-400' : gravityMed ? 'text-amber-400' : 'text-cyan-300/70'
-                }`}
-              >
-                {gravityScale.toFixed(2)}x
-              </span>
+            <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
+              <ArrowDown className={`w-3 h-3 ${gravityHigh ? 'text-orange-400' : 'text-cyan-300/70'}`} />
+              <span className="font-extrabold text-[10px] text-white">{gravityScale.toFixed(2)}x</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
-              <span
-                className={`text-xs uppercase tracking-wider font-bold ${
-                  stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
-                }`}
-              >
-                HP
-              </span>
-              <div className="w-12 h-2.5 bg-white/10 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-300 ${
-                    stabilityDanger ? 'bg-red-400' : 'bg-green-400'
-                  }`}
-                  style={{
-                    width: `${hpPct}%`,
-                    boxShadow: stabilityDanger
-                      ? '0 0 8px rgba(248,113,113,0.5)'
-                      : '0 0 8px rgba(74,222,128,0.5)',
-                  }}
+          <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
+              <span className={`text-[10px] font-bold ${stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'}`}>HP</span>
+              <div className="w-12 h-2 bg-white/10 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full transition-all duration-300 ${stabilityDanger ? 'bg-red-400' : 'bg-green-400'}`}
+                  style={{ width: `${hpPct}%` }}
                 />
               </div>
-              <span
-                className={`font-extrabold text-sm tabular-nums ${
-                  stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'
-                }`}
-              >
+              <span className={`font-extrabold text-[10px] ${stabilityDanger ? 'text-red-400 stability-flash' : 'text-green-400'}`}>
                 {hpPct.toFixed(0)}%
               </span>
             </div>
 
-            <button
-              onClick={onToggleMusic}
-              className="pointer-events-auto p-2 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10 hover:bg-white/20 transition-colors"
-            >
-              {musicOn ? (
-                <Volume2 className="w-4 h-4 text-cyan-300" />
-              ) : (
-                <VolumeX className="w-4 h-4 text-white/40" />
-              )}
+            <button onClick={onToggleMusic} className="pointer-events-auto p-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10">
+              {musicOn ? <Volume2 className="w-3.5 h-3.5 text-cyan-300" /> : <VolumeX className="w-3.5 h-3.5 text-white/40" />}
             </button>
           </div>
         </div>
 
-        <div className="flex justify-center px-5">
-          <div className="w-[80%] h-1.5 bg-white/10 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-200"
-              style={{
-                width: `${progressPct}%`,
-                background: 'linear-gradient(90deg, #00D4FF, #FF6B9D)',
-                boxShadow: '0 0 8px rgba(0, 212, 255, 0.4)',
-              }}
-            />
+        <div className="flex justify-center px-4">
+          <div className="w-[80%] h-1 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-to-r from-cyan-400 to-pink-500" style={{ width: `${progressPct}%` }} />
           </div>
         </div>
-
-        {config.hazards.length > 0 && countdown <= 0 && (
-          <div className="flex justify-center mt-2">
-            <div className="flex items-center gap-2 text-xs flex-wrap justify-center px-4">
-              {config.hazards.map((hazard) => (
-                <span
-                  key={hazard}
-                  className={`px-2 py-0.5 rounded-full border ${HAZARD_STYLES[hazard] || 'text-gray-300 bg-gray-500/20 border-gray-400/40'}`}
-                >
-                  {hazard.toLowerCase()}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {gameState === 'levelComplete' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative flex flex-col items-center gap-6 overlay-enter">
-            {isVictory ? (
-              <>
-                <div className="text-center">
-                  <h2
-                    className="text-4xl font-extrabold tracking-wide text-amber-400 mb-4"
-                    style={{ textShadow: '0 0 30px rgba(251, 191, 36, 0.6)' }}
-                  >
-                    VICTORY!
-                  </h2>
-                  <p className="text-white/80 text-lg font-bold mb-2">
-                    All {MAX_LEVEL} levels conquered!
-                  </p>
-                  <p className="text-white/40 text-sm font-semibold">
-                    {stats.score} candies caught -- {stabilityPct.toFixed(0)}% stability
-                  </p>
-                </div>
-                <button
-                  onClick={onRetry}
-                  className="pointer-events-auto px-12 py-4 bg-amber-500 hover:bg-amber-400 text-white font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-amber-500/30 transition-all duration-200"
-                >
-                  Play Again
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="text-center">
-                  <h2
-                    className="text-3xl font-extrabold tracking-wide text-green-400 mb-3"
-                    style={{ textShadow: '0 0 20px rgba(74, 222, 128, 0.5)' }}
-                  >
-                    NICE!
-                  </h2>
-                  <p className="text-white/60 text-sm font-bold">
-                    {stats.score} candies caught -- Stability {stabilityPct.toFixed(0)}%
-                  </p>
-                </div>
-                <button
-                  onClick={onNextLevel}
-                  className="pointer-events-auto px-10 py-3.5 bg-green-500 hover:bg-green-400 text-white font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200"
-                >
-                  Next Level
-                </button>
-              </>
-            )}
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-6 overlay-enter px-6 text-center">
+            <h2 className="text-5xl font-extrabold text-green-400">NICE!</h2>
+            <button onClick={onNextLevel} className="pointer-events-auto px-10 py-3.5 bg-green-500 text-white font-extrabold text-lg rounded-xl">Next Level</button>
           </div>
         </div>
       )}
 
       {gameState === 'gameOver' && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
-          <div className="relative flex flex-col items-center gap-6 overlay-enter">
-            <div className="text-center">
-              <h2 className="text-3xl font-extrabold tracking-wide text-red-400 mb-3"
-                style={{ textShadow: '0 0 20px rgba(248, 113, 113, 0.5)' }}
-              >
-                OOPS!
-              </h2>
-              <p className="text-white/60 text-sm font-bold mb-1">
-                Too many candies lost!
-              </p>
-              <p className="text-white/30 text-xs font-semibold">
-                Level {level} -- {stats.score} caught -- {stats.totalMissed} missed
-              </p>
-            </div>
-            <button
-              onClick={onRetry}
-              className="pointer-events-auto px-10 py-3.5 bg-red-500 hover:bg-red-400 text-white font-extrabold text-lg rounded-xl hover:shadow-lg hover:shadow-red-500/30 transition-all duration-200"
-            >
-              Try Again
-            </button>
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-6 overlay-enter px-6 text-center">
+            <h2 className="text-5xl font-extrabold text-red-400">OOPS!</h2>
+            <button onClick={onRetry} className="pointer-events-auto px-10 py-3.5 bg-red-500 text-white font-extrabold text-lg rounded-xl">Try Again</button>
           </div>
         </div>
       )}
