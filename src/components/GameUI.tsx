@@ -81,7 +81,7 @@ export default function GameUI({
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
         <div className="flex items-center justify-between px-2 py-2">
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Lvl</span>
               <span className="text-white font-extrabold text-lg tabular-nums leading-none">
                 {level}
@@ -89,7 +89,7 @@ export default function GameUI({
               <span className="text-white/20 text-xs">/{MAX_LEVEL}</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Got</span>
               <span className="text-white font-extrabold text-lg tabular-nums leading-none">
                 {stats.score}
@@ -98,7 +98,7 @@ export default function GameUI({
               <span className="text-white/50 text-xs font-bold">{config.target}</span>
             </div>
 
-            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+            <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <ArrowDown
                 className={`w-3.5 h-3.5 ${
                   gravityHigh ? 'text-orange-400' : gravityMed ? 'text-amber-400' : 'text-cyan-300/70'
@@ -134,7 +134,7 @@ export default function GameUI({
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-3.5 py-1.5 border border-white/10">
+            <div className="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <span
                 className={`text-xs uppercase tracking-wider font-bold ${
                   stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'
