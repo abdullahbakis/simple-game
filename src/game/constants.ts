@@ -11,19 +11,22 @@ export const CANDY_RGB: readonly [number, number, number][] = [
   [255, 107, 107],
 ];
 
+// Mevcut ekran genişliğine göre bir ölçek faktörü belirleyelim (800px baz alınmıştır)
+const screenScale = Math.min(window.innerWidth / 800, 1);
+
 export const GAME = {
   gravity: 1.4,
-  particleRadius: 4,
+  particleRadius: 4 * screenScale, // Şekerleri küçült
   chainDecayTime: 4500,
   chainSegmentLength: 8,
-  chainSegmentWidth: 14,
+  chainSegmentWidth: 14 * screenScale, // Çizgileri incelt
   maxParticleSpeed: 12,
   particleRestitution: 0.6,
   particleFriction: 0,
-  bucketWidth: 120,
-  bucketHeight: 85,
+  bucketWidth: 120 * screenScale, // Sepeti küçült
+  bucketHeight: 85 * screenScale, // Sepeti küçült
   bucketWallThickness: 5,
-  spawnerWidth: 60,
+  spawnerWidth: 60 * screenScale,
   trailLength: 8,
   maxParticles: 400,
   failThreshold: 0.08,
