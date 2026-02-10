@@ -80,7 +80,7 @@ export default function GameUI({
 
       <div className="absolute inset-x-0 top-0 z-10 pointer-events-none">
         <div className="flex items-center justify-between px-1 py-2 w-full max-w-[100vw] overflow-hidden">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-2">
             <div className="flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-xl px-2 py-1 border border-white/10">
               <span className="text-cyan-300/70 text-xs uppercase tracking-wider font-bold">Lvl</span>
               <span className="text-white font-extrabold text-lg tabular-nums leading-none">
