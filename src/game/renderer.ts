@@ -482,7 +482,7 @@ function renderSpawner(ctx: CanvasRenderingContext2D, spawner: Spawner, now: num
   const pulse = 0.5 + Math.sin(now * 0.003) * 0.5;
 
   ctx.shadowColor = `rgba(0, 212, 255, ${0.3 + pulse * 0.3})`;
-  ctx.shadowBlur = 8;
+  ctx.shadowBlur = 2;
   ctx.strokeStyle = `rgba(0, 212, 255, ${0.5 + pulse * 0.4})`;
   ctx.lineWidth = 2.5;
   ctx.lineCap = 'round';
