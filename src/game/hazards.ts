@@ -139,7 +139,7 @@ export function createHazards(
 
   const teleporters: TeleporterPair[] = [];
   for (let i = 0; i < config.teleporterCount; i++) {
-    const r = 18 + Math.random() * 6;
+    const r = (18 + Math.random() * 6) * SCALE;
     const x1 = canvasWidth * 0.12 + Math.random() * canvasWidth * 0.3;
     const y1 = safeTop + 60 + Math.random() * usableHeight * 0.4;
     const x2 = canvasWidth * 0.58 + Math.random() * canvasWidth * 0.3;
