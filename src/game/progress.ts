@@ -1,9 +1,12 @@
 const STORAGE_KEY = 'candyflow_progress';
 
-export const MILESTONE_LEVELS = [1, 12, 16, 20, 25, 30, 35, 40, 45] as const;
+export const MILESTONE_LEVELS = [1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45] as const;
 
 export const MILESTONE_NAMES: Record<number, string> = {
   1: 'Start',
+  4: 'Wind Zones',
+  7: 'Spinners',
+  10: 'Platforms',
   12: 'Black Holes',
   16: 'Lava Pools',
   20: 'Ice Zones',

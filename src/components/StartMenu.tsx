@@ -156,8 +156,8 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
 
           {showLevelSelect && (
             <div className="mt-2 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-xs">
-              <div className="grid grid-cols-3 gap-2">
-                {[1, 12, 16, 20, 25, 30, 35, 40, 45].map((lvl) => {
+              <div className="grid grid-cols-4 gap-2">
+                {[1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45].map((lvl) => {
                   const isUnlocked = unlockedMilestones.includes(lvl);
                   const isSelected = selectedLevel === lvl;
                   const name = MILESTONE_NAMES[lvl];
