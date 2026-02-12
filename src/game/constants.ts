@@ -41,6 +41,18 @@ export interface RenderContext {
   now: number;
 }
 
+function hazardLifecycle(level: number, start: number, peak: number, end: number, maxCount: number): number {
+  if (level < start || level > end) return 0;
+  if (level <= peak) {
+    if (peak === start) return maxCount;
+    const progress = (level - start) / (peak - start);
+    return Math.max(1, Math.ceil(progress * maxCount));
+  }
+  if (end === peak) return maxCount;
+  const progress = (level - peak) / (end - peak);
+  return Math.max(0, Math.round(maxCount * (1 - progress)));
+}
+
 export function getLevelConfig(level: number) {
   const l = Math.min(level, MAX_LEVEL);
 
@@ -48,19 +60,19 @@ export function getLevelConfig(level: number) {
   const spawnInterval = Math.max(45, Math.round(170 - (l - 1) * 2.8));
   const gravityScale = 1 + (l - 1) * 0.025;
 
-  const staticBarCount = l >= 2 ? Math.min(Math.ceil((l - 1) / 2), 3) : 0;
-  const windZoneCount = l >= 4 ? Math.min(Math.ceil((l - 3) / 3), 2) : 0;
-  const spinnerCount = l >= 6 ? Math.min(Math.ceil((l - 5) / 2), 3) : 0;
-  const movingPlatformCount = l >= 9 ? Math.min(Math.ceil((l - 8) / 2), 3) : 0;
+  const staticBarCount = hazardLifecycle(l, 2, 4, 8, 3);
+  const windZoneCount = hazardLifecycle(l, 4, 7, 12, 2);
+  const spinnerCount = hazardLifecycle(l, 6, 9, 15, 3);
+  const movingPlatformCount = hazardLifecycle(l, 9, 13, 19, 3);
 
-  const blackHoleCount = l >= 12 ? Math.min(Math.ceil((l - 11) / 4), 2) : 0;
-  const lavaPoolCount = l >= 16 ? Math.min(Math.ceil((l - 15) / 4), 2) : 0;
-  const iceZoneCount = l >= 20 ? Math.min(Math.ceil((l - 19) / 4), 2) : 0;
-  const teleporterCount = l >= 25 ? Math.min(Math.ceil((l - 24) / 5), 2) : 0;
-  const empPulseCount = l >= 30 ? Math.min(Math.ceil((l - 29) / 4), 2) : 0;
-  const gravityFlipperCount = l >= 35 ? Math.min(Math.ceil((l - 34) / 4), 2) : 0;
-  const laserGateCount = l >= 40 ? Math.min(Math.ceil((l - 39) / 4), 2) : 0;
-  const asteroidCount = l >= 45 ? Math.min(l - 44, 3) : 0;
+  const blackHoleCount = hazardLifecycle(l, 12, 16, 23, 2);
+  const lavaPoolCount = hazardLifecycle(l, 16, 20, 27, 2);
+  const iceZoneCount = hazardLifecycle(l, 20, 24, 31, 2);
+  const teleporterCount = hazardLifecycle(l, 25, 29, 36, 2);
+  const empPulseCount = hazardLifecycle(l, 30, 34, 41, 2);
+  const gravityFlipperCount = hazardLifecycle(l, 35, 39, 46, 2);
+  const laserGateCount = hazardLifecycle(l, 40, 44, 55, 2);
+  const asteroidCount = hazardLifecycle(l, 45, 50, 50, 3);
 
   const hazards: string[] = [];
   if (staticBarCount > 0) hazards.push('DEFLECTOR BARS');
