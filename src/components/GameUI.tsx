@@ -1,6 +1,6 @@
-import { Volume2, VolumeX, ArrowDown, Coins } from 'lucide-react';
+import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X } from 'lucide-react';
 import { GAME, getLevelConfig, MAX_GRAVITY } from '../game/constants';
-import { earnCoins } from '../game/progress';
+import { earnCoins, getReviveCost } from '../game/progress';
 import type { GameStats } from './GameCanvas';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
@@ -11,10 +11,10 @@ interface GameUIProps {
   gameState: GameState;
   countdown: number;
   coins: number;
-  failCount: number;
   onNextLevel: () => void;
-  onRetry: () => void;
-  onUnlockMilestone: () => void;
+  onReviveAd: () => void;
+  onReviveCoins: () => void;
+  onGiveUp: () => void;
   musicOn: boolean;
   onToggleMusic: () => void;
 }
@@ -25,10 +25,10 @@ export default function GameUI({
   gameState,
   countdown,
   coins,
-  failCount,
   onNextLevel,
-  onRetry,
-  onUnlockMilestone,
+  onReviveAd,
+  onReviveCoins,
+  onGiveUp,
   musicOn,
   onToggleMusic,
 }: GameUIProps) {
@@ -44,7 +44,8 @@ export default function GameUI({
   const gravityHigh = gravityPct > 60;
 
   const coinsEarned = gameState === 'levelComplete' ? earnCoins(stats.stability) : 0;
-  const canUnlockMilestone = failCount >= 3 && coins >= 500;
+  const reviveCost = getReviveCost();
+  const canAffordRevive = coins >= reviveCost;
 
   return (
     <>
@@ -76,7 +77,7 @@ export default function GameUI({
 
             <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
               <Coins className="w-3 h-3 text-amber-400" />
-              <span className="font-extrabold text-[10px] text-amber-400">{coins}</span>
+              <span className="font-extrabold text-[10px] text-amber-400">{coins.toLocaleString()}</span>
             </div>
           </div>
 
@@ -119,17 +120,38 @@ export default function GameUI({
 
       {gameState === 'gameOver' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
+          <div className="flex flex-col items-center gap-3 overlay-enter px-6 text-center w-[90vw] max-w-xs">
             <h2 className="text-5xl font-extrabold text-red-400">OOPS!</h2>
-            {canUnlockMilestone && (
-              <button
-                onClick={onUnlockMilestone}
-                className="pointer-events-auto px-6 py-2 bg-amber-500/80 hover:bg-amber-500 text-white font-bold text-sm rounded-xl transition-colors"
-              >
-                Skip Level (500 coins)
-              </button>
-            )}
-            <button onClick={onRetry} className="pointer-events-auto px-10 py-3.5 bg-red-500 text-white font-extrabold text-lg rounded-xl">Try Again</button>
+            <p className="text-white/50 text-xs mt-1">Score: {stats.score} / {config.target}</p>
+
+            <button
+              onClick={onReviveAd}
+              className="pointer-events-auto w-full flex items-center justify-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm rounded-xl transition-colors"
+            >
+              <Tv className="w-4 h-4" />
+              Revive (Watch Ad)
+            </button>
+
+            <button
+              onClick={onReviveCoins}
+              disabled={!canAffordRevive}
+              className={`pointer-events-auto w-full flex items-center justify-center gap-2 px-5 py-3 font-bold text-sm rounded-xl transition-colors ${
+                canAffordRevive
+                  ? 'bg-amber-600 hover:bg-amber-500 text-white'
+                  : 'bg-white/5 text-white/25 cursor-not-allowed'
+              }`}
+            >
+              <DollarSign className="w-4 h-4" />
+              Revive ({reviveCost.toLocaleString()} Coins)
+            </button>
+
+            <button
+              onClick={onGiveUp}
+              className="pointer-events-auto w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white/60 font-bold text-sm rounded-xl transition-colors mt-1"
+            >
+              <X className="w-4 h-4" />
+              Give Up
+            </button>
           </div>
         </div>
       )}

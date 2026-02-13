@@ -51,6 +51,7 @@ interface GameCanvasProps {
   level: number;
   paused: boolean;
   skinId: string;
+  reviveRef: React.MutableRefObject<(() => void) | null>;
   onStatsChange: (stats: GameStats) => void;
   onLevelComplete: () => void;
   onGameOver: () => void;
@@ -61,6 +62,7 @@ export default function GameCanvas({
   level,
   paused,
   skinId,
+  reviveRef,
   onStatsChange,
   onLevelComplete,
   onGameOver,
@@ -215,6 +217,14 @@ export default function GameCanvas({
     let lastTime = performance.now();
     let lastCountdownSecond = -1;
 
+    reviveRef.current = () => {
+      state.ended = false;
+      state.totalMissed = 0;
+      state.vfx.particles.length = 0;
+      lastTime = performance.now();
+      pushStats();
+    };
+
     function gameLoop(timestamp: number) {
       if (!stateRef.current) return;
 
@@ -247,6 +257,7 @@ export default function GameCanvas({
           level,
           skinId
         );
+        state.animFrame = requestAnimationFrame(gameLoop);
         return;
       }
 
@@ -333,6 +344,7 @@ export default function GameCanvas({
     state.animFrame = requestAnimationFrame(gameLoop);
 
     return () => {
+      reviveRef.current = null;
       cleanup();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps

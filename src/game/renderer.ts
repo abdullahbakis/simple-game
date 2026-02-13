@@ -31,6 +31,7 @@ export function renderFrame(
   renderHazards(rc, hazards);
   renderFunnelCollector(rc, bucket);
   renderCandyRibbons(ctx, drawing, rc.now, skinId);
+  renderSkinEffects(ctx, drawing, rc.now, skinId);
   renderCandyBalls(ctx, spawner, rc.now);
   renderSpawner(ctx, spawner, rc.now);
   renderVfx(ctx, vfx);
@@ -231,7 +232,8 @@ function getSkinColors(skinId: string, now: number, x: number, y: number): { hue
     case 'love': return { hue: (340 + Math.sin(now * 0.004 + pos * 0.01) * 15), sat: 85, light: 60 };
     case 'starry': return { hue: (60 + Math.sin(now * 0.002 + pos * 0.03) * 40), sat: 30, light: 85 };
     case 'glitch': return { hue: (now * 0.5 + Math.random() * 60) % 360, sat: 100, light: 60 };
-    case 'liquid-metal': return { hue: 210, sat: 15, light: 70 };
+    case 'toxic': return { hue: (85 + Math.sin(now * 0.008 + pos * 0.01) * 15), sat: 90, light: 50 };
+    case 'plasma': return { hue: (310 + Math.sin(now * 0.01 + pos * 0.02) * 25), sat: 100, light: 60 };
     case 'rgb': return { hue: (now * 0.2 + pos * 0.5) % 360, sat: 100, light: 55 };
     default: return { hue: (now * 0.05 + pos) % 360, sat: 90, light: 70 };
   }
@@ -240,17 +242,31 @@ function getSkinColors(skinId: string, now: number, x: number, y: number): { hue
 function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState, now: number, skinId: string) {
   if (drawing.segments.length === 0) return;
 
+  const isMatrix = skinId === 'matrix';
+  const isGlitch = skinId === 'glitch';
+
   for (const seg of drawing.segments) {
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.globalAlpha = seg.opacity;
 
+    let opacity = seg.opacity;
+    let lineW = 6;
+
+    if (isMatrix) {
+      opacity *= 0.6 + Math.sin(now * 0.02 + seg.x1 * 0.1) * 0.4;
+      lineW = 4 + Math.sin(now * 0.015 + seg.y1 * 0.08) * 3;
+    } else if (isGlitch) {
+      opacity *= Math.random() > 0.15 ? 1 : 0.2;
+      lineW = 3 + Math.random() * 6;
+    }
+
+    ctx.globalAlpha = opacity;
     const { hue, sat, light } = getSkinColors(skinId, now, seg.x1, seg.y1);
 
     ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
     ctx.shadowBlur = 2;
-    ctx.lineWidth = 6;
+    ctx.lineWidth = lineW;
     ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
     ctx.beginPath();
     ctx.moveTo(seg.x1, seg.y1);
@@ -266,6 +282,164 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
     ctx.stroke();
 
     ctx.restore();
+  }
+}
+
+type SkinEffectType = 'fire' | 'ice' | 'electric' | 'slime' | 'stars' | null;
+
+function getSkinEffectType(skinId: string): SkinEffectType {
+  switch (skinId) {
+    case 'fire': return 'fire';
+    case 'ice': return 'ice';
+    case 'electric': return 'electric';
+    case 'slime':
+    case 'toxic': return 'slime';
+    case 'gold':
+    case 'starry': return 'stars';
+    default: return null;
+  }
+}
+
+function renderSkinEffects(ctx: CanvasRenderingContext2D, drawing: DrawingState, now: number, skinId: string) {
+  if (drawing.segments.length === 0) return;
+  const effectType = getSkinEffectType(skinId);
+  if (!effectType) return;
+
+  ctx.save();
+
+  const step = Math.max(3, Math.floor(drawing.segments.length / 60));
+  for (let i = 0; i < drawing.segments.length; i += step) {
+    const seg = drawing.segments[i];
+    const mx = (seg.x1 + seg.x2) / 2;
+    const my = (seg.y1 + seg.y2) / 2;
+    const seed = mx * 73.1 + my * 37.7;
+
+    switch (effectType) {
+      case 'fire':
+        renderFireParticles(ctx, mx, my, now, seed, seg.opacity);
+        break;
+      case 'ice':
+        renderIceParticles(ctx, mx, my, now, seed, seg.opacity);
+        break;
+      case 'electric':
+        renderElectricSparks(ctx, seg, now, seed);
+        break;
+      case 'slime':
+        renderSlimeDrips(ctx, mx, my, now, seed, seg.opacity, skinId);
+        break;
+      case 'stars':
+        renderTwinklingStars(ctx, mx, my, now, seed, seg.opacity, skinId);
+        break;
+    }
+  }
+
+  ctx.restore();
+}
+
+function renderFireParticles(ctx: CanvasRenderingContext2D, x: number, y: number, now: number, seed: number, opacity: number) {
+  for (let j = 0; j < 2; j++) {
+    const t = (now * 0.003 + seed + j * 1.7) % 1;
+    const px = x + Math.sin(seed * 0.7 + j * 3 + now * 0.004) * 6;
+    const py = y - t * 18;
+    const size = (1 - t) * 3;
+    const alpha = (1 - t) * 0.7 * opacity;
+    const hue = 15 + Math.sin(seed + j) * 20;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `hsl(${hue}, 95%, 55%)`;
+    ctx.fillRect(px - size / 2, py - size / 2, size, size);
+  }
+}
+
+function renderIceParticles(ctx: CanvasRenderingContext2D, x: number, y: number, now: number, seed: number, opacity: number) {
+  for (let j = 0; j < 2; j++) {
+    const t = (now * 0.002 + seed * 0.3 + j * 2.1) % 1;
+    const px = x + Math.sin(seed * 0.5 + j * 4 + now * 0.003) * 8;
+    const py = y + t * 16;
+    const size = (1 - t) * 2.5;
+    const alpha = (1 - t) * 0.6 * opacity;
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = `rgba(200, 240, 255, 1)`;
+    ctx.beginPath();
+    ctx.arc(px, py, size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function renderElectricSparks(
+  ctx: CanvasRenderingContext2D,
+  seg: { x1: number; y1: number; x2: number; y2: number; opacity: number },
+  now: number,
+  seed: number
+) {
+  if (Math.sin(now * 0.02 + seed) > 0.3) return;
+
+  ctx.globalAlpha = seg.opacity * 0.8;
+  ctx.strokeStyle = Math.random() > 0.5 ? 'rgba(255, 255, 100, 0.9)' : 'rgba(255, 255, 255, 0.8)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+
+  const mx = (seg.x1 + seg.x2) / 2;
+  const my = (seg.y1 + seg.y2) / 2;
+  const len = 8 + Math.sin(seed) * 4;
+  const angle = Math.sin(now * 0.01 + seed) * Math.PI;
+
+  ctx.moveTo(mx, my);
+  const midX = mx + Math.cos(angle) * len * 0.5 + (Math.random() - 0.5) * 4;
+  const midY = my + Math.sin(angle) * len * 0.5 + (Math.random() - 0.5) * 4;
+  ctx.lineTo(midX, midY);
+  ctx.lineTo(midX + Math.cos(angle) * len * 0.5, midY + Math.sin(angle) * len * 0.5);
+  ctx.stroke();
+}
+
+function renderSlimeDrips(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  now: number,
+  seed: number,
+  opacity: number,
+  skinId: string
+) {
+  const t = (now * 0.0015 + seed * 0.4) % 1;
+  const px = x + Math.sin(seed * 0.3) * 3;
+  const py = y + t * 20;
+  const size = (1 - t * 0.5) * 2.5;
+  const alpha = (1 - t) * 0.65 * opacity;
+  const hue = skinId === 'toxic' ? 85 : 95;
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = `hsl(${hue}, 90%, 45%)`;
+  ctx.beginPath();
+  ctx.arc(px, py, size, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+function renderTwinklingStars(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  now: number,
+  seed: number,
+  opacity: number,
+  skinId: string
+) {
+  for (let j = 0; j < 2; j++) {
+    const angle = seed * 1.3 + j * 2.5 + now * 0.002;
+    const dist = 5 + Math.sin(seed * 0.7 + j) * 4;
+    const px = x + Math.cos(angle) * dist;
+    const py = y + Math.sin(angle) * dist;
+    const twinkle = 0.5 + 0.5 * Math.sin(now * 0.008 + seed + j * 1.9);
+    const alpha = twinkle * 0.8 * opacity;
+    const size = 1 + twinkle * 1.5;
+
+    ctx.globalAlpha = alpha;
+    if (skinId === 'gold') {
+      ctx.fillStyle = `hsl(45, 90%, ${60 + twinkle * 20}%)`;
+    } else {
+      ctx.fillStyle = `hsl(${50 + twinkle * 30}, 30%, ${80 + twinkle * 15}%)`;
+    }
+    ctx.beginPath();
+    ctx.arc(px, py, size, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 

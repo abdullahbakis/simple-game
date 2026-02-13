@@ -89,9 +89,13 @@ export function saveCoins(coins: number) {
 }
 
 export function earnCoins(stability: number): number {
-  const base = 15;
+  const base = 50;
   const bonus = stability > 0.95 ? 10 : stability > 0.85 ? 5 : 0;
   return base + bonus;
+}
+
+export function getReviveCost(): number {
+  return 250;
 }
 
 export function unlockMilestone(milestoneLevel: number) {

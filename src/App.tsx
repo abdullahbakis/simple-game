@@ -4,9 +4,10 @@ import GameUI from './components/GameUI';
 import StartMenu from './components/StartMenu';
 import ShopModal from './components/ShopModal';
 import type { GameStats } from './components/GameCanvas';
-import { updateProgress, loadCoins, saveCoins, earnCoins, unlockMilestone } from './game/progress';
+import { updateProgress, loadCoins, saveCoins, earnCoins, getReviveCost, loadProgress, MILESTONE_LEVELS, unlockMilestone } from './game/progress';
 import { getUnlockedSkins, unlockSkin, getSelectedSkin, selectSkin } from './game/skins';
 import { playLevelComplete, playVictory, playGameOver, startMusic, stopMusic, resumeAudio } from './game/audio';
+import { showRewardedAd } from './game/AdManager';
 import { MAX_LEVEL } from './game/constants';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
@@ -20,7 +21,6 @@ function App() {
   const [selectedSkinId, setSelectedSkinId] = useState(getSelectedSkin);
   const [unlockedSkins, setUnlockedSkins] = useState(getUnlockedSkins);
   const [showShop, setShowShop] = useState(false);
-  const [failCount, setFailCount] = useState(0);
   const [stats, setStats] = useState<GameStats>({
     score: 0,
     totalSpawned: 0,
@@ -28,6 +28,7 @@ function App() {
     stability: 1,
   });
   const resetKeyRef = useRef(0);
+  const reviveRef = useRef<(() => void) | null>(null);
   const [, forceRender] = useState(0);
   const levelRef = useRef(level);
   const statsRef = useRef(stats);
@@ -53,7 +54,6 @@ function App() {
       saveCoins(next);
       return next;
     });
-    setFailCount(0);
     if (levelRef.current >= MAX_LEVEL) {
       playVictory();
     } else {
@@ -63,7 +63,6 @@ function App() {
 
   const handleGameOver = useCallback(() => {
     setGameState('gameOver');
-    setFailCount(prev => prev + 1);
     playGameOver();
   }, []);
 
@@ -77,7 +76,6 @@ function App() {
     setGameState('playing');
     setCountdown(3);
     setStats({ score: 0, totalSpawned: 0, totalMissed: 0, stability: 1 });
-    setFailCount(0);
     resetKeyRef.current++;
     forceRender((n) => n + 1);
     if (musicOn) startMusic();
@@ -92,28 +90,33 @@ function App() {
     forceRender((n) => n + 1);
   }, []);
 
-  const handleRetry = useCallback(() => {
+  const doRevive = useCallback(() => {
+    reviveRef.current?.();
+    setGameState('playing');
+    setStats(prev => ({ ...prev, stability: 1, totalMissed: 0 }));
+  }, []);
+
+  const handleReviveAd = useCallback(() => {
+    showRewardedAd(() => {
+      doRevive();
+    });
+  }, [doRevive]);
+
+  const handleReviveCoins = useCallback(() => {
+    const cost = getReviveCost();
+    setCoins(prev => {
+      if (prev < cost) return prev;
+      const next = prev - cost;
+      saveCoins(next);
+      return next;
+    });
+    doRevive();
+  }, [doRevive]);
+
+  const handleGiveUp = useCallback(() => {
     setGameState('menu');
     stopMusic();
   }, []);
-
-  const handleUnlockMilestone = useCallback(() => {
-    if (coins >= 500) {
-      setCoins(prev => {
-        const next = prev - 500;
-        saveCoins(next);
-        return next;
-      });
-      unlockMilestone(levelRef.current + 1);
-      setLevel(prev => prev + 1);
-      setGameState('playing');
-      setCountdown(3);
-      setStats({ score: 0, totalSpawned: 0, totalMissed: 0, stability: 1 });
-      setFailCount(0);
-      resetKeyRef.current++;
-      forceRender((n) => n + 1);
-    }
-  }, [coins]);
 
   const handleToggleMusic = useCallback(() => {
     setMusicOn(prev => {
@@ -144,6 +147,47 @@ function App() {
     setSelectedSkinId(skinId);
   }, []);
 
+  const addCoins = useCallback((amount: number) => {
+    setCoins(prev => {
+      const next = prev + amount;
+      saveCoins(next);
+      return next;
+    });
+  }, []);
+
+  const handleWatchAdForCoins = useCallback(() => {
+    showRewardedAd(() => {
+      addCoins(250);
+    });
+  }, [addCoins]);
+
+  const handlePurchaseCoins = useCallback((amount: number) => {
+    addCoins(amount);
+  }, [addCoins]);
+
+  const getNextMilestoneCost = useCallback((): number | null => {
+    const progress = loadProgress();
+    const nextMilestone = MILESTONE_LEVELS.find(l => l > progress.highestLevel);
+    if (!nextMilestone) return null;
+    if (progress.highestLevel < 30) return 2000;
+    if (progress.highestLevel < 60) return 5000;
+    return 10000;
+  }, []);
+
+  const handleUnlockNextMilestone = useCallback(() => {
+    const progress = loadProgress();
+    const nextMilestone = MILESTONE_LEVELS.find(l => l > progress.highestLevel);
+    const cost = getNextMilestoneCost();
+    if (!nextMilestone || cost === null || coins < cost) return;
+
+    unlockMilestone(nextMilestone);
+    setCoins(prev => {
+      const next = prev - cost;
+      saveCoins(next);
+      return next;
+    });
+  }, [coins, getNextMilestoneCost]);
+
   const paused = gameState !== 'playing';
 
   return (
@@ -157,6 +201,7 @@ function App() {
             level={level}
             paused={paused}
             skinId={selectedSkinId}
+            reviveRef={reviveRef}
             onStatsChange={handleStatsChange}
             onLevelComplete={handleLevelComplete}
             onGameOver={handleGameOver}
@@ -168,10 +213,10 @@ function App() {
             gameState={gameState}
             countdown={countdown}
             coins={coins}
-            failCount={failCount}
             onNextLevel={handleNextLevel}
-            onRetry={handleRetry}
-            onUnlockMilestone={handleUnlockMilestone}
+            onReviveAd={handleReviveAd}
+            onReviveCoins={handleReviveCoins}
+            onGiveUp={handleGiveUp}
             musicOn={musicOn}
             onToggleMusic={handleToggleMusic}
           />
@@ -185,6 +230,10 @@ function App() {
           onBuy={handleBuySkin}
           onSelect={handleSelectSkin}
           onClose={() => setShowShop(false)}
+          onWatchAdForCoins={handleWatchAdForCoins}
+          onPurchaseCoins={handlePurchaseCoins}
+          nextMilestoneCost={getNextMilestoneCost()}
+          onUnlockNextMilestone={handleUnlockNextMilestone}
         />
       )}
     </div>
