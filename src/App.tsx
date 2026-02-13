@@ -28,7 +28,6 @@ function App() {
     stability: 1,
   });
   const resetKeyRef = useRef(0);
-  const reviveRef = useRef<(() => void) | null>(null);
   const [, forceRender] = useState(0);
   const levelRef = useRef(level);
   const statsRef = useRef(stats);
@@ -91,9 +90,11 @@ function App() {
   }, []);
 
   const doRevive = useCallback(() => {
-    reviveRef.current?.();
     setGameState('playing');
-    setStats(prev => ({ ...prev, stability: 1, totalMissed: 0 }));
+    setCountdown(3);
+    setStats({ score: 0, totalSpawned: 0, totalMissed: 0, stability: 1 });
+    resetKeyRef.current++;
+    forceRender((n) => n + 1);
   }, []);
 
   const handleReviveAd = useCallback(() => {
@@ -201,7 +202,6 @@ function App() {
             level={level}
             paused={paused}
             skinId={selectedSkinId}
-            reviveRef={reviveRef}
             onStatsChange={handleStatsChange}
             onLevelComplete={handleLevelComplete}
             onGameOver={handleGameOver}

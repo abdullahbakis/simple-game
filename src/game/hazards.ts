@@ -300,7 +300,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.repulsorFieldCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.0003 + Math.random() * 0.0002 });
+    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.0008 + Math.random() * 0.0004 });
   }
 
   const phaseWalls: PhaseWall[] = [];
