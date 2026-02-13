@@ -50,6 +50,7 @@ export interface GameStats {
 interface GameCanvasProps {
   level: number;
   paused: boolean;
+  skinId: string;
   onStatsChange: (stats: GameStats) => void;
   onLevelComplete: () => void;
   onGameOver: () => void;
@@ -59,6 +60,7 @@ interface GameCanvasProps {
 export default function GameCanvas({
   level,
   paused,
+  skinId,
   onStatsChange,
   onLevelComplete,
   onGameOver,
@@ -241,7 +243,9 @@ export default function GameCanvas({
           state.bucket,
           state.obstacles,
           state.hazards,
-          state.vfx
+          state.vfx,
+          level,
+          skinId
         );
         return;
       }
@@ -314,7 +318,9 @@ export default function GameCanvas({
         state.bucket,
         state.obstacles,
         state.hazards,
-        state.vfx
+        state.vfx,
+        level,
+        skinId
       );
 
       if (inCountdown) {

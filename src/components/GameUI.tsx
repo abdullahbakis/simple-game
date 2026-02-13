@@ -1,5 +1,6 @@
-import { Volume2, VolumeX, ArrowDown } from 'lucide-react';
-import { GAME, getLevelConfig, MAX_LEVEL } from '../game/constants';
+import { Volume2, VolumeX, ArrowDown, Coins } from 'lucide-react';
+import { GAME, getLevelConfig, MAX_GRAVITY } from '../game/constants';
+import { earnCoins } from '../game/progress';
 import type { GameStats } from './GameCanvas';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
@@ -9,8 +10,11 @@ interface GameUIProps {
   stats: GameStats;
   gameState: GameState;
   countdown: number;
+  coins: number;
+  failCount: number;
   onNextLevel: () => void;
   onRetry: () => void;
+  onUnlockMilestone: () => void;
   musicOn: boolean;
   onToggleMusic: () => void;
 }
@@ -20,8 +24,11 @@ export default function GameUI({
   stats,
   gameState,
   countdown,
+  coins,
+  failCount,
   onNextLevel,
   onRetry,
+  onUnlockMilestone,
   musicOn,
   onToggleMusic,
 }: GameUIProps) {
@@ -33,9 +40,11 @@ export default function GameUI({
   const stabilityDanger = hpPct <= 30;
   const progressPct = Math.min((stats.score / config.target) * 100, 100);
   const gravityScale = config.gravityScale;
-  const maxGravity = 1 + (MAX_LEVEL - 1) * 0.025;
-  const gravityPct = Math.min(((gravityScale - 1) / (maxGravity - 1)) * 100, 100);
+  const gravityPct = Math.min(((gravityScale - 1) / (MAX_GRAVITY - 1)) * 100, 100);
   const gravityHigh = gravityPct > 60;
+
+  const coinsEarned = gameState === 'levelComplete' ? earnCoins(stats.stability) : 0;
+  const canUnlockMilestone = failCount >= 3 && coins >= 500;
 
   return (
     <>
@@ -64,13 +73,18 @@ export default function GameUI({
               <ArrowDown className={`w-3 h-3 ${gravityHigh ? 'text-orange-400' : 'text-cyan-300/70'}`} />
               <span className="font-extrabold text-[10px] text-white">{gravityScale.toFixed(2)}x</span>
             </div>
+
+            <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
+              <Coins className="w-3 h-3 text-amber-400" />
+              <span className="font-extrabold text-[10px] text-amber-400">{coins}</span>
+            </div>
           </div>
 
           <div className="flex items-center gap-1">
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
               <span className={`text-[10px] font-bold ${stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'}`}>HP</span>
               <div className="w-12 h-2 bg-white/10 rounded-full overflow-hidden">
-                <div 
+                <div
                   className={`h-full rounded-full transition-all duration-300 ${stabilityDanger ? 'bg-red-400' : 'bg-green-400'}`}
                   style={{ width: `${hpPct}%` }}
                 />
@@ -95,8 +109,9 @@ export default function GameUI({
 
       {gameState === 'levelComplete' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-6 overlay-enter px-6 text-center">
+          <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
             <h2 className="text-5xl font-extrabold text-green-400">NICE!</h2>
+            <p className="text-amber-400 font-bold text-sm">+{coinsEarned} coins earned</p>
             <button onClick={onNextLevel} className="pointer-events-auto px-10 py-3.5 bg-green-500 text-white font-extrabold text-lg rounded-xl">Next Level</button>
           </div>
         </div>
@@ -104,8 +119,16 @@ export default function GameUI({
 
       {gameState === 'gameOver' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex flex-col items-center gap-6 overlay-enter px-6 text-center">
+          <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
             <h2 className="text-5xl font-extrabold text-red-400">OOPS!</h2>
+            {canUnlockMilestone && (
+              <button
+                onClick={onUnlockMilestone}
+                className="pointer-events-auto px-6 py-2 bg-amber-500/80 hover:bg-amber-500 text-white font-bold text-sm rounded-xl transition-colors"
+              >
+                Skip Level (500 coins)
+              </button>
+            )}
             <button onClick={onRetry} className="pointer-events-auto px-10 py-3.5 bg-red-500 text-white font-extrabold text-lg rounded-xl">Try Again</button>
           </div>
         </div>

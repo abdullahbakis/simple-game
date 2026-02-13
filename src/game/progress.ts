@@ -1,6 +1,7 @@
 const STORAGE_KEY = 'candyflow_progress';
+const COINS_KEY = 'candyflow_coins';
 
-export const MILESTONE_LEVELS = [1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45] as const;
+export const MILESTONE_LEVELS = [1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90] as const;
 
 export const MILESTONE_NAMES: Record<number, string> = {
   1: 'Start',
@@ -15,6 +16,14 @@ export const MILESTONE_NAMES: Record<number, string> = {
   35: 'Anti-Gravity',
   40: 'Laser Gates',
   45: 'Asteroids',
+  50: 'Tesla Coils',
+  55: 'Repulsors',
+  60: 'Phase Walls',
+  65: 'Mag Cores',
+  70: 'Bumpers',
+  75: 'Solar Flares',
+  80: 'Slow-Mo',
+  90: 'The Void',
 };
 
 export interface Progress {
@@ -63,4 +72,33 @@ export function getUnlockedMilestones(): number[] {
 
 export function resetProgress() {
   saveProgress({ highestLevel: 1, highestCompleted: 0 });
+}
+
+export function loadCoins(): number {
+  try {
+    const data = localStorage.getItem(COINS_KEY);
+    if (data) return JSON.parse(data);
+  } catch {}
+  return 0;
+}
+
+export function saveCoins(coins: number) {
+  try {
+    localStorage.setItem(COINS_KEY, JSON.stringify(coins));
+  } catch {}
+}
+
+export function earnCoins(stability: number): number {
+  const base = 15;
+  const bonus = stability > 0.95 ? 10 : stability > 0.85 ? 5 : 0;
+  return base + bonus;
+}
+
+export function unlockMilestone(milestoneLevel: number) {
+  const current = loadProgress();
+  const newProgress: Progress = {
+    highestLevel: Math.max(current.highestLevel, milestoneLevel),
+    highestCompleted: current.highestCompleted,
+  };
+  saveProgress(newProgress);
 }

@@ -1,9 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
-import { ChevronDown, Lock, Unlock } from 'lucide-react';
-import { getUnlockedMilestones, MILESTONE_NAMES, loadProgress } from '../game/progress';
+import { ChevronDown, Lock, Unlock, Coins, ShoppingBag } from 'lucide-react';
+import { getUnlockedMilestones, MILESTONE_NAMES, MILESTONE_LEVELS, loadProgress } from '../game/progress';
 
 interface StartMenuProps {
+  coins: number;
   onPlay: (startLevel: number) => void;
+  onOpenShop: () => void;
 }
 
 const CANDY_COLORS = [
@@ -25,7 +27,7 @@ interface FloatingBlob {
   phase: number;
 }
 
-export default function StartMenu({ onPlay }: StartMenuProps) {
+export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showLevelSelect, setShowLevelSelect] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(1);
@@ -119,30 +121,45 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
     <div className="fixed inset-0 z-30">
       <canvas ref={canvasRef} className="absolute inset-0" />
 
-      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-6">
-        <div className="flex flex-col items-center gap-4">
+      <div className="relative z-10 flex flex-col items-center justify-center h-full gap-5">
+        <div className="flex flex-col items-center gap-3">
           <h1 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight select-none candy-title">
             Candy Flow
           </h1>
 
           <p className="text-cyan-300/70 text-xs sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw]">
-            50 Levels -- Draw lines -- Guide the candies!
+            100 Levels -- Draw lines -- Guide the candies!
           </p>
 
-          {progress.highestCompleted > 0 && (
-            <p className="text-white/30 text-xs tracking-wider">
-              Best: Level {progress.highestCompleted} cleared
-            </p>
-          )}
+          <div className="flex items-center gap-4">
+            {progress.highestCompleted > 0 && (
+              <p className="text-white/30 text-xs tracking-wider">
+                Best: Level {progress.highestCompleted} cleared
+              </p>
+            )}
+            <div className="flex items-center gap-1.5">
+              <Coins className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-amber-400 font-bold text-sm">{coins}</span>
+            </div>
+          </div>
         </div>
 
-        <div className="flex flex-col items-center gap-3 mt-2">
-          <button
-            onClick={handlePlay}
-            className="px-14 py-4 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
-          >
-            {selectedLevel === 1 ? 'PLAY' : `START LVL ${selectedLevel}`}
-          </button>
+        <div className="flex flex-col items-center gap-3 mt-1">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handlePlay}
+              className="px-12 py-3.5 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
+            >
+              {selectedLevel === 1 ? 'PLAY' : `START LVL ${selectedLevel}`}
+            </button>
+
+            <button
+              onClick={onOpenShop}
+              className="p-3.5 bg-white/10 hover:bg-white/20 border border-white/10 rounded-2xl transition-colors"
+            >
+              <ShoppingBag className="w-5 h-5 text-amber-400" />
+            </button>
+          </div>
 
           {unlockedMilestones.length > 1 && (
             <button
@@ -155,9 +172,9 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
           )}
 
           {showLevelSelect && (
-            <div className="mt-2 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-xs">
-              <div className="grid grid-cols-4 gap-2">
-                {[1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45].map((lvl) => {
+            <div className="mt-1 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-sm max-h-[40vh] overflow-y-auto shop-scroll">
+              <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                {[...MILESTONE_LEVELS].map((lvl) => {
                   const isUnlocked = unlockedMilestones.includes(lvl);
                   const isSelected = selectedLevel === lvl;
                   const name = MILESTONE_NAMES[lvl];
@@ -185,7 +202,7 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
                         )}
                         <span className="font-bold text-sm">{lvl}</span>
                       </div>
-                      <span className="text-[10px] opacity-60 leading-tight text-center">
+                      <span className="text-[9px] opacity-60 leading-tight text-center">
                         {name}
                       </span>
                     </button>
@@ -196,7 +213,7 @@ export default function StartMenu({ onPlay }: StartMenuProps) {
           )}
         </div>
 
-        <div className="flex items-center gap-3 mt-2">
+        <div className="flex items-center gap-3 mt-1">
           {CANDY_COLORS.slice(0, 5).map((c, i) => (
             <div
               key={i}

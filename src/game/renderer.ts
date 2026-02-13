@@ -15,11 +15,13 @@ export function renderFrame(
   bucket: Bucket,
   obstacles: ObstacleState,
   hazards: HazardState,
-  vfx: VfxState
+  vfx: VfxState,
+  level: number = 1,
+  skinId: string = 'rainbow'
 ) {
   const { ctx, width, height } = rc;
   ctx.clearRect(0, 0, width, height);
-  renderSpaceBg(rc);
+  renderSpaceBg(rc, level);
   renderStars(rc);
   renderDeathZone(ctx, width, height);
   renderWindZones(rc, obstacles);
@@ -28,7 +30,7 @@ export function renderFrame(
   renderMovingPlatforms(rc, obstacles);
   renderHazards(rc, hazards);
   renderFunnelCollector(rc, bucket);
-  renderCandyRibbons(ctx, drawing, rc.now);
+  renderCandyRibbons(ctx, drawing, rc.now, skinId);
   renderCandyBalls(ctx, spawner, rc.now);
   renderSpawner(ctx, spawner, rc.now);
   renderVfx(ctx, vfx);
@@ -38,14 +40,63 @@ const _starCache: { x: number; y: number; r: number; twinkleOffset: number }[] =
 let _starW = 0;
 let _starH = 0;
 
-function renderSpaceBg(rc: RenderContext) {
-  const { ctx, width, height } = rc;
+interface BgTheme {
+  top: string;
+  mid: string;
+  bottom: string;
+}
+
+function getBgTheme(level: number): BgTheme {
+  if (level <= 20) return { top: '#0B1628', mid: '#152238', bottom: '#1A2744' };
+  if (level <= 40) return { top: '#081820', mid: '#0E2830', bottom: '#143838' };
+  if (level <= 60) return { top: '#0A0A18', mid: '#121228', bottom: '#181830' };
+  if (level <= 80) return { top: '#1A0A08', mid: '#281210', bottom: '#301818' };
+  return { top: '#080810', mid: '#101020', bottom: '#181828' };
+}
+
+function renderSpaceBg(rc: RenderContext, level: number) {
+  const { ctx, width, height, now } = rc;
+  const theme = getBgTheme(level);
   const grad = ctx.createLinearGradient(0, 0, 0, height);
-  grad.addColorStop(0, '#0B1628');
-  grad.addColorStop(0.5, '#152238');
-  grad.addColorStop(1, '#1A2744');
+  grad.addColorStop(0, theme.top);
+  grad.addColorStop(0.5, theme.mid);
+  grad.addColorStop(1, theme.bottom);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, width, height);
+
+  if (level > 40 && level <= 60) {
+    ctx.strokeStyle = 'rgba(0, 180, 200, 0.04)';
+    ctx.lineWidth = 0.5;
+    const spacing = 40;
+    for (let x = (now * 0.01) % spacing; x < width; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = (now * 0.008) % spacing; y < height; y += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  }
+
+  if (level > 80) {
+    for (let i = 0; i < 3; i++) {
+      const shimmerX = (width * 0.3 + i * width * 0.2 + Math.sin(now * 0.0005 + i * 2) * 60);
+      const shimmerY = height * 0.5;
+      const shimmerR = 100 + Math.sin(now * 0.001 + i) * 30;
+      const shimmerAlpha = 0.02 + Math.sin(now * 0.002 + i * 1.5) * 0.01;
+      const sg = ctx.createRadialGradient(shimmerX, shimmerY, 0, shimmerX, shimmerY, shimmerR);
+      sg.addColorStop(0, `rgba(100, 140, 200, ${shimmerAlpha})`);
+      sg.addColorStop(1, 'transparent');
+      ctx.fillStyle = sg;
+      ctx.beginPath();
+      ctx.arc(shimmerX, shimmerY, shimmerR, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 }
 
 function renderStars(rc: RenderContext) {
@@ -165,7 +216,28 @@ function renderCandyBalls(ctx: CanvasRenderingContext2D, spawner: Spawner, now: 
   }
 }
 
-function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState, now: number) {
+function getSkinColors(skinId: string, now: number, x: number, y: number): { hue: number; sat: number; light: number } {
+  const pos = x * 0.5 + y * 0.3;
+  switch (skinId) {
+    case 'gold': return { hue: 45, sat: 90, light: 60 };
+    case 'neon-blue': return { hue: 200, sat: 100, light: 60 };
+    case 'fire': return { hue: (15 + Math.sin(now * 0.01 + pos * 0.01) * 15), sat: 95, light: 55 };
+    case 'ice': return { hue: 195, sat: 70, light: 75 };
+    case 'matrix': return { hue: 120, sat: 100, light: 50 };
+    case 'slime': return { hue: (90 + Math.sin(now * 0.005 + pos * 0.01) * 20), sat: 80, light: 55 };
+    case 'bubble': return { hue: (200 + Math.sin(now * 0.003 + pos * 0.02) * 30), sat: 60, light: 75 };
+    case 'void': return { hue: 260, sat: 20, light: 25 };
+    case 'electric': return { hue: 185, sat: 100, light: 70 };
+    case 'love': return { hue: (340 + Math.sin(now * 0.004 + pos * 0.01) * 15), sat: 85, light: 60 };
+    case 'starry': return { hue: (60 + Math.sin(now * 0.002 + pos * 0.03) * 40), sat: 30, light: 85 };
+    case 'glitch': return { hue: (now * 0.5 + Math.random() * 60) % 360, sat: 100, light: 60 };
+    case 'liquid-metal': return { hue: 210, sat: 15, light: 70 };
+    case 'rgb': return { hue: (now * 0.2 + pos * 0.5) % 360, sat: 100, light: 55 };
+    default: return { hue: (now * 0.05 + pos) % 360, sat: 90, light: 70 };
+  }
+}
+
+function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState, now: number, skinId: string) {
   if (drawing.segments.length === 0) return;
 
   for (const seg of drawing.segments) {
@@ -174,12 +246,12 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
     ctx.lineJoin = 'round';
     ctx.globalAlpha = seg.opacity;
 
-    const hue = (now * 0.05 + seg.x1 * 0.5 + seg.y1 * 0.3) % 360;
+    const { hue, sat, light } = getSkinColors(skinId, now, seg.x1, seg.y1);
 
-    ctx.shadowColor = `hsla(${hue}, 100%, 65%, 0.6)`;
+    ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
     ctx.shadowBlur = 2;
     ctx.lineWidth = 6;
-    ctx.strokeStyle = `hsla(${hue}, 90%, 70%, 0.9)`;
+    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
     ctx.beginPath();
     ctx.moveTo(seg.x1, seg.y1);
     ctx.lineTo(seg.x2, seg.y2);
@@ -187,7 +259,7 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
 
     ctx.shadowBlur = 0;
     ctx.lineWidth = 2;
-    ctx.strokeStyle = `hsla(${hue}, 100%, 88%, 0.7)`;
+    ctx.strokeStyle = `hsla(${hue}, ${Math.min(sat + 10, 100)}%, ${Math.min(light + 18, 95)}%, 0.7)`;
     ctx.beginPath();
     ctx.moveTo(seg.x1, seg.y1);
     ctx.lineTo(seg.x2, seg.y2);

@@ -74,6 +74,63 @@ export interface Asteroid {
   vy: number;
 }
 
+export interface TeslaCoilPair {
+  x1: number; y1: number;
+  x2: number; y2: number;
+  interval: number;
+  arcDuration: number;
+  lastActivation: number;
+  active: boolean;
+}
+
+export interface RepulsorField {
+  x: number; y: number;
+  radius: number;
+  strength: number;
+}
+
+export interface PhaseWall {
+  body: Matter.Body;
+  x: number; y: number;
+  width: number; height: number;
+  angle: number;
+  interval: number;
+  solid: boolean;
+  lastToggle: number;
+}
+
+export interface MagneticCore {
+  x: number; y: number;
+  radius: number;
+  strength: number;
+}
+
+export interface BumperOrb {
+  body: Matter.Body;
+  x: number; y: number;
+  radius: number;
+}
+
+export interface SolarFlare {
+  y: number;
+  speed: number;
+  killHeight: number;
+  width: number;
+  xOffset: number;
+}
+
+export interface SlowMoField {
+  x: number; y: number;
+  width: number; height: number;
+  friction: number;
+}
+
+export interface VoidZone {
+  x: number; y: number;
+  width: number; height: number;
+  vx: number; vy: number;
+}
+
 export interface HazardState {
   blackHoles: BlackHole[];
   lavaPools: LavaPool[];
@@ -83,6 +140,14 @@ export interface HazardState {
   gravityFlippers: GravityFlipper[];
   laserGates: LaserGate[];
   asteroids: Asteroid[];
+  teslaCoils: TeslaCoilPair[];
+  repulsorFields: RepulsorField[];
+  phaseWalls: PhaseWall[];
+  magneticCores: MagneticCore[];
+  bumperOrbs: BumperOrb[];
+  solarFlares: SolarFlare[];
+  slowMoFields: SlowMoField[];
+  voidZones: VoidZone[];
 }
 
 function avoidsBucket(x: number, y: number, bx: number, by: number, margin: number): boolean {
@@ -215,13 +280,116 @@ export function createHazards(
     asteroids.push({ body, radius, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
   }
 
-  return { blackHoles, lavaPools, iceZones, teleporters, empPulses, gravityFlippers, laserGates, asteroids };
+  const teslaCoils: TeslaCoilPair[] = [];
+  for (let i = 0; i < config.teslaCoilCount; i++) {
+    const x1 = canvasWidth * 0.15 + Math.random() * canvasWidth * 0.25;
+    const x2 = canvasWidth * 0.6 + Math.random() * canvasWidth * 0.25;
+    const baseY = safeTop + ((i + 0.5) / Math.max(config.teslaCoilCount, 1)) * usableHeight * 0.5;
+    teslaCoils.push({
+      x1, y1: baseY, x2, y2: baseY + (Math.random() - 0.5) * 40,
+      interval: 2500, arcDuration: 500,
+      lastActivation: -10000, active: false,
+    });
+  }
+
+  const repulsorFields: RepulsorField[] = [];
+  for (let i = 0; i < config.repulsorFieldCount; i++) {
+    let x = 0, y = 0;
+    for (let a = 0; a < 30; a++) {
+      x = canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+      y = safeTop + ((i + 0.5) / Math.max(config.repulsorFieldCount, 1)) * usableHeight * 0.6;
+      if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
+    }
+    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.0003 + Math.random() * 0.0002 });
+  }
+
+  const phaseWalls: PhaseWall[] = [];
+  for (let i = 0; i < config.phaseWallCount; i++) {
+    const w = (90 + Math.random() * 80) * SCALE;
+    const h = 10 * SCALE;
+    let x = 0, y = 0;
+    for (let a = 0; a < 30; a++) {
+      x = canvasWidth * 0.15 + Math.random() * canvasWidth * 0.7;
+      y = safeTop + ((i + 0.5) / Math.max(config.phaseWallCount, 1)) * usableHeight * 0.6;
+      if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
+    }
+    const angle = (Math.random() - 0.5) * 0.6;
+    const body = Matter.Bodies.rectangle(x, y, w, h, {
+      isStatic: true, angle, label: 'phaseWall',
+      collisionFilter: { category: CATEGORY.obstacle, mask: CATEGORY.particle },
+      restitution: 0.4, friction: 0,
+    });
+    phaseWalls.push({ body, x, y, width: w, height: h, angle, interval: 3000, solid: true, lastToggle: 0 });
+  }
+
+  const magneticCores: MagneticCore[] = [];
+  for (let i = 0; i < config.magneticCoreCount; i++) {
+    let x = 0, y = 0;
+    for (let a = 0; a < 30; a++) {
+      x = canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+      y = safeTop + ((i + 0.5) / Math.max(config.magneticCoreCount, 1)) * usableHeight * 0.5;
+      if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
+    }
+    magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: 0.0006 + Math.random() * 0.0003 });
+  }
+
+  const bumperOrbs: BumperOrb[] = [];
+  for (let i = 0; i < config.bumperOrbCount; i++) {
+    const radius = (16 + Math.random() * 10) * SCALE;
+    let x = 0, y = 0;
+    for (let a = 0; a < 30; a++) {
+      x = canvasWidth * 0.15 + Math.random() * canvasWidth * 0.7;
+      y = safeTop + ((i + 0.5) / Math.max(config.bumperOrbCount, 1)) * usableHeight * 0.6;
+      if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
+    }
+    const body = Matter.Bodies.circle(x, y, radius, {
+      isStatic: true, label: 'bumper',
+      collisionFilter: { category: CATEGORY.obstacle, mask: CATEGORY.particle },
+      restitution: 1.5, friction: 0,
+    });
+    bumperOrbs.push({ body, x, y, radius });
+  }
+
+  const solarFlares: SolarFlare[] = [];
+  for (let i = 0; i < config.solarFlareCount; i++) {
+    const y = safeTop + 40 + Math.random() * usableHeight * 0.3;
+    solarFlares.push({
+      y, speed: 0.02 + Math.random() * 0.015,
+      killHeight: 8, width: canvasWidth * (0.5 + Math.random() * 0.3),
+      xOffset: canvasWidth * 0.1 + Math.random() * canvasWidth * 0.3,
+    });
+  }
+
+  const slowMoFields: SlowMoField[] = [];
+  for (let i = 0; i < config.slowMoFieldCount; i++) {
+    const w = 80 + Math.random() * 60;
+    const h = 100 + Math.random() * 60;
+    const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.slowMoFieldCount, 1)) * canvasWidth * 0.7;
+    const y = safeTop + 50 + i * 130;
+    slowMoFields.push({ x: cx - w / 2, y, width: w, height: h, friction: 0.94 });
+  }
+
+  const voidZones: VoidZone[] = [];
+  for (let i = 0; i < config.voidZoneCount; i++) {
+    const w = (100 + Math.random() * 60) * SCALE;
+    const h = (80 + Math.random() * 50) * SCALE;
+    const x = canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+    const y = safeTop + Math.random() * usableHeight * 0.4;
+    const speed = 0.3 + Math.random() * 0.2;
+    const angle = Math.random() * Math.PI * 2;
+    voidZones.push({ x, y, width: w, height: h, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
+  }
+
+  return {
+    blackHoles, lavaPools, iceZones, teleporters, empPulses, gravityFlippers, laserGates, asteroids,
+    teslaCoils, repulsorFields, phaseWalls, magneticCores, bumperOrbs, solarFlares, slowMoFields, voidZones,
+  };
 }
 
 export function addHazardsToWorld(hazards: HazardState, world: Matter.World) {
-  for (const ast of hazards.asteroids) {
-    Matter.Composite.add(world, ast.body);
-  }
+  for (const ast of hazards.asteroids) Matter.Composite.add(world, ast.body);
+  for (const pw of hazards.phaseWalls) Matter.Composite.add(world, pw.body);
+  for (const bo of hazards.bumperOrbs) Matter.Composite.add(world, bo.body);
 }
 
 export function updateHazards(
@@ -261,6 +429,40 @@ export function updateHazards(
     if (ny < ast.radius + 10) { ny = ast.radius + 10; ast.vy = Math.abs(ast.vy); }
     if (ny > canvasHeight - ast.radius - 50) { ny = canvasHeight - ast.radius - 50; ast.vy = -Math.abs(ast.vy); }
     Matter.Body.setPosition(ast.body, { x: nx, y: ny });
+  }
+
+  for (const tc of hazards.teslaCoils) {
+    if (!tc.active && now - tc.lastActivation > tc.interval) {
+      tc.active = true;
+      tc.lastActivation = now;
+    }
+    if (tc.active && now - tc.lastActivation > tc.arcDuration) {
+      tc.active = false;
+    }
+  }
+
+  for (const pw of hazards.phaseWalls) {
+    if (now - pw.lastToggle > pw.interval) {
+      pw.solid = !pw.solid;
+      pw.lastToggle = now;
+      pw.body.collisionFilter.category = pw.solid ? CATEGORY.obstacle : 0;
+    }
+  }
+
+  for (const sf of hazards.solarFlares) {
+    sf.y += sf.speed * delta;
+    if (sf.y > canvasHeight + 20) {
+      sf.y = -20;
+    }
+  }
+
+  for (const vz of hazards.voidZones) {
+    vz.x += vz.vx * delta * 0.06;
+    vz.y += vz.vy * delta * 0.06;
+    if (vz.x < 10) { vz.x = 10; vz.vx = Math.abs(vz.vx); }
+    if (vz.x + vz.width > canvasWidth - 10) { vz.x = canvasWidth - vz.width - 10; vz.vx = -Math.abs(vz.vx); }
+    if (vz.y < 10) { vz.y = 10; vz.vy = Math.abs(vz.vy); }
+    if (vz.y + vz.height > canvasHeight - 50) { vz.y = canvasHeight - vz.height - 50; vz.vy = -Math.abs(vz.vy); }
   }
 }
 
@@ -322,6 +524,51 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
         if (p.body.velocity.y > -4) {
           Matter.Body.applyForce(p.body, p.body.position, { x: 0, y: -gf.strength });
         }
+      }
+    }
+  }
+
+  for (const rf of hazards.repulsorFields) {
+    for (const p of particles) {
+      const dx = p.body.position.x - rf.x;
+      const dy = p.body.position.y - rf.y;
+      const distSq = dx * dx + dy * dy;
+      const dist = Math.sqrt(distSq);
+      if (dist < rf.radius && dist > 5) {
+        const force = rf.strength * (1 - dist / rf.radius);
+        Matter.Body.applyForce(p.body, p.body.position, {
+          x: (dx / dist) * force,
+          y: (dy / dist) * force,
+        });
+      }
+    }
+  }
+
+  for (const mc of hazards.magneticCores) {
+    for (const p of particles) {
+      const dx = mc.x - p.body.position.x;
+      const dy = mc.y - p.body.position.y;
+      const distSq = dx * dx + dy * dy;
+      const dist = Math.sqrt(distSq);
+      if (dist < mc.radius && dist > 15) {
+        const force = mc.strength * (1 - dist / mc.radius);
+        Matter.Body.applyForce(p.body, p.body.position, {
+          x: (dx / dist) * force,
+          y: (dy / dist) * force,
+        });
+      }
+    }
+  }
+
+  for (const sm of hazards.slowMoFields) {
+    for (const p of particles) {
+      const pos = p.body.position;
+      if (pos.x >= sm.x && pos.x <= sm.x + sm.width &&
+          pos.y >= sm.y && pos.y <= sm.y + sm.height) {
+        Matter.Body.setVelocity(p.body, {
+          x: p.body.velocity.x * sm.friction,
+          y: p.body.velocity.y * sm.friction,
+        });
       }
     }
   }
@@ -404,6 +651,37 @@ export function findHazardKills(hazards: HazardState, particles: Particle[]): Pa
     for (const p of particles) {
       const dist = pointToSegmentDist(p.body.position.x, p.body.position.y, ax, ay, bx, by);
       if (dist < hitDist) {
+        killed.add(p);
+      }
+    }
+  }
+
+  for (const tc of hazards.teslaCoils) {
+    if (!tc.active) continue;
+    const hitDist = 12;
+    for (const p of particles) {
+      const dist = pointToSegmentDist(p.body.position.x, p.body.position.y, tc.x1, tc.y1, tc.x2, tc.y2);
+      if (dist < hitDist) {
+        killed.add(p);
+      }
+    }
+  }
+
+  for (const sf of hazards.solarFlares) {
+    for (const p of particles) {
+      const pos = p.body.position;
+      if (pos.x >= sf.xOffset && pos.x <= sf.xOffset + sf.width &&
+          pos.y >= sf.y - sf.killHeight / 2 && pos.y <= sf.y + sf.killHeight / 2) {
+        killed.add(p);
+      }
+    }
+  }
+
+  for (const vz of hazards.voidZones) {
+    for (const p of particles) {
+      const pos = p.body.position;
+      if (pos.x >= vz.x && pos.x <= vz.x + vz.width &&
+          pos.y >= vz.y && pos.y <= vz.y + vz.height) {
         killed.add(p);
       }
     }

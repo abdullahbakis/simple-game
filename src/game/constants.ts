@@ -1,4 +1,4 @@
-export const MAX_LEVEL = 50;
+export const MAX_LEVEL = 100;
 
 export const CANDY_PALETTE = ['#FF6B9D', '#00D4FF', '#7FFF00', '#FFD93D', '#FF8C42', '#FF6B6B'] as const;
 
@@ -11,20 +11,19 @@ export const CANDY_RGB: readonly [number, number, number][] = [
   [255, 107, 107],
 ];
 
-// Mevcut ekran genişliğine göre bir ölçek faktörü belirleyelim (800px baz alınmıştır)
 const screenScale = Math.min(window.innerWidth / 800, 1);
 
 export const GAME = {
   gravity: 1.4,
-  particleRadius: 7 * screenScale, // Şekerleri küçült
+  particleRadius: 7 * screenScale,
   chainDecayTime: 4500,
   chainSegmentLength: 8,
-  chainSegmentWidth: 18 * screenScale, // Çizgileri incelt
+  chainSegmentWidth: 18 * screenScale,
   maxParticleSpeed: 12,
   particleRestitution: 0.6,
   particleFriction: 0,
-  bucketWidth: 120 * screenScale, // Sepeti küçült
-  bucketHeight: 85 * screenScale, // Sepeti küçült
+  bucketWidth: 120 * screenScale,
+  bucketHeight: 85 * screenScale,
   bucketWallThickness: 5,
   spawnerWidth: 60 * screenScale,
   trailLength: 8,
@@ -33,6 +32,8 @@ export const GAME = {
   gridSize: 40,
   countdownDuration: 3000,
 };
+
+export const MAX_GRAVITY = 1 + 39 * 0.015 + 30 * 0.01;
 
 export interface RenderContext {
   ctx: CanvasRenderingContext2D;
@@ -57,22 +58,40 @@ export function getLevelConfig(level: number) {
   const l = Math.min(level, MAX_LEVEL);
 
   const target = 35 + (l - 1) * 7 + Math.floor(l / 10) * 5;
-  const spawnInterval = Math.max(45, Math.round(170 - (l - 1) * 2.8));
-  const gravityScale = 1 + (l - 1) * 0.025;
+  const spawnLevel = Math.min(l, 80);
+  const spawnInterval = Math.max(45, Math.round(170 - (spawnLevel - 1) * 2.8));
+
+  let gravityScale: number;
+  if (l <= 40) {
+    gravityScale = 1 + (l - 1) * 0.015;
+  } else if (l <= 70) {
+    gravityScale = 1 + 39 * 0.015 + (l - 40) * 0.01;
+  } else {
+    gravityScale = MAX_GRAVITY;
+  }
 
   const staticBarCount = hazardLifecycle(l, 2, 4, 8, 3);
   const windZoneCount = hazardLifecycle(l, 4, 7, 12, 2);
-  const spinnerCount = hazardLifecycle(l, 6, 9, 15, 3);
-  const movingPlatformCount = hazardLifecycle(l, 9, 13, 19, 3);
+  const spinnerCount = hazardLifecycle(l, 7, 10, 15, 3);
+  const movingPlatformCount = hazardLifecycle(l, 10, 14, 19, 3);
 
-  const blackHoleCount = hazardLifecycle(l, 12, 16, 23, 2);
-  const lavaPoolCount = hazardLifecycle(l, 16, 20, 27, 2);
-  const iceZoneCount = hazardLifecycle(l, 20, 24, 31, 2);
-  const teleporterCount = hazardLifecycle(l, 25, 29, 36, 2);
-  const empPulseCount = hazardLifecycle(l, 30, 34, 41, 2);
-  const gravityFlipperCount = hazardLifecycle(l, 35, 39, 46, 2);
-  const laserGateCount = hazardLifecycle(l, 40, 44, 55, 2);
-  const asteroidCount = hazardLifecycle(l, 45, 50, 50, 3);
+  const blackHoleCount = hazardLifecycle(l, 12, 16, 22, 2);
+  const lavaPoolCount = hazardLifecycle(l, 16, 20, 26, 2);
+  const iceZoneCount = hazardLifecycle(l, 20, 24, 30, 2);
+  const teleporterCount = hazardLifecycle(l, 25, 29, 35, 2);
+  const empPulseCount = hazardLifecycle(l, 30, 34, 40, 2);
+  const gravityFlipperCount = hazardLifecycle(l, 35, 39, 45, 2);
+  const laserGateCount = hazardLifecycle(l, 40, 44, 50, 2);
+  const asteroidCount = hazardLifecycle(l, 45, 49, 55, 3);
+
+  const teslaCoilCount = hazardLifecycle(l, 50, 54, 60, 2);
+  const repulsorFieldCount = hazardLifecycle(l, 55, 60, 67, 2);
+  const phaseWallCount = hazardLifecycle(l, 60, 65, 72, 2);
+  const magneticCoreCount = hazardLifecycle(l, 65, 70, 77, 2);
+  const bumperOrbCount = hazardLifecycle(l, 70, 75, 82, 2);
+  const solarFlareCount = hazardLifecycle(l, 75, 80, 87, 2);
+  const slowMoFieldCount = hazardLifecycle(l, 80, 86, 95, 2);
+  const voidZoneCount = hazardLifecycle(l, 90, 96, 105, 2);
 
   const hazards: string[] = [];
   if (staticBarCount > 0) hazards.push('DEFLECTOR BARS');
@@ -87,6 +106,14 @@ export function getLevelConfig(level: number) {
   if (gravityFlipperCount > 0) hazards.push('GRAVITY FLIPPERS');
   if (laserGateCount > 0) hazards.push('LASER GATES');
   if (asteroidCount > 0) hazards.push('ASTEROIDS');
+  if (teslaCoilCount > 0) hazards.push('TESLA COILS');
+  if (repulsorFieldCount > 0) hazards.push('REPULSOR FIELDS');
+  if (phaseWallCount > 0) hazards.push('PHASE WALLS');
+  if (magneticCoreCount > 0) hazards.push('MAGNETIC CORES');
+  if (bumperOrbCount > 0) hazards.push('BUMPER ORBS');
+  if (solarFlareCount > 0) hazards.push('SOLAR FLARES');
+  if (slowMoFieldCount > 0) hazards.push('SLOW-MO FIELDS');
+  if (voidZoneCount > 0) hazards.push('THE VOID');
 
   return {
     level: l,
@@ -105,6 +132,14 @@ export function getLevelConfig(level: number) {
     gravityFlipperCount,
     laserGateCount,
     asteroidCount,
+    teslaCoilCount,
+    repulsorFieldCount,
+    phaseWallCount,
+    magneticCoreCount,
+    bumperOrbCount,
+    solarFlareCount,
+    slowMoFieldCount,
+    voidZoneCount,
     hazards,
   };
 }
