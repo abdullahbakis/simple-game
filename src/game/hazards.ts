@@ -486,24 +486,21 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
   for (const ice of hazards.iceZones) {
     for (const p of particles) {
       const pos = p.body.position;
-      // YENİSİ (Daha kaygan ve kaotik)
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
         
-        // 1. Sürtünmeyi tamamen kapat (Hızlanarak kaysın)
-        // Matter.js bazen bunu frame başında sıfırlayabilir, o yüzden her frame zorluyoruz.
-        p.body.friction = 0;
-        p.body.frictionAir = 0;
-      
-        // 2. Güçlü Kayma Etkisi (Chaos Factor)
-        // Oran: %30 şansla (daha sık)
-        if (Math.random() < 0.30) { 
-          // Güç: 0.0008 yerine 0.004 (5 kat daha güçlü itiş)
-          // Bu sayede toplar düz düşmek yerine sağa sola sertçe savrulacak.
-          const slideForce = (Math.random() - 0.5) * 0.004;
+        // 1. Sürtünmeyi sıfırla (Buz etkisi: Toplar yavaşlamaz, kayar)
+        p.body.frictionAir = 0; 
+
+        // 2. Rastgele sağa/sola kuvvet uygula (Dengesizlik hissi)
+        // Oranı 0.4 ve gücü 0.0015 yaptım ki kayma net hissedilsin.
+        if (Math.random() < 0.4) { 
+          const slideForce = (Math.random() - 0.5) * 0.0015;
           Matter.Body.applyForce(p.body, p.body.position, { x: slideForce, y: 0 });
         }
       }
+    }
+  }
     }
   }
 
