@@ -488,19 +488,12 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const pos = p.body.position;
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
-        
-        // 1. Sürtünmeyi sıfırla (Buz etkisi: Toplar yavaşlamaz, kayar)
-        p.body.frictionAir = 0; 
-
-        // 2. Rastgele sağa/sola kuvvet uygula (Dengesizlik hissi)
-        // Oranı 0.4 ve gücü 0.0015 yaptım ki kayma net hissedilsin.
-        if (Math.random() < 0.4) { 
+        p.body.frictionAir = 0;
+        if (Math.random() < 0.4) {
           const slideForce = (Math.random() - 0.5) * 0.0015;
           Matter.Body.applyForce(p.body, p.body.position, { x: slideForce, y: 0 });
         }
       }
-    }
-  }
     }
   }
 
