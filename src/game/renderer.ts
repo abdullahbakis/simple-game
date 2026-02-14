@@ -636,43 +636,75 @@ function renderWindZones(rc: RenderContext, obstacles: ObstacleState) {
   const { ctx, now } = rc;
   for (const zone of obstacles.windZones) {
     ctx.save();
-    ctx.fillStyle = 'rgba(0, 150, 255, 0.08)';
-    ctx.fillRect(zone.x, zone.y, zone.width, zone.height);
 
-    ctx.strokeStyle = 'rgba(0, 180, 255, 0.3)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
-    ctx.setLineDash([]);
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(zone.x, zone.y, zone.width, zone.height);
+    ctx.clip();
 
     const dir = zone.forceX > 0 ? 1 : -1;
-    const streakCount = 5;
+    const streakCount = 7;
     const yStep = zone.height / (streakCount + 1);
-
     for (let i = 1; i <= streakCount; i++) {
-      const baseY = zone.y + i * yStep;
-      const travel = zone.width + 30;
-      const offset = ((now * 0.06 + i * (travel / streakCount)) % travel) - 15;
-      const sx = dir > 0 ? zone.x + offset : zone.x + zone.width - offset;
-      const streakLen = 18 + (i % 3) * 6;
-      const ex = sx + streakLen * dir;
-      if (Math.min(sx, ex) > zone.x + zone.width || Math.max(sx, ex) < zone.x) continue;
-      const clampSx = Math.max(zone.x, Math.min(zone.x + zone.width, sx));
-      const clampEx = Math.max(zone.x, Math.min(zone.x + zone.width, ex));
+      const baseY = zone.y + i * yStep + Math.sin(now * 0.002 + i * 1.3) * 4;
+      const travel = zone.width + 60;
+      const offset = ((now * 0.04 + i * (travel / streakCount)) % travel) - 30;
+      const startX = dir > 0 ? zone.x + offset : zone.x + zone.width - offset;
+      const streakLen = 30 + (i % 3) * 15;
+      const fadeIn = Math.min(1, Math.max(0, (dir > 0 ? startX - zone.x : zone.x + zone.width - startX) / 20));
+      const fadeOut = Math.min(1, Math.max(0, (dir > 0 ? zone.x + zone.width - startX : startX - zone.x) / 30));
+      const alpha = (0.15 + Math.sin(now * 0.003 + i * 0.9) * 0.08) * fadeIn * fadeOut;
 
       ctx.beginPath();
-      ctx.moveTo(clampSx, baseY);
-      ctx.lineTo(clampEx, baseY);
-      ctx.strokeStyle = `rgba(100, 200, 255, ${0.25 + Math.sin(now * 0.003 + i) * 0.1})`;
-      ctx.lineWidth = 1.5;
+      ctx.moveTo(startX, baseY);
+      const steps = 8;
+      for (let s = 1; s <= steps; s++) {
+        const t = s / steps;
+        const px = startX + streakLen * dir * t;
+        const py = baseY + Math.sin(t * Math.PI * 2 + now * 0.005 + i) * 3;
+        ctx.lineTo(px, py);
+      }
+      ctx.strokeStyle = `rgba(140, 210, 255, ${alpha})`;
+      ctx.lineWidth = 1.2 + (i % 2) * 0.6;
       ctx.lineCap = 'round';
       ctx.stroke();
     }
 
-    ctx.font = 'bold 10px Nunito, sans-serif';
-    ctx.fillStyle = 'rgba(100, 200, 255, 0.5)';
-    ctx.textAlign = 'center';
-    ctx.fillText('WIND', zone.x + zone.width / 2, zone.y + 14);
+    const puffCount = 5;
+    for (let i = 0; i < puffCount; i++) {
+      const seed = i * 73.7 + zone.x * 1.3;
+      const travel = zone.width + 80;
+      const rawOffset = ((now * 0.025 + seed) % travel) - 40;
+      const px = dir > 0 ? zone.x + rawOffset : zone.x + zone.width - rawOffset;
+      const py = zone.y + (Math.abs(Math.sin(seed * 2.1)) * 0.8 + 0.1) * zone.height
+        + Math.sin(now * 0.001 + seed) * 6;
+      const puffR = 6 + Math.sin(seed * 0.5) * 3;
+      const distFromEdge = dir > 0
+        ? Math.min(px - zone.x, zone.x + zone.width - px)
+        : Math.min(px - zone.x, zone.x + zone.width - px);
+      const edgeFade = Math.min(1, distFromEdge / 25);
+      const pAlpha = (0.06 + Math.sin(now * 0.002 + seed) * 0.02) * edgeFade;
+
+      if (px > zone.x - puffR && px < zone.x + zone.width + puffR) {
+        const pGrad = ctx.createRadialGradient(px, py, 0, px, py, puffR);
+        pGrad.addColorStop(0, `rgba(200, 230, 255, ${pAlpha * 1.5})`);
+        pGrad.addColorStop(0.6, `rgba(180, 220, 250, ${pAlpha})`);
+        pGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = pGrad;
+        ctx.beginPath();
+        ctx.arc(px, py, puffR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(120, 200, 255, 0.12)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 6]);
+    ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
+    ctx.setLineDash([]);
+
     ctx.restore();
   }
 }
