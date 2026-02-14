@@ -100,7 +100,7 @@ export function createObstacles(
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(levelConfig.windZoneCount, 1)) * canvasWidth * 0.6;
     const y = safeTop + 50 + i * 130;
     // Gücü artırdık: 0.00015 yerine 0.0005 baz aldık
-const forceX = (Math.random() > 0.5 ? 1 : -1) * (0.0005 + Math.random() * 0.0003);
+const forceX = (Math.random() > 0.5 ? 1 : -1) * (0.0008 + Math.random() * 0.0005);
 
     windZones.push({ x: cx - w / 2, y, width: w, height: h, forceX });
   }
