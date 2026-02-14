@@ -487,16 +487,19 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
     for (const p of particles) {
       const pos = p.body.position;
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
-          pos.y >= ice.y && pos.y <= ice.y + ice.height) {
-        Matter.Body.applyForce(p.body, p.body.position, {
-          x: (Math.random() - 0.5) * 0.0006,
-          y: 0,
-        });
-        Matter.Body.setVelocity(p.body, {
-          x: p.body.velocity.x * 1.005,
-          y: p.body.velocity.y * 0.995,
-        });
-      }
+    pos.y >= ice.y && pos.y <= ice.y + ice.height) {
+  
+  // 1. Sürtünmeyi sıfırla ki top yağ gibi kaysın
+  p.body.frictionAir = 0; 
+
+  // 2. Sağa sola rastgele minik darbeler uygula (Dengesizlik hissi)
+  if (Math.random() < 0.15) { // Her frame'de değil, ara sıra vur
+    Matter.Body.applyForce(p.body, p.body.position, {
+      x: (Math.random() - 0.5) * 0.0008, // Rastgele yön
+      y: 0
+    });
+  }
+}
     }
   }
 
