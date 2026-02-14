@@ -7,6 +7,7 @@ import type { ObstacleState } from './obstacles';
 import type { HazardState } from './hazards';
 import type { VfxState } from './vfx';
 import { renderHazards } from './hazards-renderer';
+import { renderBackground } from './backgrounds';
 
 export function renderFrame(
   rc: RenderContext,
@@ -21,8 +22,7 @@ export function renderFrame(
 ) {
   const { ctx, width, height } = rc;
   ctx.clearRect(0, 0, width, height);
-  renderSpaceBg(rc, level);
-  renderStars(rc);
+  renderBackground(rc, level);
   renderDeathZone(ctx, width, height);
   renderWindZones(rc, obstacles);
   renderStaticBars(rc, obstacles);
@@ -35,206 +35,6 @@ export function renderFrame(
   renderCandyBalls(ctx, spawner, rc.now);
   renderSpawner(ctx, spawner, rc.now);
   renderVfx(ctx, vfx);
-}
-
-const _starCache: { x: number; y: number; r: number; twinkleOffset: number }[] = [];
-let _starW = 0;
-let _starH = 0;
-
-interface BgTheme {
-  top: string;
-  mid: string;
-  bottom: string;
-}
-
-function getBgTheme(level: number): BgTheme {
-  if (level <= 20) return { top: '#0B1628', mid: '#152238', bottom: '#1A2744' };
-  if (level <= 40) return { top: '#081820', mid: '#0E2830', bottom: '#143838' };
-  if (level <= 60) return { top: '#0A0A18', mid: '#121228', bottom: '#181830' };
-  if (level <= 80) return { top: '#1A0A08', mid: '#281210', bottom: '#301818' };
-  return { top: '#080810', mid: '#101020', bottom: '#181828' };
-}
-
-function renderSpaceBg(rc: RenderContext, level: number) {
-  const { ctx, width, height } = rc;
-  const theme = getBgTheme(level);
-  const grad = ctx.createLinearGradient(0, 0, 0, height);
-  grad.addColorStop(0, theme.top);
-  grad.addColorStop(0.5, theme.mid);
-  grad.addColorStop(1, theme.bottom);
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, width, height);
-
-  if (level <= 20) renderBreezeAtmosphere(rc);
-  else if (level <= 40) renderVortexAtmosphere(rc);
-  else if (level <= 60) renderElectricAtmosphere(rc);
-  else if (level <= 80) renderInfernoAtmosphere(rc);
-  else renderAbyssAtmosphere(rc);
-}
-
-function renderBreezeAtmosphere(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-  for (let i = 0; i < 4; i++) {
-    const baseY = height * (0.15 + i * 0.2);
-    const drift = now * 0.008 + i * 100;
-    const alpha = 0.03 + Math.sin(now * 0.001 + i) * 0.01;
-    ctx.strokeStyle = `rgba(180, 210, 240, ${alpha})`;
-    ctx.lineWidth = 2 + i * 0.5;
-    ctx.beginPath();
-    for (let x = 0; x <= width; x += 4) {
-      const y = baseY + Math.sin((x + drift) * 0.008) * 15 + Math.sin((x + drift) * 0.003) * 8;
-      if (x === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-}
-
-function renderVortexAtmosphere(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-  const cx = width * 0.5;
-  const cy = height * 0.45;
-  const rot = now * 0.0003;
-  for (let arm = 0; arm < 3; arm++) {
-    const armOffset = (arm / 3) * Math.PI * 2;
-    ctx.strokeStyle = `rgba(40, 120, 100, ${0.04 - arm * 0.008})`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    for (let t = 0; t < 8; t += 0.05) {
-      const angle = t + rot + armOffset;
-      const r = t * 25;
-      const x = cx + Math.cos(angle) * r;
-      const y = cy + Math.sin(angle) * r * 0.6;
-      if (t === 0) ctx.moveTo(x, y);
-      else ctx.lineTo(x, y);
-    }
-    ctx.stroke();
-  }
-}
-
-function renderElectricAtmosphere(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-  const spacing = 40;
-  ctx.strokeStyle = 'rgba(0, 180, 200, 0.04)';
-  ctx.lineWidth = 0.5;
-  for (let x = (now * 0.01) % spacing; x < width; x += spacing) {
-    ctx.beginPath();
-    ctx.moveTo(x, 0);
-    ctx.lineTo(x, height);
-    ctx.stroke();
-  }
-  for (let y = (now * 0.008) % spacing; y < height; y += spacing) {
-    ctx.beginPath();
-    ctx.moveTo(0, y);
-    ctx.lineTo(width, y);
-    ctx.stroke();
-  }
-
-  for (let gx = spacing; gx < width; gx += spacing) {
-    for (let gy = spacing; gy < height; gy += spacing) {
-      const pulse = Math.sin(now * 0.003 + gx * 0.1 + gy * 0.1);
-      if (pulse > 0.7) {
-        const nodeAlpha = (pulse - 0.7) * 0.15;
-        ctx.fillStyle = `rgba(0, 220, 255, ${nodeAlpha})`;
-        ctx.beginPath();
-        ctx.arc(gx, gy, 2, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-}
-
-function renderInfernoAtmosphere(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-  const heatGrad = ctx.createLinearGradient(0, height * 0.7, 0, height);
-  heatGrad.addColorStop(0, 'transparent');
-  heatGrad.addColorStop(1, 'rgba(180, 40, 10, 0.06)');
-  ctx.fillStyle = heatGrad;
-  ctx.fillRect(0, height * 0.7, width, height * 0.3);
-
-  for (let i = 0; i < 5; i++) {
-    const baseX = width * (0.1 + i * 0.2);
-    const t = ((now * 0.0005 + i * 0.2) % 1);
-    const y = height * (1 - t);
-    const wobble = Math.sin(now * 0.003 + i * 2) * 10;
-    ctx.strokeStyle = `rgba(200, 80, 20, ${(1 - t) * 0.04})`;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(baseX + wobble, y);
-    ctx.lineTo(baseX + wobble + Math.sin(now * 0.004 + i) * 5, y - 30);
-    ctx.stroke();
-  }
-
-  for (let i = 0; i < 6; i++) {
-    const t = ((now * 0.0003 + i * 0.167) % 1);
-    const ex = width * (0.05 + (i * 0.17));
-    const ey = height * (1 - t);
-    const eAlpha = (1 - t) * 0.06;
-    const eSize = (1 - t) * 2;
-    ctx.fillStyle = `rgba(255, 100, 20, ${eAlpha})`;
-    ctx.beginPath();
-    ctx.arc(ex + Math.sin(now * 0.002 + i) * 8, ey, Math.max(eSize, 0.3), 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function renderAbyssAtmosphere(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-  for (let i = 0; i < 3; i++) {
-    const shimmerX = width * 0.3 + i * width * 0.2 + Math.sin(now * 0.0005 + i * 2) * 60;
-    const shimmerY = height * 0.5;
-    const shimmerR = 100 + Math.sin(now * 0.001 + i) * 30;
-    const shimmerAlpha = 0.025 + Math.sin(now * 0.002 + i * 1.5) * 0.012;
-    const sg = ctx.createRadialGradient(shimmerX, shimmerY, 0, shimmerX, shimmerY, shimmerR);
-    sg.addColorStop(0, `rgba(100, 140, 200, ${shimmerAlpha})`);
-    sg.addColorStop(1, 'transparent');
-    ctx.fillStyle = sg;
-    ctx.beginPath();
-    ctx.arc(shimmerX, shimmerY, shimmerR, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  for (let i = 0; i < 2; i++) {
-    const mistX = width * (0.3 + i * 0.4) + Math.sin(now * 0.0003 + i * 3) * 80;
-    const mistY = height * (0.3 + i * 0.3);
-    const mistR = 140 + Math.sin(now * 0.0008 + i) * 40;
-    const mistAlpha = 0.015 + Math.sin(now * 0.001 + i * 2) * 0.008;
-    const mg = ctx.createRadialGradient(mistX, mistY, 0, mistX, mistY, mistR);
-    mg.addColorStop(0, `rgba(60, 80, 160, ${mistAlpha})`);
-    mg.addColorStop(0.6, `rgba(40, 50, 120, ${mistAlpha * 0.5})`);
-    mg.addColorStop(1, 'transparent');
-    ctx.fillStyle = mg;
-    ctx.beginPath();
-    ctx.arc(mistX, mistY, mistR, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-function renderStars(rc: RenderContext) {
-  const { ctx, width, height, now } = rc;
-
-  if (_starW !== width || _starH !== height || _starCache.length === 0) {
-    _starCache.length = 0;
-    _starW = width;
-    _starH = height;
-    const count = Math.floor((width * height) / 4000);
-    for (let i = 0; i < count; i++) {
-      _starCache.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        r: 0.4 + Math.random() * 1.2,
-        twinkleOffset: Math.random() * Math.PI * 2,
-      });
-    }
-  }
-
-  for (const s of _starCache) {
-    const twinkle = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(now * 0.002 + s.twinkleOffset));
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${twinkle})`;
-    ctx.fill();
-  }
 }
 
 function renderDeathZone(ctx: CanvasRenderingContext2D, w: number, h: number) {
