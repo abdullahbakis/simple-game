@@ -229,7 +229,7 @@ export function createHazards(
       lastPulse: -10000,
       currentRadius: 0,
       maxRadius: 120 + Math.random() * 60,
-      strength: 0.0006 + Math.random() * 0.0003,
+      strength: 0.003 + Math.random() * 0.0015,
       active: false,
     });
   }
@@ -300,7 +300,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.repulsorFieldCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.0008 + Math.random() * 0.0004 });
+    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.005 + Math.random() * 0.003 });
   }
 
   const phaseWalls: PhaseWall[] = [];
@@ -330,7 +330,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.magneticCoreCount, 1)) * usableHeight * 0.5;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: 0.0006 + Math.random() * 0.0003 });
+    magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: 0.003 + Math.random() * 0.0015 });
   }
 
   const bumperOrbs: BumperOrb[] = [];
@@ -345,7 +345,7 @@ export function createHazards(
     const body = Matter.Bodies.circle(x, y, radius, {
       isStatic: true, label: 'bumper',
       collisionFilter: { category: CATEGORY.obstacle, mask: CATEGORY.particle },
-      restitution: 1.5, friction: 0,
+      restitution: 1.8, friction: 0,
     });
     bumperOrbs.push({ body, x, y, radius });
   }
@@ -366,7 +366,7 @@ export function createHazards(
     const h = 100 + Math.random() * 60;
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.slowMoFieldCount, 1)) * canvasWidth * 0.7;
     const y = safeTop + 50 + i * 130;
-    slowMoFields.push({ x: cx - w / 2, y, width: w, height: h, friction: 0.94 });
+    slowMoFields.push({ x: cx - w / 2, y, width: w, height: h, friction: 0.85 });
   }
 
   const voidZones: VoidZone[] = [];
@@ -488,12 +488,13 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const pos = p.body.position;
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
-        const dampedVx = p.body.velocity.x * ice.dampening;
-        const dampedVy = p.body.velocity.y * ice.dampening;
-        const minFall = 0.35;
+        Matter.Body.applyForce(p.body, p.body.position, {
+          x: (Math.random() - 0.5) * 0.0006,
+          y: 0,
+        });
         Matter.Body.setVelocity(p.body, {
-          x: dampedVx,
-          y: dampedVy > 0 ? Math.max(dampedVy, minFall) : dampedVy,
+          x: p.body.velocity.x * 1.005,
+          y: p.body.velocity.y * 0.995,
         });
       }
     }
@@ -501,16 +502,19 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
 
   for (const emp of hazards.empPulses) {
     if (!emp.active) continue;
-    const ringInner = Math.max(0, emp.currentRadius - 25);
-    const ringOuter = emp.currentRadius + 25;
+    const ringInner = Math.max(0, emp.currentRadius - 35);
+    const ringOuter = emp.currentRadius + 35;
     for (const p of particles) {
       const dx = p.body.position.x - emp.x;
       const dy = p.body.position.y - emp.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist > ringInner && dist < ringOuter && dist > 1) {
+        const ringCenter = emp.currentRadius;
+        const proximity = 1 - Math.abs(dist - ringCenter) / 35;
+        const force = emp.strength * proximity;
         Matter.Body.applyForce(p.body, p.body.position, {
-          x: (dx / dist) * emp.strength,
-          y: (dy / dist) * emp.strength,
+          x: (dx / dist) * force,
+          y: (dy / dist) * force,
         });
       }
     }
@@ -535,7 +539,8 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const distSq = dx * dx + dy * dy;
       const dist = Math.sqrt(distSq);
       if (dist < rf.radius && dist > 5) {
-        const force = rf.strength * (1 - dist / rf.radius);
+        const normalDist = dist / rf.radius;
+        const force = Math.min(rf.strength / (normalDist * normalDist + 0.15), rf.strength * 4);
         Matter.Body.applyForce(p.body, p.body.position, {
           x: (dx / dist) * force,
           y: (dy / dist) * force,
@@ -551,10 +556,27 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const distSq = dx * dx + dy * dy;
       const dist = Math.sqrt(distSq);
       if (dist < mc.radius && dist > 15) {
-        const force = mc.strength * (1 - dist / mc.radius);
+        const normalDist = dist / mc.radius;
+        const force = Math.min(mc.strength / (normalDist + 0.2), mc.strength * 3);
         Matter.Body.applyForce(p.body, p.body.position, {
           x: (dx / dist) * force,
           y: (dy / dist) * force,
+        });
+      }
+    }
+  }
+
+  for (const bo of hazards.bumperOrbs) {
+    const bPos = bo.body.position;
+    const touchDist = bo.radius + GAME.particleRadius * 3;
+    for (const p of particles) {
+      const dx = p.body.position.x - bPos.x;
+      const dy = p.body.position.y - bPos.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < touchDist && dist > 1) {
+        Matter.Body.applyForce(p.body, p.body.position, {
+          x: (dx / dist) * 0.003,
+          y: (dy / dist) * 0.003,
         });
       }
     }
