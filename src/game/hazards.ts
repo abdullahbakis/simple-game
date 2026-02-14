@@ -489,10 +489,8 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
         p.body.frictionAir = 0;
-        if (Math.random() < 0.4) {
-          const slideForce = (Math.random() - 0.5) * 0.0015;
-          Matter.Body.applyForce(p.body, p.body.position, { x: slideForce, y: 0 });
-        }
+        const direction = p.body.id % 2 === 0 ? 1 : -1;
+        Matter.Body.applyForce(p.body, p.body.position, { x: direction * 0.0006, y: 0 });
       }
     }
   }
