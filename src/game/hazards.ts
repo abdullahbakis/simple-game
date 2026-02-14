@@ -490,7 +490,7 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
         p.body.frictionAir = 0;
         const direction = p.body.id % 2 === 0 ? 1 : -1;
-        Matter.Body.applyForce(p.body, p.body.position, { x: direction * 0.0006, y: 0 });
+        Matter.Body.applyForce(p.body, p.body.position, { x: direction * 0.0012, y: 0 });
       }
     }
   }
