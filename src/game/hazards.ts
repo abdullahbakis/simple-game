@@ -178,7 +178,7 @@ export function createHazards(
       x, y,
       radius: (80 + Math.random() * 30) * SCALE,
       killRadius: (22 + Math.random() * 6) * SCALE,
-      strength: 0.0020 + Math.random() * 0.0010,
+      strength: 0.0020 + Math.random() * 0.001,
       angle: Math.random() * Math.PI * 2,
       speed: 0.001 + Math.random() * 0.0005,
     });
