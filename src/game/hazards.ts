@@ -485,7 +485,7 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
 
   for (const ice of hazards.iceZones) {
     for (const p of particles) {
-      const pos = p.body.position;
+      const pos = p.body.position; 
       if (pos.x >= ice.x && pos.x <= ice.x + ice.width &&
     pos.y >= ice.y && pos.y <= ice.y + ice.height) {
   
