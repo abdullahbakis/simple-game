@@ -305,7 +305,7 @@ export function createHazards(
 
   const phaseWalls: PhaseWall[] = [];
   for (let i = 0; i < config.phaseWallCount; i++) {
-    const w = (90 + Math.random() * 80) * SCALE;
+    const w = (140 + Math.random() * 100) * SCALE;
     const h = 10 * SCALE;
     let x = 0, y = 0;
     for (let a = 0; a < 30; a++) {
