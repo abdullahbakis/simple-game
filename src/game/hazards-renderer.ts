@@ -861,59 +861,138 @@ function renderSolarFlares(rc: RenderContext, hazards: HazardState) {
   }
 }
 
+function slowMoBlobPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, now: number) {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const rx = w / 2;
+  const ry = h / 2;
+  const points = 64;
+  ctx.beginPath();
+  for (let i = 0; i <= points; i++) {
+    const t = (i / points) * Math.PI * 2;
+    const wobble = 1
+      + 0.1 * Math.sin(t * 5 + now * 0.0008)
+      + 0.06 * Math.cos(t * 8 - now * 0.0012)
+      + 0.04 * Math.sin(t * 3 + now * 0.0006);
+    const px = cx + Math.cos(t) * rx * wobble;
+    const py = cy + Math.sin(t) * ry * wobble;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 function renderSlowMoFields(rc: RenderContext, hazards: HazardState) {
   const { ctx, now } = rc;
   for (const sm of hazards.slowMoFields) {
     ctx.save();
 
+    const cx = sm.x + sm.width / 2;
+    const cy = sm.y + sm.height / 2;
+    const maxR = Math.max(sm.width, sm.height) / 2;
+
     ctx.save();
-    roundedRect(ctx, sm.x, sm.y, sm.width, sm.height, 5);
+    slowMoBlobPath(ctx, sm.x, sm.y, sm.width, sm.height, now);
     ctx.clip();
 
-    const bgGrad = ctx.createLinearGradient(sm.x, sm.y, sm.x, sm.y + sm.height);
-    bgGrad.addColorStop(0, 'rgba(60, 40, 120, 0.15)');
-    bgGrad.addColorStop(0.5, 'rgba(50, 30, 100, 0.12)');
-    bgGrad.addColorStop(1, 'rgba(40, 20, 90, 0.15)');
+    const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
+    bgGrad.addColorStop(0, 'rgba(40, 100, 180, 0.18)');
+    bgGrad.addColorStop(0.4, 'rgba(30, 80, 160, 0.12)');
+    bgGrad.addColorStop(0.7, 'rgba(20, 60, 140, 0.07)');
+    bgGrad.addColorStop(1, 'rgba(15, 50, 120, 0.03)');
     ctx.fillStyle = bgGrad;
-    ctx.fillRect(sm.x, sm.y, sm.width, sm.height);
+    ctx.fillRect(sm.x - 15, sm.y - 15, sm.width + 30, sm.height + 30);
 
-    const wavePhase = now * 0.0005;
-    for (let i = 0; i < 3; i++) {
-      const baseY = sm.y + sm.height * (0.25 + i * 0.25);
-      ctx.strokeStyle = `rgba(80, 50, 150, ${0.08 + Math.sin(now * 0.002 + i) * 0.03})`;
-      ctx.lineWidth = 1;
+    const ringCount = 4;
+    for (let i = 0; i < ringCount; i++) {
+      const phase = now * 0.0004 + i * 1.5;
+      const progress = (phase % 3) / 3;
+      const ringR = maxR * 0.2 + progress * maxR * 0.8;
+      const ringAlpha = (1 - progress) * 0.12;
+      if (ringAlpha < 0.01) continue;
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(80, 160, 220, ${ringAlpha})`;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
+
+    const wavePhase = now * 0.0003;
+    for (let i = 0; i < 4; i++) {
+      const baseY = sm.y + sm.height * (0.2 + i * 0.2);
+      const alpha = 0.08 + Math.sin(now * 0.0015 + i * 1.1) * 0.03;
+      ctx.strokeStyle = `rgba(60, 140, 200, ${alpha})`;
+      ctx.lineWidth = 1.2;
       ctx.beginPath();
       for (let px = 0; px <= sm.width; px += 3) {
-        const y = baseY + Math.sin((px * 0.02) + wavePhase + i * 2) * 6;
+        const xNorm = px / sm.width;
+        const edgeFade = Math.sin(xNorm * Math.PI);
+        const y = baseY + Math.sin(px * 0.015 + wavePhase + i * 2.2) * 8 * edgeFade;
         if (px === 0) ctx.moveTo(sm.x + px, y);
         else ctx.lineTo(sm.x + px, y);
       }
       ctx.stroke();
     }
 
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < 15; i++) {
       const seed = i * 137.5 + sm.x * 3.1;
-      const px = sm.x + Math.abs(Math.sin(seed)) * sm.width;
-      const baseY = sm.y + Math.abs(Math.sin(seed * 2.3)) * sm.height;
-      const drift = Math.sin(now * 0.0003 + seed) * 8;
+      const angle = seed * 2.39996;
+      const dist = Math.abs(Math.sin(seed * 0.3)) * maxR * 0.85;
+      const px = cx + Math.cos(angle) * dist;
+      const baseY = cy + Math.sin(angle) * dist * (sm.height / sm.width);
+      const drift = Math.sin(now * 0.0004 + seed) * 6;
       const py = baseY + drift;
-      const pSize = 1.5 + Math.sin(seed * 0.7) * 0.8;
-      const pAlpha = 0.2 + Math.sin(now * 0.001 + seed) * 0.1;
+      const pSize = 1.5 + Math.sin(seed * 0.7) * 1;
+      const distFromCenter = Math.sqrt(Math.pow(px - cx, 2) + Math.pow(py - cy, 2)) / maxR;
+      const pAlpha = (0.25 + Math.sin(now * 0.001 + seed) * 0.1) * Math.max(0, 1 - distFromCenter);
 
-      if (py >= sm.y && py <= sm.y + sm.height) {
-        ctx.beginPath();
-        ctx.arc(px, py, pSize, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(120, 80, 200, ${pAlpha})`;
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(px, py, pSize, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(100, 180, 230, ${pAlpha})`;
+      ctx.fill();
     }
+
+    const clockX = cx;
+    const clockY = cy;
+    const clockR = Math.min(sm.width, sm.height) * 0.12;
+    const clockAlpha = 0.15 + Math.sin(now * 0.002) * 0.05;
+
+    ctx.beginPath();
+    ctx.arc(clockX, clockY, clockR, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(100, 180, 230, ${clockAlpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    for (let i = 0; i < 12; i++) {
+      const tickAngle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+      const inner = clockR * 0.8;
+      const outer = clockR * 0.95;
+      ctx.beginPath();
+      ctx.moveTo(clockX + Math.cos(tickAngle) * inner, clockY + Math.sin(tickAngle) * inner);
+      ctx.lineTo(clockX + Math.cos(tickAngle) * outer, clockY + Math.sin(tickAngle) * outer);
+      ctx.strokeStyle = `rgba(100, 180, 230, ${clockAlpha * 0.7})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    const slowHandAngle = (now * 0.0002) % (Math.PI * 2) - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(clockX, clockY);
+    ctx.lineTo(clockX + Math.cos(slowHandAngle) * clockR * 0.65, clockY + Math.sin(slowHandAngle) * clockR * 0.65);
+    ctx.strokeStyle = `rgba(120, 190, 240, ${clockAlpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.stroke();
 
     ctx.restore();
 
-    ctx.strokeStyle = `rgba(70, 40, 140, ${0.25 + Math.sin(now * 0.003) * 0.05})`;
+    ctx.globalAlpha = 0.2 + Math.sin(now * 0.0015) * 0.05;
+    ctx.strokeStyle = 'rgba(60, 150, 210, 0.35)';
     ctx.lineWidth = 1.5;
-    roundedRect(ctx, sm.x, sm.y, sm.width, sm.height, 5);
+    slowMoBlobPath(ctx, sm.x, sm.y, sm.width, sm.height, now);
     ctx.stroke();
+    ctx.globalAlpha = 1;
 
     ctx.restore();
   }

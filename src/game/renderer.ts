@@ -632,78 +632,104 @@ function renderFunnelCollector(rc: RenderContext, bucket: Bucket) {
   ctx.restore();
 }
 
+function windCloudPath(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, now: number) {
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  const rx = w / 2;
+  const ry = h / 2;
+  const lobes = 10;
+  ctx.beginPath();
+  for (let i = 0; i <= 60; i++) {
+    const t = (i / 60) * Math.PI * 2;
+    const lobeWobble = 1 + 0.15 * Math.sin(t * lobes + now * 0.001) + 0.08 * Math.cos(t * 7 - now * 0.0015);
+    const px = cx + Math.cos(t) * rx * lobeWobble;
+    const py = cy + Math.sin(t) * ry * lobeWobble;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+}
+
 function renderWindZones(rc: RenderContext, obstacles: ObstacleState) {
   const { ctx, now } = rc;
   for (const zone of obstacles.windZones) {
     ctx.save();
 
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(zone.x, zone.y, zone.width, zone.height);
+    windCloudPath(ctx, zone.x, zone.y, zone.width, zone.height, now);
     ctx.clip();
 
+    const bgGrad = ctx.createRadialGradient(
+      zone.x + zone.width / 2, zone.y + zone.height / 2, 0,
+      zone.x + zone.width / 2, zone.y + zone.height / 2, Math.max(zone.width, zone.height) / 2
+    );
+    bgGrad.addColorStop(0, 'rgba(180, 220, 255, 0.12)');
+    bgGrad.addColorStop(0.6, 'rgba(160, 210, 250, 0.07)');
+    bgGrad.addColorStop(1, 'rgba(140, 200, 245, 0.02)');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(zone.x - 10, zone.y - 10, zone.width + 20, zone.height + 20);
+
+    const puffCount = 8;
+    for (let i = 0; i < puffCount; i++) {
+      const seed = i * 53.7 + zone.x * 1.7;
+      const bx = zone.x + (0.1 + Math.abs(Math.sin(seed * 1.3)) * 0.8) * zone.width;
+      const by = zone.y + (0.15 + Math.abs(Math.sin(seed * 2.7)) * 0.7) * zone.height;
+      const br = 12 + Math.sin(seed * 0.8) * 6;
+      const breathe = 1 + Math.sin(now * 0.0015 + seed) * 0.15;
+      const r = br * breathe;
+      const pAlpha = 0.08 + Math.sin(now * 0.001 + seed * 0.5) * 0.03;
+      const pg = ctx.createRadialGradient(bx, by, 0, bx, by, r);
+      pg.addColorStop(0, `rgba(210, 235, 255, ${pAlpha * 2})`);
+      pg.addColorStop(0.5, `rgba(190, 225, 250, ${pAlpha})`);
+      pg.addColorStop(1, 'transparent');
+      ctx.fillStyle = pg;
+      ctx.beginPath();
+      ctx.arc(bx, by, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
     const dir = zone.forceX > 0 ? 1 : -1;
-    const streakCount = 7;
+    const streakCount = 8;
     const yStep = zone.height / (streakCount + 1);
     for (let i = 1; i <= streakCount; i++) {
-      const baseY = zone.y + i * yStep + Math.sin(now * 0.002 + i * 1.3) * 4;
-      const travel = zone.width + 60;
-      const offset = ((now * 0.04 + i * (travel / streakCount)) % travel) - 30;
+      const baseY = zone.y + i * yStep + Math.sin(now * 0.002 + i * 1.3) * 5;
+      const travel = zone.width + 80;
+      const offset = ((now * 0.05 + i * (travel / streakCount)) % travel) - 40;
       const startX = dir > 0 ? zone.x + offset : zone.x + zone.width - offset;
-      const streakLen = 30 + (i % 3) * 15;
-      const fadeIn = Math.min(1, Math.max(0, (dir > 0 ? startX - zone.x : zone.x + zone.width - startX) / 20));
-      const fadeOut = Math.min(1, Math.max(0, (dir > 0 ? zone.x + zone.width - startX : startX - zone.x) / 30));
-      const alpha = (0.15 + Math.sin(now * 0.003 + i * 0.9) * 0.08) * fadeIn * fadeOut;
+      const streakLen = 25 + (i % 3) * 12;
+      const cx = zone.x + zone.width / 2;
+      const cy = zone.y + zone.height / 2;
+      const distFromCenter = Math.sqrt(
+        Math.pow((startX - cx) / (zone.width / 2), 2) +
+        Math.pow((baseY - cy) / (zone.height / 2), 2)
+      );
+      const centerFade = Math.max(0, 1 - distFromCenter * 0.8);
+      const alpha = (0.2 + Math.sin(now * 0.003 + i * 0.9) * 0.1) * centerFade;
 
+      if (alpha < 0.02) continue;
       ctx.beginPath();
       ctx.moveTo(startX, baseY);
-      const steps = 8;
+      const steps = 10;
       for (let s = 1; s <= steps; s++) {
         const t = s / steps;
         const px = startX + streakLen * dir * t;
-        const py = baseY + Math.sin(t * Math.PI * 2 + now * 0.005 + i) * 3;
+        const py = baseY + Math.sin(t * Math.PI * 2.5 + now * 0.004 + i) * 4;
         ctx.lineTo(px, py);
       }
-      ctx.strokeStyle = `rgba(140, 210, 255, ${alpha})`;
-      ctx.lineWidth = 1.2 + (i % 2) * 0.6;
+      ctx.strokeStyle = `rgba(160, 220, 255, ${alpha})`;
+      ctx.lineWidth = 1.0 + (i % 3) * 0.4;
       ctx.lineCap = 'round';
       ctx.stroke();
     }
 
-    const puffCount = 5;
-    for (let i = 0; i < puffCount; i++) {
-      const seed = i * 73.7 + zone.x * 1.3;
-      const travel = zone.width + 80;
-      const rawOffset = ((now * 0.025 + seed) % travel) - 40;
-      const px = dir > 0 ? zone.x + rawOffset : zone.x + zone.width - rawOffset;
-      const py = zone.y + (Math.abs(Math.sin(seed * 2.1)) * 0.8 + 0.1) * zone.height
-        + Math.sin(now * 0.001 + seed) * 6;
-      const puffR = 6 + Math.sin(seed * 0.5) * 3;
-      const distFromEdge = dir > 0
-        ? Math.min(px - zone.x, zone.x + zone.width - px)
-        : Math.min(px - zone.x, zone.x + zone.width - px);
-      const edgeFade = Math.min(1, distFromEdge / 25);
-      const pAlpha = (0.06 + Math.sin(now * 0.002 + seed) * 0.02) * edgeFade;
-
-      if (px > zone.x - puffR && px < zone.x + zone.width + puffR) {
-        const pGrad = ctx.createRadialGradient(px, py, 0, px, py, puffR);
-        pGrad.addColorStop(0, `rgba(200, 230, 255, ${pAlpha * 1.5})`);
-        pGrad.addColorStop(0.6, `rgba(180, 220, 250, ${pAlpha})`);
-        pGrad.addColorStop(1, 'transparent');
-        ctx.fillStyle = pGrad;
-        ctx.beginPath();
-        ctx.arc(px, py, puffR, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-
     ctx.restore();
 
-    ctx.strokeStyle = 'rgba(120, 200, 255, 0.12)';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([6, 6]);
-    ctx.strokeRect(zone.x, zone.y, zone.width, zone.height);
-    ctx.setLineDash([]);
+    ctx.globalAlpha = 0.15 + Math.sin(now * 0.002) * 0.05;
+    ctx.strokeStyle = 'rgba(160, 215, 255, 0.4)';
+    ctx.lineWidth = 1.5;
+    windCloudPath(ctx, zone.x, zone.y, zone.width, zone.height, now);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
 
     ctx.restore();
   }
