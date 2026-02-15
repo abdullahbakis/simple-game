@@ -605,8 +605,8 @@ function renderRepulsorFields(rc: RenderContext, hazards: HazardState) {
 
     const pulse = 0.5 + Math.sin(now * 0.004) * 0.3;
     const grad = ctx.createRadialGradient(rf.x, rf.y, 0, rf.x, rf.y, rf.radius);
-    grad.addColorStop(0, `rgba(255, 100, 200, ${0.12 * pulse})`);
-    grad.addColorStop(0.5, `rgba(255, 60, 160, ${0.05 * pulse})`);
+    grad.addColorStop(0, `rgba(255, 100, 200, ${0.6 * pulse})`);
+    grad.addColorStop(0.5, `rgba(255, 60, 160, ${0.3 * pulse})`);
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
