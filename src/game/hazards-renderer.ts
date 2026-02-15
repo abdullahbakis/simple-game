@@ -683,8 +683,8 @@ function renderMagneticCores(rc: RenderContext, hazards: HazardState) {
     ctx.save();
 
     const grad = ctx.createRadialGradient(mc.x, mc.y, 0, mc.x, mc.y, mc.radius);
-    grad.addColorStop(0, 'rgba(200, 80, 40, 0.12)');
-    grad.addColorStop(0.5, 'rgba(180, 60, 30, 0.05)');
+    grad.addColorStop(0, 'rgba(200, 80, 40, 0.55)');
+    grad.addColorStop(0.5, 'rgba(180, 60, 30, 0.3)');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
