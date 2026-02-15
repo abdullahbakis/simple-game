@@ -14,7 +14,7 @@ export const CANDY_RGB: readonly [number, number, number][] = [
 const screenScale = Math.min(window.innerWidth / 800, 1);
 
 export const GAME = {
-  gravity: 0.8,
+  gravity: 0.7,
   particleRadius: 7 * screenScale,
   chainDecayTime: 4500,
   chainSegmentLength: 8,
