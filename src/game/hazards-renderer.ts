@@ -896,10 +896,10 @@ function renderSlowMoFields(rc: RenderContext, hazards: HazardState) {
     ctx.clip();
 
     const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-    bgGrad.addColorStop(0, 'rgba(40, 100, 180, 0.18)');
-    bgGrad.addColorStop(0.4, 'rgba(30, 80, 160, 0.12)');
-    bgGrad.addColorStop(0.7, 'rgba(20, 60, 140, 0.07)');
-    bgGrad.addColorStop(1, 'rgba(15, 50, 120, 0.03)');
+    bgGrad.addColorStop(0, 'rgba(40, 100, 180, 0.6)');
+    bgGrad.addColorStop(0.4, 'rgba(30, 80, 160, 0.5)');
+    bgGrad.addColorStop(0.7, 'rgba(20, 60, 140, 0.4)');
+    bgGrad.addColorStop(1, 'rgba(15, 50, 120, 0.2)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(sm.x - 15, sm.y - 15, sm.width + 30, sm.height + 30);
 
