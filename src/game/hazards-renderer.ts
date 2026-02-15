@@ -809,11 +809,11 @@ function renderSolarFlares(rc: RenderContext, hazards: HazardState) {
 
     const outerAura = ctx.createLinearGradient(sf.xOffset, sf.y - beamH * 4, sf.xOffset, sf.y + beamH * 4);
     outerAura.addColorStop(0, 'transparent');
-    outerAura.addColorStop(0.25, `rgba(200, 60, 0, ${0.06 * pulse})`);
-    outerAura.addColorStop(0.4, `rgba(255, 100, 10, ${0.12 * pulse})`);
-    outerAura.addColorStop(0.5, `rgba(255, 130, 20, ${0.18 * pulse})`);
-    outerAura.addColorStop(0.6, `rgba(255, 100, 10, ${0.12 * pulse})`);
-    outerAura.addColorStop(0.75, `rgba(200, 60, 0, ${0.06 * pulse})`);
+    outerAura.addColorStop(0.25, `rgba(200, 60, 0, ${0.4 * pulse})`);
+    outerAura.addColorStop(0.4, `rgba(255, 100, 10, ${0.6 * pulse})`);
+    outerAura.addColorStop(0.5, `rgba(255, 130, 20, ${0.8 * pulse})`);
+    outerAura.addColorStop(0.6, `rgba(255, 100, 10, ${0.6 * pulse})`);
+    outerAura.addColorStop(0.75, `rgba(200, 60, 0, ${0.4 * pulse})`);
     outerAura.addColorStop(1, 'transparent');
     ctx.fillStyle = outerAura;
     ctx.fillRect(sf.xOffset, sf.y - beamH * 4, sf.width, beamH * 8);
