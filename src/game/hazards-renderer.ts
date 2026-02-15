@@ -181,7 +181,7 @@ function renderIceZones(rc: RenderContext, hazards: HazardState) {
 
     const bgGrad = ctx.createLinearGradient(ice.x, ice.y, ice.x + ice.width * 0.3, ice.y + ice.height);
     bgGrad.addColorStop(0, 'rgba(200, 240, 255, 0.6)');
-    bgGrad.addColorStop(0.3, 'rgba(160, 220, 245, 0.12)');
+    bgGrad.addColorStop(0.3, 'rgba(160, 220, 245, 0.5)');
     bgGrad.addColorStop(0.6, 'rgba(180, 235, 255, 0.15)');
     bgGrad.addColorStop(1, 'rgba(140, 210, 240, 0.1)');
     ctx.fillStyle = bgGrad;
