@@ -375,9 +375,9 @@ function renderGravityFlippers(rc: RenderContext, hazards: HazardState) {
     ctx.clip();
 
     const bgGrad = ctx.createLinearGradient(gf.x, gf.y + gf.height, gf.x, gf.y);
-    bgGrad.addColorStop(0, 'rgba(40, 200, 120, 0.45)');
-    bgGrad.addColorStop(0.5, 'rgba(40, 200, 120, 0.55)');
-    bgGrad.addColorStop(1, 'rgba(40, 220, 140, 0.65)');
+    bgGrad.addColorStop(0, 'rgba(40, 200, 120, 0.40)');
+    bgGrad.addColorStop(0.5, 'rgba(40, 200, 120, 0.50)');
+    bgGrad.addColorStop(1, 'rgba(40, 220, 140, 0.60)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(gf.x, gf.y, gf.width, gf.height);
 
