@@ -463,9 +463,9 @@ function renderWindZones(rc: RenderContext, obstacles: ObstacleState) {
       zone.x + zone.width / 2, zone.y + zone.height / 2, 0,
       zone.x + zone.width / 2, zone.y + zone.height / 2, Math.max(zone.width, zone.height) / 2
     );
-    bgGrad.addColorStop(0, 'rgba(180, 220, 255, 0.12)');
-    bgGrad.addColorStop(0.6, 'rgba(160, 210, 250, 0.07)');
-    bgGrad.addColorStop(1, 'rgba(140, 200, 245, 0.02)');
+    bgGrad.addColorStop(0, 'rgba(180, 220, 255, 0.5)');
+    bgGrad.addColorStop(0.6, 'rgba(160, 210, 250, 0.3)');
+    bgGrad.addColorStop(1, 'rgba(140, 200, 245, 0.1)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(zone.x - 10, zone.y - 10, zone.width + 20, zone.height + 20);
 
