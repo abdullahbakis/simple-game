@@ -105,17 +105,17 @@ export function getLevelConfig(level: number) {
     if (l === 100) {
       voidZoneCount = 4;
     } else if (l >= 97) {
-      voidZoneCount = 3;
-      repulsorFieldCount = 2;
+      voidZoneCount = 2;
+      repulsorFieldCount = 1;
       laserGateCount = 2;
     } else if (l >= 94) {
-      voidZoneCount = 2;
+      voidZoneCount = 1;
       iceZoneCount = 2;
-      solarFlareCount = 2;
+      solarFlareCount = 1;
     } else {
-      voidZoneCount = 2;
+      voidZoneCount = 1;
       blackHoleCount = 2;
-      teslaCoilCount = 2;
+      teslaCoilCount = 1;
     }
   }
 
