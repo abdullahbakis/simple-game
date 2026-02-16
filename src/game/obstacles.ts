@@ -1,8 +1,6 @@
 import Matter from 'matter-js';
-import { CATEGORY } from './constants';
+import { CATEGORY, screenScale as SCALE } from './constants';
 import type { LevelConfig } from './constants';
-// Ekran ölçeğini hesapla (800px genişlik baz alınmıştır)
-const SCALE = Math.min(window.innerWidth / 800, 1);
 
 export interface StaticBar {
   body: Matter.Body;
@@ -99,7 +97,7 @@ export function createObstacles(
     const h = (150 + Math.random() * 100) * SCALE;
     const cx = canvasWidth * 0.15 + ((i + 0.5) / Math.max(levelConfig.windZoneCount, 1)) * canvasWidth * 0.6;
     const y = safeTop + 50 + i * 130;
-const forceX = (Math.random() > 0.5 ? 1 : -1) * (0.001 + Math.random() * 0.0008);
+const forceX = (Math.random() > 0.5 ? 1 : -1) * (0.001 + Math.random() * 0.0008) * SCALE;
 
     windZones.push({ x: cx - w / 2, y, width: w, height: h, forceX });
   }
@@ -206,7 +204,7 @@ export function updateObstacles(obstacles: ObstacleState, now: number, delta: nu
   }
 }
 
-const MAX_WIND_SPEED = 3.5;
+const MAX_WIND_SPEED = 3.5 * SCALE;
 
 export function applyWindForces(
   obstacles: ObstacleState,
@@ -225,7 +223,7 @@ export function applyWindForces(
         const windDir = Math.sign(zone.forceX);
         const alignedSpeed = vx * windDir;
         if (alignedSpeed < MAX_WIND_SPEED) {
-          Matter.Body.applyForce(p.body, p.body.position, { x: zone.forceX, y: 0.00002 });
+          Matter.Body.applyForce(p.body, p.body.position, { x: zone.forceX, y: 0.00002 * SCALE });
         }
       }
     }

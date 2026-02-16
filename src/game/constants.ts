@@ -11,15 +11,15 @@ export const CANDY_RGB: readonly [number, number, number][] = [
   [255, 107, 107],
 ];
 
-const screenScale = Math.min(window.innerWidth / 800, 1);
+export const screenScale = Math.min(window.innerWidth / 800, 1);
 
 export const GAME = {
-  gravity: 0.7,
+  gravity: 0.7 * screenScale,
   particleRadius: 7 * screenScale,
   chainDecayTime: 4500,
   chainSegmentLength: 8,
   chainSegmentWidth: 18 * screenScale,
-  maxParticleSpeed: 12,
+  maxParticleSpeed: 12 * screenScale,
   particleRestitution: 0.6,
   particleFriction: 0,
   bucketWidth: 120 * screenScale,

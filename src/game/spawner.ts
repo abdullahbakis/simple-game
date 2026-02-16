@@ -1,5 +1,5 @@
 import Matter from 'matter-js';
-import { GAME, CATEGORY, CANDY_PALETTE } from './constants';
+import { GAME, CATEGORY, CANDY_PALETTE, screenScale } from './constants';
 import type { LevelConfig } from './constants';
 
 export interface Particle {
@@ -117,7 +117,7 @@ export function clampParticleVelocities(spawner: Spawner, maxSpeed: number) {
 
 const NUDGE_THRESHOLD = 1800;
 const REMOVE_THRESHOLD = 4000;
-const STUCK_SPEED = 0.5;
+const STUCK_SPEED = 0.5 * screenScale;
 
 export function handleStuckParticles(
   spawner: Spawner,
@@ -148,8 +148,8 @@ export function handleStuckParticles(
     } else if (duration > NUDGE_THRESHOLD) {
       const angle = Math.random() * Math.PI * 2;
       Matter.Body.applyForce(p.body, p.body.position, {
-        x: Math.cos(angle) * 0.0006,
-        y: Math.sin(angle) * 0.0004 + 0.0005,
+        x: Math.cos(angle) * 0.0006 * screenScale,
+        y: (Math.sin(angle) * 0.0004 + 0.0005) * screenScale,
       });
       p.stuckSince = now - NUDGE_THRESHOLD + 400;
     }

@@ -1,8 +1,7 @@
 import Matter from 'matter-js';
-import { GAME, CATEGORY } from './constants';
+import { GAME, CATEGORY, screenScale as SCALE } from './constants';
 import type { LevelConfig } from './constants';
 import type { Particle } from './spawner';
-const SCALE = Math.min(window.innerWidth / 800, 1);
 
 export interface BlackHole {
   x: number;
@@ -181,7 +180,7 @@ export function createHazards(
       x, y,
       radius: (80 + Math.random() * 30) * SCALE,
       killRadius: (22 + Math.random() * 6) * SCALE,
-      strength: 0.0080 + Math.random() * 0.0040,
+      strength: (0.0080 + Math.random() * 0.0040) * SCALE,
       angle: Math.random() * Math.PI * 2,
       speed: 0.001 + Math.random() * 0.0005,
     });
@@ -238,8 +237,8 @@ export function createHazards(
       interval: 3000 + Math.random() * 2000,
       lastPulse: -10000,
       currentRadius: 0,
-      maxRadius: 120 + Math.random() * 60,
-      strength: 0.003 + Math.random() * 0.0015,
+      maxRadius: (120 + Math.random() * 60) * SCALE,
+      strength: (0.003 + Math.random() * 0.0015) * SCALE,
       active: false,
     });
   }
@@ -252,7 +251,7 @@ export function createHazards(
     const cx = claimCenter ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.gravityFlipperCount, 1)) * canvasWidth * 0.6;
     if (claimCenter) centerClaimed = true;
     const y = safeTop + 80 + i * 140;
-    gravityFlippers.push({ x: cx - w / 2, y, width: w, height: h, strength: 0.003 });
+    gravityFlippers.push({ x: cx - w / 2, y, width: w, height: h, strength: 0.003 * SCALE });
   }
 
   const laserGates: LaserGate[] = [];
@@ -272,7 +271,7 @@ export function createHazards(
       length: (80 + Math.random() * 60) * SCALE,
       angle: Math.random() * Math.PI,
       speed: 0.0006 + Math.random() * 0.0004,
-      killWidth: 6,
+      killWidth: 6 * SCALE,
     });
   }
 
@@ -283,7 +282,7 @@ export function createHazards(
     const x = claimCenter ? centerX : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
     if (claimCenter) centerClaimed = true;
     const y = safeTop + Math.random() * usableHeight * 0.5;
-    const speed = 0.8 + Math.random() * 0.6;
+    const speed = (0.8 + Math.random() * 0.6) * SCALE;
     const angle = Math.random() * Math.PI * 2;
     const body = Matter.Bodies.circle(x, y, radius, {
       isStatic: true,
@@ -318,7 +317,7 @@ export function createHazards(
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
     if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
-    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.005 + Math.random() * 0.003 });
+    repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: (0.005 + Math.random() * 0.003) * SCALE });
   }
 
   const phaseWalls: PhaseWall[] = [];
@@ -350,7 +349,7 @@ export function createHazards(
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
     if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
-    magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: 0.003 + Math.random() * 0.0015 });
+    magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: (0.003 + Math.random() * 0.0015) * SCALE });
   }
 
   const bumperOrbs: BumperOrb[] = [];
@@ -379,8 +378,8 @@ export function createHazards(
     const xOff = claimCenter ? centerX - flareW / 2 : canvasWidth * 0.1 + Math.random() * canvasWidth * 0.3;
     if (claimCenter) centerClaimed = true;
     solarFlares.push({
-      y, speed: 0.02 + Math.random() * 0.015,
-      killHeight: 8, width: flareW,
+      y, speed: (0.02 + Math.random() * 0.015) * SCALE,
+      killHeight: 8 * SCALE, width: flareW,
       xOffset: xOff,
     });
   }
@@ -404,7 +403,7 @@ export function createHazards(
     const x = claimCenter ? centerX - w / 2 : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
     if (claimCenter) centerClaimed = true;
     const y = safeTop + Math.random() * usableHeight * 0.4;
-    const speed = 0.3 + Math.random() * 0.2;
+    const speed = (0.3 + Math.random() * 0.2) * SCALE;
     const angle = Math.random() * Math.PI * 2;
     voidZones.push({ x, y, width: w, height: h, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed });
   }
@@ -443,7 +442,7 @@ export function updateHazards(
       emp.active = true;
     }
     if (emp.active) {
-      emp.currentRadius += delta * 0.15;
+      emp.currentRadius += delta * 0.15 * SCALE;
       if (emp.currentRadius > emp.maxRadius) {
         emp.active = false;
       }
@@ -519,22 +518,23 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
           pos.y >= ice.y && pos.y <= ice.y + ice.height) {
         p.body.frictionAir = 0;
         const direction = p.body.id % 2 === 0 ? 1 : -1;
-        Matter.Body.applyForce(p.body, p.body.position, { x: direction * 0.0012, y: 0 });
+        Matter.Body.applyForce(p.body, p.body.position, { x: direction * 0.0012 * SCALE, y: 0 });
       }
     }
   }
 
   for (const emp of hazards.empPulses) {
     if (!emp.active) continue;
-    const ringInner = Math.max(0, emp.currentRadius - 35);
-    const ringOuter = emp.currentRadius + 35;
+    const ringW = 35 * SCALE;
+    const ringInner = Math.max(0, emp.currentRadius - ringW);
+    const ringOuter = emp.currentRadius + ringW;
     for (const p of particles) {
       const dx = p.body.position.x - emp.x;
       const dy = p.body.position.y - emp.y;
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist > ringInner && dist < ringOuter && dist > 1) {
         const ringCenter = emp.currentRadius;
-        const proximity = 1 - Math.abs(dist - ringCenter) / 35;
+        const proximity = 1 - Math.abs(dist - ringCenter) / ringW;
         const force = emp.strength * proximity;
         Matter.Body.applyForce(p.body, p.body.position, {
           x: (dx / dist) * force,
@@ -549,7 +549,7 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const pos = p.body.position;
       if (pos.x >= gf.x && pos.x <= gf.x + gf.width &&
           pos.y >= gf.y && pos.y <= gf.y + gf.height) {
-        if (p.body.velocity.y > -4) {
+        if (p.body.velocity.y > -4 * SCALE) {
           Matter.Body.applyForce(p.body, p.body.position, { x: 0, y: -gf.strength });
         }
       }
@@ -562,7 +562,7 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const dy = p.body.position.y - rf.y;
       const distSq = dx * dx + dy * dy;
       const dist = Math.sqrt(distSq);
-      if (dist < rf.radius && dist > 5) {
+      if (dist < rf.radius && dist > 5 * SCALE) {
         const normalDist = dist / rf.radius;
         const force = Math.min(rf.strength / (normalDist * normalDist + 0.15), rf.strength * 4);
         Matter.Body.applyForce(p.body, p.body.position, {
@@ -579,7 +579,7 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const dy = mc.y - p.body.position.y;
       const distSq = dx * dx + dy * dy;
       const dist = Math.sqrt(distSq);
-      if (dist < mc.radius && dist > 15) {
+      if (dist < mc.radius && dist > 15 * SCALE) {
         const normalDist = dist / mc.radius;
         const force = Math.min(mc.strength / (normalDist + 0.2), mc.strength * 3);
         Matter.Body.applyForce(p.body, p.body.position, {
@@ -599,8 +599,8 @@ export function applyHazardForces(hazards: HazardState, particles: { body: Matte
       const dist = Math.sqrt(dx * dx + dy * dy);
       if (dist < touchDist && dist > 1) {
         Matter.Body.applyForce(p.body, p.body.position, {
-          x: (dx / dist) * 0.003,
-          y: (dy / dist) * 0.003,
+          x: (dx / dist) * 0.003 * SCALE,
+          y: (dy / dist) * 0.003 * SCALE,
         });
       }
     }
@@ -630,8 +630,8 @@ export function applyTeleporters(hazards: HazardState, particles: Particle[], no
       const dx1 = pos.x - tp.x1;
       const dy1 = pos.y - tp.y1;
       if (dx1 * dx1 + dy1 * dy1 < tp.radius * tp.radius) {
-        Matter.Body.setPosition(p.body, { x: tp.x2, y: tp.y2 + tp.radius + 5 });
-        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2) });
+        Matter.Body.setPosition(p.body, { x: tp.x2, y: tp.y2 + tp.radius + 5 * SCALE });
+        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2 * SCALE) });
         tp.cooldowns.set(p.body.id, now);
         continue;
       }
@@ -639,8 +639,8 @@ export function applyTeleporters(hazards: HazardState, particles: Particle[], no
       const dx2 = pos.x - tp.x2;
       const dy2 = pos.y - tp.y2;
       if (dx2 * dx2 + dy2 * dy2 < tp.radius * tp.radius) {
-        Matter.Body.setPosition(p.body, { x: tp.x1, y: tp.y1 + tp.radius + 5 });
-        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2) });
+        Matter.Body.setPosition(p.body, { x: tp.x1, y: tp.y1 + tp.radius + 5 * SCALE });
+        Matter.Body.setVelocity(p.body, { x: p.body.velocity.x * 0.5, y: Math.max(p.body.velocity.y, 2 * SCALE) });
         tp.cooldowns.set(p.body.id, now);
       }
     }
@@ -704,7 +704,7 @@ export function findHazardKills(hazards: HazardState, particles: Particle[]): Pa
 
   for (const tc of hazards.teslaCoils) {
     if (!tc.active) continue;
-    const hitDist = 12;
+    const hitDist = 12 * SCALE;
     for (const p of particles) {
       const dist = pointToSegmentDist(p.body.position.x, p.body.position.y, tc.x1, tc.y1, tc.x2, tc.y2);
       if (dist < hitDist) {
