@@ -180,10 +180,10 @@ function renderIceZones(rc: RenderContext, hazards: HazardState) {
     ctx.clip();
 
     const bgGrad = ctx.createLinearGradient(ice.x, ice.y, ice.x + ice.width * 0.3, ice.y + ice.height);
-    bgGrad.addColorStop(0, 'rgba(200, 240, 255, 0.18)');
-    bgGrad.addColorStop(0.3, 'rgba(160, 220, 245, 0.12)');
-    bgGrad.addColorStop(0.6, 'rgba(180, 235, 255, 0.15)');
-    bgGrad.addColorStop(1, 'rgba(140, 210, 240, 0.1)');
+    bgGrad.addColorStop(0, 'rgba(200, 240, 255, 0.6)');
+    bgGrad.addColorStop(0.3, 'rgba(160, 220, 245, 0.5)');
+    bgGrad.addColorStop(0.6, 'rgba(180, 235, 255, 0.55)');
+    bgGrad.addColorStop(1, 'rgba(140, 210, 240, 0.4)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(ice.x, ice.y, ice.width, ice.height);
 
@@ -375,9 +375,9 @@ function renderGravityFlippers(rc: RenderContext, hazards: HazardState) {
     ctx.clip();
 
     const bgGrad = ctx.createLinearGradient(gf.x, gf.y + gf.height, gf.x, gf.y);
-    bgGrad.addColorStop(0, 'rgba(40, 200, 120, 0.04)');
-    bgGrad.addColorStop(0.5, 'rgba(40, 200, 120, 0.08)');
-    bgGrad.addColorStop(1, 'rgba(40, 220, 140, 0.12)');
+    bgGrad.addColorStop(0, 'rgba(40, 200, 120, 0.40)');
+    bgGrad.addColorStop(0.5, 'rgba(40, 200, 120, 0.50)');
+    bgGrad.addColorStop(1, 'rgba(40, 220, 140, 0.60)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(gf.x, gf.y, gf.width, gf.height);
 
@@ -605,8 +605,8 @@ function renderRepulsorFields(rc: RenderContext, hazards: HazardState) {
 
     const pulse = 0.5 + Math.sin(now * 0.004) * 0.3;
     const grad = ctx.createRadialGradient(rf.x, rf.y, 0, rf.x, rf.y, rf.radius);
-    grad.addColorStop(0, `rgba(255, 100, 200, ${0.12 * pulse})`);
-    grad.addColorStop(0.5, `rgba(255, 60, 160, ${0.05 * pulse})`);
+    grad.addColorStop(0, `rgba(255, 100, 200, ${0.6 * pulse})`);
+    grad.addColorStop(0.5, `rgba(255, 60, 160, ${0.3 * pulse})`);
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -683,8 +683,8 @@ function renderMagneticCores(rc: RenderContext, hazards: HazardState) {
     ctx.save();
 
     const grad = ctx.createRadialGradient(mc.x, mc.y, 0, mc.x, mc.y, mc.radius);
-    grad.addColorStop(0, 'rgba(200, 80, 40, 0.12)');
-    grad.addColorStop(0.5, 'rgba(180, 60, 30, 0.05)');
+    grad.addColorStop(0, 'rgba(200, 80, 40, 0.55)');
+    grad.addColorStop(0.5, 'rgba(180, 60, 30, 0.3)');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
@@ -809,11 +809,11 @@ function renderSolarFlares(rc: RenderContext, hazards: HazardState) {
 
     const outerAura = ctx.createLinearGradient(sf.xOffset, sf.y - beamH * 4, sf.xOffset, sf.y + beamH * 4);
     outerAura.addColorStop(0, 'transparent');
-    outerAura.addColorStop(0.25, `rgba(200, 60, 0, ${0.06 * pulse})`);
-    outerAura.addColorStop(0.4, `rgba(255, 100, 10, ${0.12 * pulse})`);
-    outerAura.addColorStop(0.5, `rgba(255, 130, 20, ${0.18 * pulse})`);
-    outerAura.addColorStop(0.6, `rgba(255, 100, 10, ${0.12 * pulse})`);
-    outerAura.addColorStop(0.75, `rgba(200, 60, 0, ${0.06 * pulse})`);
+    outerAura.addColorStop(0.25, `rgba(200, 60, 0, ${0.4 * pulse})`);
+    outerAura.addColorStop(0.4, `rgba(255, 100, 10, ${0.6 * pulse})`);
+    outerAura.addColorStop(0.5, `rgba(255, 130, 20, ${0.8 * pulse})`);
+    outerAura.addColorStop(0.6, `rgba(255, 100, 10, ${0.6 * pulse})`);
+    outerAura.addColorStop(0.75, `rgba(200, 60, 0, ${0.4 * pulse})`);
     outerAura.addColorStop(1, 'transparent');
     ctx.fillStyle = outerAura;
     ctx.fillRect(sf.xOffset, sf.y - beamH * 4, sf.width, beamH * 8);
@@ -896,10 +896,10 @@ function renderSlowMoFields(rc: RenderContext, hazards: HazardState) {
     ctx.clip();
 
     const bgGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, maxR);
-    bgGrad.addColorStop(0, 'rgba(40, 100, 180, 0.18)');
-    bgGrad.addColorStop(0.4, 'rgba(30, 80, 160, 0.12)');
-    bgGrad.addColorStop(0.7, 'rgba(20, 60, 140, 0.07)');
-    bgGrad.addColorStop(1, 'rgba(15, 50, 120, 0.03)');
+    bgGrad.addColorStop(0, 'rgba(40, 100, 180, 0.6)');
+    bgGrad.addColorStop(0.4, 'rgba(30, 80, 160, 0.5)');
+    bgGrad.addColorStop(0.7, 'rgba(20, 60, 140, 0.4)');
+    bgGrad.addColorStop(1, 'rgba(15, 50, 120, 0.2)');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(sm.x - 15, sm.y - 15, sm.width + 30, sm.height + 30);
 

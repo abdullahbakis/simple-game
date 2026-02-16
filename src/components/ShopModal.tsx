@@ -116,50 +116,69 @@ export default function ShopModal({
                 const owned = unlockedSkins.includes(skin.id);
                 const isSelected = selectedSkin === skin.id;
                 const canAfford = coins >= skin.cost;
+                const isCosmic = skin.id === 'cosmic-emperor';
 
                 return (
                   <div
                     key={skin.id}
                     className={`
                       flex items-center justify-between px-4 py-3 rounded-xl border transition-all
-                      ${isSelected
-                        ? 'bg-cyan-500/15 border-cyan-400/40'
-                        : owned
-                          ? 'bg-white/5 border-white/10 hover:bg-white/8'
-                          : 'bg-white/3 border-white/5'
+                      ${isCosmic && !owned
+                        ? 'cosmic-shop-card border-amber-400/40 relative overflow-hidden'
+                        : isCosmic && isSelected
+                          ? 'cosmic-shop-card border-amber-400/50 relative overflow-hidden'
+                          : isSelected
+                            ? 'bg-cyan-500/15 border-cyan-400/40'
+                            : owned
+                              ? 'bg-white/5 border-white/10 hover:bg-white/8'
+                              : 'bg-white/3 border-white/5'
                       }
                     `}
                   >
-                    <div className="flex items-center gap-3">
+                    {isCosmic && <div className="cosmic-sparkle-bg absolute inset-0 pointer-events-none" />}
+                    <div className="flex items-center gap-3 relative z-10">
                       <SkinPreview skinId={skin.id} />
                       <div>
-                        <p className={`font-bold text-sm ${owned ? 'text-white' : 'text-white/50'}`}>
+                        <p className={`font-bold text-sm ${
+                          isCosmic ? 'cosmic-text-shimmer' : owned ? 'text-white' : 'text-white/50'
+                        }`}>
                           {skin.name}
                         </p>
                         {!owned && (
-                          <p className={`text-xs ${canAfford ? 'text-amber-400' : 'text-white/30'}`}>
+                          <p className={`text-xs ${
+                            isCosmic ? 'text-amber-300/80' : canAfford ? 'text-amber-400' : 'text-white/30'
+                          }`}>
                             {skin.cost.toLocaleString()} coins
+                          </p>
+                        )}
+                        {isCosmic && !owned && (
+                          <p className="text-[9px] text-amber-400/50 mt-0.5">
+                            Or beat Level 100
                           </p>
                         )}
                       </div>
                     </div>
 
-                    <div>
+                    <div className="relative z-10">
                       {isSelected ? (
-                        <span className="flex items-center gap-1 text-cyan-400 text-xs font-bold">
+                        <span className={`flex items-center gap-1 text-xs font-bold ${isCosmic ? 'text-amber-300' : 'text-cyan-400'}`}>
                           <Check className="w-3.5 h-3.5" /> Equipped
                         </span>
                       ) : owned ? (
                         <button
                           onClick={() => onSelect(skin.id)}
-                          className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-lg transition-colors"
+                          className={`px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-colors ${
+                            isCosmic ? 'bg-amber-500/30 hover:bg-amber-500/50' : 'bg-white/10 hover:bg-white/20'
+                          }`}
                         >
                           Equip
                         </button>
                       ) : canAfford ? (
                         <button
                           onClick={() => onBuy(skin.id, skin.cost)}
-                          className="px-3 py-1.5 bg-amber-500/80 hover:bg-amber-500 text-white text-xs font-bold rounded-lg transition-colors"
+                          className={`px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-colors ${
+                            isCosmic ? 'bg-amber-500/80 hover:bg-amber-500 cosmic-btn-glow' : 'bg-amber-500/80 hover:bg-amber-500'
+                          }`}
                         >
                           Buy
                         </button>
@@ -198,7 +217,19 @@ function SkinPreview({ skinId }: { skinId: string }) {
     toxic: 'linear-gradient(90deg, #39FF14, #7FFF00)',
     rgb: 'linear-gradient(90deg, #FF0000, #00FF00, #0000FF)',
     plasma: 'linear-gradient(90deg, #FF00FF, #FF69B4, #FF00FF)',
+    'cosmic-emperor': 'linear-gradient(90deg, #FF6B9D, #FFD700, #00D4FF, #7FFF00, #FF6B9D)',
   };
+
+  if (skinId === 'cosmic-emperor') {
+    return (
+      <div className="relative">
+        <div
+          className="w-8 h-2 rounded-full cosmic-preview-glow"
+          style={{ background: colors[skinId] }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div

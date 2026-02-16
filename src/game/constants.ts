@@ -14,7 +14,7 @@ export const CANDY_RGB: readonly [number, number, number][] = [
 const screenScale = Math.min(window.innerWidth / 800, 1);
 
 export const GAME = {
-  gravity: 0.8,
+  gravity: 0.7,
   particleRadius: 7 * screenScale,
   chainDecayTime: 4500,
   chainSegmentLength: 8,
@@ -75,23 +75,49 @@ export function getLevelConfig(level: number) {
   const spinnerCount = hazardLifecycle(l, 7, 10, 15, 3);
   const movingPlatformCount = hazardLifecycle(l, 10, 14, 19, 3);
 
-  const blackHoleCount = hazardLifecycle(l, 12, 16, 22, 2);
+  let blackHoleCount = hazardLifecycle(l, 12, 16, 22, 2);
   const lavaPoolCount = hazardLifecycle(l, 16, 20, 26, 2);
-  const iceZoneCount = hazardLifecycle(l, 20, 24, 30, 2);
+  let iceZoneCount = hazardLifecycle(l, 20, 24, 30, 2);
   const teleporterCount = hazardLifecycle(l, 25, 29, 35, 2);
   const empPulseCount = hazardLifecycle(l, 30, 34, 40, 2);
   const gravityFlipperCount = hazardLifecycle(l, 35, 39, 45, 2);
-  const laserGateCount = hazardLifecycle(l, 40, 44, 50, 2);
+  let laserGateCount = hazardLifecycle(l, 40, 44, 50, 2);
   const asteroidCount = hazardLifecycle(l, 45, 49, 55, 3);
 
-  const teslaCoilCount = hazardLifecycle(l, 50, 54, 60, 2);
-  const repulsorFieldCount = hazardLifecycle(l, 55, 60, 67, 2);
+  let teslaCoilCount = hazardLifecycle(l, 50, 54, 60, 2);
+  let repulsorFieldCount = hazardLifecycle(l, 55, 60, 67, 2);
   const phaseWallCount = hazardLifecycle(l, 60, 65, 72, 2);
   const magneticCoreCount = hazardLifecycle(l, 65, 70, 77, 2);
   const bumperOrbCount = hazardLifecycle(l, 70, 75, 82, 2);
-  const solarFlareCount = hazardLifecycle(l, 75, 80, 87, 2);
-  const slowMoFieldCount = hazardLifecycle(l, 80, 86, 95, 2);
-  const voidZoneCount = hazardLifecycle(l, 90, 96, 105, 2);
+  let solarFlareCount = hazardLifecycle(l, 75, 80, 87, 2);
+  let slowMoFieldCount = hazardLifecycle(l, 80, 86, 95, 2);
+  let voidZoneCount = hazardLifecycle(l, 90, 96, 105, 2);
+
+  if (l >= 90) {
+    slowMoFieldCount = 0;
+    blackHoleCount = 0;
+    iceZoneCount = 0;
+    teslaCoilCount = 0;
+    solarFlareCount = 0;
+    repulsorFieldCount = 0;
+    laserGateCount = 0;
+
+    if (l === 100) {
+      voidZoneCount = 4;
+    } else if (l >= 97) {
+      voidZoneCount = 2;
+      repulsorFieldCount = 1;
+      laserGateCount = 2;
+    } else if (l >= 94) {
+      voidZoneCount = 1;
+      iceZoneCount = 2;
+      solarFlareCount = 1;
+    } else {
+      voidZoneCount = 1;
+      blackHoleCount = 2;
+      teslaCoilCount = 1;
+    }
+  }
 
   const hazards: string[] = [];
   if (staticBarCount > 0) hazards.push('DEFLECTOR BARS');

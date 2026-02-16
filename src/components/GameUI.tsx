@@ -1,5 +1,5 @@
 import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X } from 'lucide-react';
-import { GAME, getLevelConfig, MAX_GRAVITY } from '../game/constants';
+import { GAME, getLevelConfig, MAX_GRAVITY, MAX_LEVEL } from '../game/constants';
 import { earnCoins, getReviveCost } from '../game/progress';
 import type { GameStats } from './GameCanvas';
 
@@ -17,6 +17,7 @@ interface GameUIProps {
   onGiveUp: () => void;
   musicOn: boolean;
   onToggleMusic: () => void;
+  onReturnToMenu?: () => void;
 }
 
 export default function GameUI({
@@ -31,6 +32,7 @@ export default function GameUI({
   onGiveUp,
   musicOn,
   onToggleMusic,
+  onReturnToMenu,
 }: GameUIProps) {
   const config = getLevelConfig(level);
   const lossPoint = 1 - GAME.failThreshold;
@@ -108,7 +110,40 @@ export default function GameUI({
         </div>
       </div>
 
-      {gameState === 'levelComplete' && (
+      {gameState === 'levelComplete' && level >= MAX_LEVEL && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 backdrop-blur-md">
+          <div className="flex flex-col items-center gap-5 overlay-enter px-8 text-center max-w-sm">
+            <div className="finale-crown-glow">
+              <div className="text-6xl finale-crown-pulse">&#9813;</div>
+            </div>
+            <h2 className="text-4xl sm:text-5xl font-extrabold finale-title-gradient tracking-tight leading-tight">
+              COSMIC EMPEROR
+            </h2>
+            <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
+            <p className="text-amber-100/70 text-sm leading-relaxed italic">
+              "The universe doesn't yield to the strong -- it yields to the relentless.
+              You didn't just play the game. You mastered chaos itself."
+            </p>
+            <div className="flex flex-col items-center gap-1 mt-1">
+              <p className="text-amber-400 font-bold text-sm">+{coinsEarned} coins earned</p>
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                <span className="cosmic-preview-glow inline-block w-6 h-1.5 rounded-full" style={{
+                  background: 'linear-gradient(90deg, #FF6B9D, #FFD700, #00D4FF, #7FFF00, #FF6B9D)'
+                }} />
+                <span className="text-amber-300 font-bold text-xs">Cosmic Emperor Skin Unlocked</span>
+              </div>
+            </div>
+            <button
+              onClick={onReturnToMenu}
+              className="pointer-events-auto px-10 py-3.5 font-extrabold text-lg rounded-xl text-white finale-btn mt-2"
+            >
+              Claim Glory
+            </button>
+          </div>
+        </div>
+      )}
+
+      {gameState === 'levelComplete' && level < MAX_LEVEL && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
             <h2 className="text-5xl font-extrabold text-green-400">NICE!</h2>

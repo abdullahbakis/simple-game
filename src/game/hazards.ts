@@ -166,6 +166,7 @@ export function createHazards(
   const usableHeight = Math.max(safeBottom - safeTop, 100);
   const margin = 110;
   const centerX = canvasWidth * 0.5;
+  let centerClaimed = false;
 
   const blackHoles: BlackHole[] = [];
   for (let i = 0; i < config.blackHoleCount; i++) {
@@ -175,7 +176,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.blackHoleCount, 1)) * usableHeight * 0.5;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     blackHoles.push({
       x, y,
       radius: (80 + Math.random() * 30) * SCALE,
@@ -190,7 +191,9 @@ export function createHazards(
   for (let i = 0; i < config.lavaPoolCount; i++) {
     const w = (100 + Math.random() * 80) * SCALE;
     const h = (18 + Math.random() * 12) * SCALE;
-    const cx = i === 0 ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.lavaPoolCount, 1)) * canvasWidth * 0.7;
+    const claimCenter = i === 0 && !centerClaimed;
+    const cx = claimCenter ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.lavaPoolCount, 1)) * canvasWidth * 0.7;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + usableHeight * 0.55 + i * 50;
     lavaPools.push({ x: cx - w / 2, y, width: w, height: h });
   }
@@ -199,7 +202,9 @@ export function createHazards(
   for (let i = 0; i < config.iceZoneCount; i++) {
     const w = 90 + Math.random() * 60;
     const h = 110 + Math.random() * 70;
-    const cx = i === 0 ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.iceZoneCount, 1)) * canvasWidth * 0.7;
+    const claimCenter = i === 0 && !centerClaimed;
+    const cx = claimCenter ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.iceZoneCount, 1)) * canvasWidth * 0.7;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + 40 + i * 120;
     iceZones.push({ x: cx - w / 2, y, width: w, height: h, dampening: 0.975 });
   }
@@ -207,7 +212,9 @@ export function createHazards(
   const teleporters: TeleporterPair[] = [];
   for (let i = 0; i < config.teleporterCount; i++) {
     const r = (18 + Math.random() * 6) * SCALE;
-    const x1 = i === 0 ? centerX : canvasWidth * 0.12 + Math.random() * canvasWidth * 0.3;
+    const claimCenter = i === 0 && !centerClaimed;
+    const x1 = claimCenter ? centerX : canvasWidth * 0.12 + Math.random() * canvasWidth * 0.3;
+    if (claimCenter) centerClaimed = true;
     const y1 = safeTop + 60 + Math.random() * usableHeight * 0.4;
     const x2 = canvasWidth * 0.58 + Math.random() * canvasWidth * 0.3;
     const y2 = safeTop + 60 + Math.random() * usableHeight * 0.4;
@@ -225,7 +232,7 @@ export function createHazards(
     if (!avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) {
       x = x < bucketCenterX ? canvasWidth * 0.15 : canvasWidth * 0.85;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     empPulses.push({
       x, y,
       interval: 3000 + Math.random() * 2000,
@@ -241,7 +248,9 @@ export function createHazards(
   for (let i = 0; i < config.gravityFlipperCount; i++) {
     const w = 80 + Math.random() * 50;
     const h = 100 + Math.random() * 60;
-    const cx = i === 0 ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.gravityFlipperCount, 1)) * canvasWidth * 0.6;
+    const claimCenter = i === 0 && !centerClaimed;
+    const cx = claimCenter ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.gravityFlipperCount, 1)) * canvasWidth * 0.6;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + 80 + i * 140;
     gravityFlippers.push({ x: cx - w / 2, y, width: w, height: h, strength: 0.003 });
   }
@@ -257,7 +266,7 @@ export function createHazards(
     if (!avoidsBucket(x, y, bucketCenterX, bucketTopY, margin + 20)) {
       x = x < bucketCenterX ? canvasWidth * 0.15 : canvasWidth * 0.85;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     laserGates.push({
       x, y,
       length: (80 + Math.random() * 60) * SCALE,
@@ -270,7 +279,9 @@ export function createHazards(
   const asteroids: Asteroid[] = [];
   for (let i = 0; i < config.asteroidCount; i++) {
     const radius = (18 + Math.random() * 14) * SCALE;
-    const x = i === 0 ? centerX : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+    const claimCenter = i === 0 && !centerClaimed;
+    const x = claimCenter ? centerX : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + Math.random() * usableHeight * 0.5;
     const speed = 0.8 + Math.random() * 0.6;
     const angle = Math.random() * Math.PI * 2;
@@ -286,8 +297,10 @@ export function createHazards(
 
   const teslaCoils: TeslaCoilPair[] = [];
   for (let i = 0; i < config.teslaCoilCount; i++) {
-    const x1 = i === 0 ? centerX - canvasWidth * 0.15 : canvasWidth * 0.15 + Math.random() * canvasWidth * 0.25;
-    const x2 = i === 0 ? centerX + canvasWidth * 0.15 : canvasWidth * 0.6 + Math.random() * canvasWidth * 0.25;
+    const claimCenter = i === 0 && !centerClaimed;
+    const x1 = claimCenter ? centerX - canvasWidth * 0.15 : canvasWidth * 0.15 + Math.random() * canvasWidth * 0.25;
+    const x2 = claimCenter ? centerX + canvasWidth * 0.15 : canvasWidth * 0.6 + Math.random() * canvasWidth * 0.25;
+    if (claimCenter) centerClaimed = true;
     const baseY = safeTop + ((i + 0.5) / Math.max(config.teslaCoilCount, 1)) * usableHeight * 0.5;
     teslaCoils.push({
       x1, y1: baseY, x2, y2: baseY + (Math.random() - 0.5) * 40,
@@ -304,7 +317,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.repulsorFieldCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     repulsorFields.push({ x, y, radius: (60 + Math.random() * 30) * SCALE, strength: 0.005 + Math.random() * 0.003 });
   }
 
@@ -318,7 +331,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.phaseWallCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     const angle = (Math.random() - 0.5) * 0.6;
     const body = Matter.Bodies.rectangle(x, y, w, h, {
       isStatic: true, angle, label: 'phaseWall',
@@ -336,7 +349,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.magneticCoreCount, 1)) * usableHeight * 0.5;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     magneticCores.push({ x, y, radius: (70 + Math.random() * 30) * SCALE, strength: 0.003 + Math.random() * 0.0015 });
   }
 
@@ -349,7 +362,7 @@ export function createHazards(
       y = safeTop + ((i + 0.5) / Math.max(config.bumperOrbCount, 1)) * usableHeight * 0.6;
       if (avoidsBucket(x, y, bucketCenterX, bucketTopY, margin)) break;
     }
-    if (i === 0) x = centerX;
+    if (i === 0 && !centerClaimed) { x = centerX; centerClaimed = true; }
     const body = Matter.Bodies.circle(x, y, radius, {
       isStatic: true, label: 'bumper',
       collisionFilter: { category: CATEGORY.obstacle, mask: CATEGORY.particle },
@@ -362,7 +375,9 @@ export function createHazards(
   for (let i = 0; i < config.solarFlareCount; i++) {
     const y = safeTop + 40 + Math.random() * usableHeight * 0.3;
     const flareW = canvasWidth * (0.5 + Math.random() * 0.3);
-    const xOff = i === 0 ? centerX - flareW / 2 : canvasWidth * 0.1 + Math.random() * canvasWidth * 0.3;
+    const claimCenter = i === 0 && !centerClaimed;
+    const xOff = claimCenter ? centerX - flareW / 2 : canvasWidth * 0.1 + Math.random() * canvasWidth * 0.3;
+    if (claimCenter) centerClaimed = true;
     solarFlares.push({
       y, speed: 0.02 + Math.random() * 0.015,
       killHeight: 8, width: flareW,
@@ -374,7 +389,9 @@ export function createHazards(
   for (let i = 0; i < config.slowMoFieldCount; i++) {
     const w = 80 + Math.random() * 60;
     const h = 100 + Math.random() * 60;
-    const cx = i === 0 ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.slowMoFieldCount, 1)) * canvasWidth * 0.7;
+    const claimCenter = i === 0 && !centerClaimed;
+    const cx = claimCenter ? centerX : canvasWidth * 0.15 + ((i + 0.5) / Math.max(config.slowMoFieldCount, 1)) * canvasWidth * 0.7;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + 50 + i * 130;
     slowMoFields.push({ x: cx - w / 2, y, width: w, height: h, friction: 0.85 });
   }
@@ -383,7 +400,9 @@ export function createHazards(
   for (let i = 0; i < config.voidZoneCount; i++) {
     const w = (100 + Math.random() * 60) * SCALE;
     const h = (80 + Math.random() * 50) * SCALE;
-    const x = i === 0 ? centerX - w / 2 : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+    const claimCenter = i === 0 && !centerClaimed;
+    const x = claimCenter ? centerX - w / 2 : canvasWidth * 0.2 + Math.random() * canvasWidth * 0.6;
+    if (claimCenter) centerClaimed = true;
     const y = safeTop + Math.random() * usableHeight * 0.4;
     const speed = 0.3 + Math.random() * 0.2;
     const angle = Math.random() * Math.PI * 2;
