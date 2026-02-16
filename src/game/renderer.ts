@@ -1,4 +1,4 @@
-import { GAME, CANDY_RGB } from './constants';
+import { GAME, CANDY_RGB, isMobile } from './constants';
 import type { RenderContext } from './constants';
 import type { Spawner } from './spawner';
 import type { DrawingState } from './drawing';
@@ -179,22 +179,31 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
     ctx.globalAlpha = opacity;
     const { hue, sat, light } = getSkinColors(skinId, now, seg.x1, seg.y1);
 
-    ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
-    ctx.shadowBlur = 2;
-    ctx.lineWidth = lineW;
-    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
-    ctx.beginPath();
-    ctx.moveTo(seg.x1, seg.y1);
-    ctx.lineTo(seg.x2, seg.y2);
-    ctx.stroke();
+    if (isMobile) {
+      ctx.lineWidth = lineW;
+      ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+    } else {
+      ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
+      ctx.shadowBlur = 2;
+      ctx.lineWidth = lineW;
+      ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
 
-    ctx.shadowBlur = 0;
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = `hsla(${hue}, ${Math.min(sat + 10, 100)}%, ${Math.min(light + 18, 95)}%, 0.7)`;
-    ctx.beginPath();
-    ctx.moveTo(seg.x1, seg.y1);
-    ctx.lineTo(seg.x2, seg.y2);
-    ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = `hsla(${hue}, ${Math.min(sat + 10, 100)}%, ${Math.min(light + 18, 95)}%, 0.7)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+    }
 
     ctx.restore();
   }

@@ -92,11 +92,17 @@ export function removeParticle(
 
 export function findMissedParticles(
   spawner: Spawner,
-  canvasHeight: number
+  canvasHeight: number,
+  canvasWidth?: number
 ): Particle[] {
   const missed: Particle[] = [];
+  const margin = 10;
   for (const p of spawner.particles) {
-    if (p.body.position.y > canvasHeight + 20) {
+    const { x, y } = p.body.position;
+    if (
+      y > canvasHeight + margin ||
+      (canvasWidth !== undefined && (x < -margin || x > canvasWidth + margin))
+    ) {
       missed.push(p);
     }
   }

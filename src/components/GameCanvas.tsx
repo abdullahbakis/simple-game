@@ -298,7 +298,7 @@ export default function GameCanvas({
 
       updateVfx(state.vfx, delta);
 
-      const missed = findMissedParticles(state.spawner, height);
+      const missed = findMissedParticles(state.spawner, height, width);
       for (const p of missed) {
         if (!state.collectedBodies.has(p.body.id)) {
           state.totalMissed++;
