@@ -3,14 +3,19 @@ import GameCanvas from './components/GameCanvas';
 import GameUI from './components/GameUI';
 import StartMenu from './components/StartMenu';
 import ShopModal from './components/ShopModal';
+import ToastNotification from './components/ToastNotification';
 import type { GameStats } from './components/GameCanvas';
+import type { ToastData } from './components/ToastNotification';
 import { updateProgress, loadCoins, saveCoins, earnCoins, getReviveCost, loadProgress, MILESTONE_LEVELS, unlockMilestone } from './game/progress';
 import { getUnlockedSkins, unlockSkin, getSelectedSkin, selectSkin } from './game/skins';
 import { playLevelComplete, playVictory, playGameOver, startMusic, stopMusic, resumeAudio } from './game/audio';
 import { showRewardedAd } from './game/AdManager';
 import { MAX_LEVEL } from './game/constants';
+import { getMilestoneForLevel } from './game/milestones';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
+
+let toastIdCounter = 0;
 
 function App() {
   const [level, setLevel] = useState(1);
@@ -21,6 +26,7 @@ function App() {
   const [selectedSkinId, setSelectedSkinId] = useState(getSelectedSkin);
   const [unlockedSkins, setUnlockedSkins] = useState(getUnlockedSkins);
   const [showShop, setShowShop] = useState(false);
+  const [toasts, setToasts] = useState<ToastData[]>([]);
   const [stats, setStats] = useState<GameStats>({
     score: 0,
     totalSpawned: 0,
@@ -31,6 +37,7 @@ function App() {
   const [, forceRender] = useState(0);
   const levelRef = useRef(level);
   const statsRef = useRef(stats);
+  const shownToastsRef = useRef<Set<number>>(new Set());
 
   useEffect(() => {
     levelRef.current = level;
@@ -39,6 +46,15 @@ function App() {
   useEffect(() => {
     statsRef.current = stats;
   }, [stats]);
+
+  const showToast = useCallback((title: string, subtitle: string) => {
+    const id = ++toastIdCounter;
+    setToasts(prev => [...prev, { id, title, subtitle }]);
+  }, []);
+
+  const dismissToast = useCallback((id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  }, []);
 
   const handleStatsChange = useCallback((newStats: GameStats) => {
     setStats(newStats);
@@ -55,6 +71,8 @@ function App() {
     });
     if (levelRef.current >= MAX_LEVEL) {
       playVictory();
+      unlockSkin('cosmic-emperor');
+      setUnlockedSkins(getUnlockedSkins());
     } else {
       playLevelComplete();
     }
@@ -77,17 +95,27 @@ function App() {
     setStats({ score: 0, totalSpawned: 0, totalMissed: 0, stability: 1 });
     resetKeyRef.current++;
     forceRender((n) => n + 1);
+    shownToastsRef.current.clear();
     if (musicOn) startMusic();
   }, [musicOn]);
 
   const handleNextLevel = useCallback(() => {
-    setLevel((l) => l + 1);
+    const nextLevel = levelRef.current + 1;
+    setLevel(nextLevel);
     setGameState('playing');
     setCountdown(3);
     setStats({ score: 0, totalSpawned: 0, totalMissed: 0, stability: 1 });
     resetKeyRef.current++;
     forceRender((n) => n + 1);
-  }, []);
+
+    const milestone = getMilestoneForLevel(nextLevel);
+    if (milestone && !shownToastsRef.current.has(nextLevel)) {
+      shownToastsRef.current.add(nextLevel);
+      setTimeout(() => {
+        showToast(milestone.title, milestone.subtitle);
+      }, 500);
+    }
+  }, [showToast]);
 
   const doRevive = useCallback(() => {
     setGameState('playing');
@@ -115,6 +143,11 @@ function App() {
   }, [doRevive]);
 
   const handleGiveUp = useCallback(() => {
+    setGameState('menu');
+    stopMusic();
+  }, []);
+
+  const handleReturnToMenu = useCallback(() => {
     setGameState('menu');
     stopMusic();
   }, []);
@@ -219,7 +252,9 @@ function App() {
             onGiveUp={handleGiveUp}
             musicOn={musicOn}
             onToggleMusic={handleToggleMusic}
+            onReturnToMenu={handleReturnToMenu}
           />
+          <ToastNotification toasts={toasts} onDismiss={dismissToast} />
         </>
       )}
       {showShop && (
