@@ -19,7 +19,7 @@ export const isMobile =
   (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
 
 export const GAME = {
-  gravity: 0.6 * screenScale,
+  gravity: 0.45 * screenScale,
   particleRadius: 7 * screenScale,
   chainDecayTime: 4500,
   chainSegmentLength: 8,
