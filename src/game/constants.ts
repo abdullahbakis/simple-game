@@ -13,9 +13,10 @@ export const CANDY_RGB: readonly [number, number, number][] = [
 
 export const screenScale = Math.min(window.innerWidth / 800, 1);
 
-export const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-  navigator.userAgent
-) || window.innerWidth < 768;
+export const isMobile =
+  /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+  window.innerWidth < 768 ||
+  (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
 
 export const GAME = {
   gravity: 0.6 * screenScale,
@@ -30,8 +31,8 @@ export const GAME = {
   bucketHeight: 85 * screenScale,
   bucketWallThickness: 5,
   spawnerWidth: 60 * screenScale,
-  trailLength: isMobile ? 3 : 8,
-  maxParticles: isMobile ? 175 : 400,
+  trailLength: 8,
+  maxParticles: 400,
   failThreshold: 0.08,
   gridSize: 40,
   countdownDuration: 3000,

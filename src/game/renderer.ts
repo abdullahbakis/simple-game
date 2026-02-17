@@ -1,4 +1,4 @@
-import { GAME, CANDY_RGB, isMobile } from './constants';
+import { GAME, CANDY_RGB } from './constants';
 import type { RenderContext } from './constants';
 import type { Spawner } from './spawner';
 import type { DrawingState } from './drawing';
@@ -8,6 +8,8 @@ import type { HazardState } from './hazards';
 import type { VfxState } from './vfx';
 import { renderHazards } from './hazards-renderer';
 import { renderBackground } from './backgrounds';
+import { getBallSprite, getSpriteOffset } from './sprite-cache';
+import { getTrailLimit, shouldUseShadowBlur, disableShadows, enableShadows } from './performance';
 
 export function renderFrame(
   rc: RenderContext,
@@ -21,6 +23,10 @@ export function renderFrame(
   skinId: string = 'rainbow'
 ) {
   const { ctx, width, height } = rc;
+
+  const shadowsOff = !shouldUseShadowBlur();
+  if (shadowsOff) disableShadows(ctx);
+
   ctx.clearRect(0, 0, width, height);
   renderBackground(rc, level);
   renderDeathZone(ctx, width, height);
@@ -32,9 +38,11 @@ export function renderFrame(
   renderFunnelCollector(rc, bucket);
   renderCandyRibbons(ctx, drawing, rc.now, skinId);
   renderSkinEffects(ctx, drawing, rc.now, skinId);
-  renderCandyBalls(ctx, spawner, rc.now);
+  renderCandyBalls(ctx, spawner);
   renderSpawner(ctx, spawner, rc.now);
   renderVfx(ctx, vfx);
+
+  if (shadowsOff) enableShadows(ctx);
 }
 
 function renderDeathZone(ctx: CanvasRenderingContext2D, w: number, h: number) {
@@ -45,21 +53,25 @@ function renderDeathZone(ctx: CanvasRenderingContext2D, w: number, h: number) {
   ctx.fillRect(0, h - 30, w, 30);
 }
 
-function renderCandyBalls(ctx: CanvasRenderingContext2D, spawner: Spawner, now: number) {
+function renderCandyBalls(ctx: CanvasRenderingContext2D, spawner: Spawner) {
+  const trailLimit = getTrailLimit();
+  const vr = GAME.particleRadius * 1.8;
+  const off = getSpriteOffset();
+
   for (const p of spawner.particles) {
     const ci = p.colorIdx % CANDY_RGB.length;
     const [cr, cg, cb] = CANDY_RGB[ci];
     const px = p.body.position.x;
     const py = p.body.position.y;
-    const vr = GAME.particleRadius * 1.8;
 
     const vx = p.body.velocity.x;
     const vy = p.body.velocity.y;
     const speed = Math.sqrt(vx * vx + vy * vy);
     if (speed > 1.5) {
-      for (let i = p.trail.length - 1; i >= 0; i--) {
+      const len = Math.min(p.trail.length, trailLimit);
+      for (let i = len - 1; i >= 0; i--) {
         const t = p.trail[i];
-        const frac = (p.trail.length - i) / p.trail.length;
+        const frac = (len - i) / len;
         const alpha = frac * 0.35 * Math.min(speed / 5, 1);
         const rad = vr * (1 - i * 0.1);
         ctx.beginPath();
@@ -69,61 +81,7 @@ function renderCandyBalls(ctx: CanvasRenderingContext2D, spawner: Spawner, now: 
       }
     }
 
-    ctx.save();
-    ctx.shadowColor = `rgba(${cr},${cg},${cb},0.6)`;
-    ctx.shadowBlur = 3;
-
-    const grad = ctx.createRadialGradient(
-      px - vr * 0.3, py - vr * 0.3, 0,
-      px, py, vr
-    );
-    grad.addColorStop(0, '#FFFFFF');
-    grad.addColorStop(0.35, `rgba(${cr},${cg},${cb},0.9)`);
-    grad.addColorStop(1, `rgba(${Math.max(cr - 40, 0)},${Math.max(cg - 40, 0)},${Math.max(cb - 40, 0)},1)`);
-
-    ctx.beginPath();
-    ctx.arc(px, py, vr, 0, Math.PI * 2);
-    ctx.fillStyle = grad;
-    ctx.fill();
-
-    ctx.strokeStyle = `rgba(${Math.max(cr - 60, 0)},${Math.max(cg - 60, 0)},${Math.max(cb - 60, 0)},0.5)`;
-    ctx.lineWidth = 0.8;
-    ctx.stroke();
-
-    ctx.shadowBlur = 0;
-    ctx.beginPath();
-    ctx.arc(px - vr * 0.25, py - vr * 0.25, vr * 0.25, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fill();
-
-    const wobble = Math.sin(now * 0.006 + p.createdAt) * 0.5;
-    const eyeSpacing = vr * 0.28;
-    const eyeY = py - vr * 0.05 + wobble;
-    const eyeR = vr * 0.12;
-
-    ctx.fillStyle = '#1a1a2e';
-    ctx.beginPath();
-    ctx.arc(px - eyeSpacing, eyeY, eyeR, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(px + eyeSpacing, eyeY, eyeR, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.arc(px - eyeSpacing - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(px + eyeSpacing - eyeR * 0.3, eyeY - eyeR * 0.3, eyeR * 0.45, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.arc(px, py + vr * 0.2, vr * 0.18, 0, Math.PI);
-    ctx.strokeStyle = '#1a1a2e';
-    ctx.lineWidth = 0.6;
-    ctx.stroke();
-
-    ctx.restore();
+    ctx.drawImage(getBallSprite(ci), px - off, py - off);
   }
 }
 
@@ -179,31 +137,22 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
     ctx.globalAlpha = opacity;
     const { hue, sat, light } = getSkinColors(skinId, now, seg.x1, seg.y1);
 
-    if (isMobile) {
-      ctx.lineWidth = lineW;
-      ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
-      ctx.beginPath();
-      ctx.moveTo(seg.x1, seg.y1);
-      ctx.lineTo(seg.x2, seg.y2);
-      ctx.stroke();
-    } else {
-      ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
-      ctx.shadowBlur = 2;
-      ctx.lineWidth = lineW;
-      ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
-      ctx.beginPath();
-      ctx.moveTo(seg.x1, seg.y1);
-      ctx.lineTo(seg.x2, seg.y2);
-      ctx.stroke();
+    ctx.shadowColor = `hsla(${hue}, ${sat}%, ${light}%, 0.6)`;
+    ctx.shadowBlur = 2;
+    ctx.lineWidth = lineW;
+    ctx.strokeStyle = `hsla(${hue}, ${sat}%, ${light}%, 0.9)`;
+    ctx.beginPath();
+    ctx.moveTo(seg.x1, seg.y1);
+    ctx.lineTo(seg.x2, seg.y2);
+    ctx.stroke();
 
-      ctx.shadowBlur = 0;
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = `hsla(${hue}, ${Math.min(sat + 10, 100)}%, ${Math.min(light + 18, 95)}%, 0.7)`;
-      ctx.beginPath();
-      ctx.moveTo(seg.x1, seg.y1);
-      ctx.lineTo(seg.x2, seg.y2);
-      ctx.stroke();
-    }
+    ctx.shadowBlur = 0;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = `hsla(${hue}, ${Math.min(sat + 10, 100)}%, ${Math.min(light + 18, 95)}%, 0.7)`;
+    ctx.beginPath();
+    ctx.moveTo(seg.x1, seg.y1);
+    ctx.lineTo(seg.x2, seg.y2);
+    ctx.stroke();
 
     ctx.restore();
   }

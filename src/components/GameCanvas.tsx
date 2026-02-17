@@ -31,6 +31,8 @@ import {
 import { createVfxState, spawnCollectionSparks, spawnDrawingSparks, spawnHazardKillSparks, spawnMissSparks, updateVfx } from '../game/vfx';
 import { renderFrame, renderCountdown } from '../game/renderer';
 import { GAME, getLevelConfig } from '../game/constants';
+import { initSpriteCache } from '../game/sprite-cache';
+import { tickPerformance } from '../game/performance';
 import { playCollect, playMiss, playHazardKill, playCountdownTick, playCountdownGo, playDraw, resumeAudio } from '../game/audio';
 import type { LevelConfig } from '../game/constants';
 import type { Spawner } from '../game/spawner';
@@ -134,6 +136,8 @@ export default function GameCanvas({
     addHazardsToWorld(hazards, world);
     const vfx = createVfxState();
 
+    initSpriteCache();
+
     const state = {
       engine,
       world,
@@ -217,6 +221,8 @@ export default function GameCanvas({
 
     function gameLoop(timestamp: number) {
       if (!stateRef.current) return;
+
+      tickPerformance(timestamp);
 
       const countdownElapsed = timestamp - state.countdownStart;
       const countdownRemaining = GAME.countdownDuration - countdownElapsed;
