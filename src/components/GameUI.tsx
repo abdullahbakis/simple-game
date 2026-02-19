@@ -202,7 +202,7 @@ export default function GameUI({
                     {tr.levelComplete.nice}
                   </h2>
                   <p className="text-white/30 text-xs font-semibold uppercase tracking-widest">
-                    Level {level} complete
+                    {tr.levelComplete.levelCompleteSubtitle.replace('{level}', String(level))}
                   </p>
                 </div>
 
@@ -211,13 +211,13 @@ export default function GameUI({
                 <div className="w-full space-y-1.5">
                   <div className="flex items-center justify-between px-3 py-2 rounded-xl"
                     style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                    <span className="text-white/35 text-xs font-semibold">Collected</span>
+                    <span className="text-white/35 text-xs font-semibold">{tr.levelComplete.collected}</span>
                     <span className="text-green-400 font-extrabold text-sm">{stats.score}</span>
                   </div>
                   {stats.totalMissed > 0 && (
                     <div className="flex items-center justify-between px-3 py-2 rounded-xl"
                       style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                      <span className="text-white/35 text-xs font-semibold">Missed</span>
+                      <span className="text-white/35 text-xs font-semibold">{tr.levelComplete.missed}</span>
                       <span className="text-red-400/80 font-extrabold text-sm">-{stats.totalMissed}</span>
                     </div>
                   )}
@@ -228,7 +228,7 @@ export default function GameUI({
                   <Coins className="w-4 h-4 text-amber-400" />
                   <span className="text-white/50 text-sm">+</span>
                   <span className="text-amber-400 font-extrabold text-base">{coinsEarned}</span>
-                  <span className="text-white/30 text-xs font-semibold">coins</span>
+                  <span className="text-white/30 text-xs font-semibold">{tr.levelComplete.coins}</span>
                 </div>
 
                 <button
@@ -253,9 +253,9 @@ export default function GameUI({
             <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mb-1">
               <Pause className="w-6 h-6 text-white/70" />
             </div>
-            <h2 className="text-3xl font-extrabold text-white tracking-wide">Paused</h2>
+            <h2 className="text-3xl font-extrabold text-white tracking-wide">{tr.pause.paused}</h2>
             <p className="text-white/40 text-xs uppercase tracking-widest">
-              Level {level}
+              {tr.pause.levelLabel.replace('{level}', String(level))}
             </p>
 
             <div className="flex flex-col gap-2 w-56 mt-1">
@@ -264,7 +264,7 @@ export default function GameUI({
                 className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all"
               >
                 <Play className="w-4 h-4" />
-                Continue
+                {tr.pause.continue}
               </button>
 
               <button
@@ -272,8 +272,8 @@ export default function GameUI({
                 className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white/70 font-bold text-sm rounded-xl transition-colors"
               >
                 {musicOn
-                  ? <><Volume2 className="w-4 h-4" /> Music On</>
-                  : <><VolumeX className="w-4 h-4" /> Music Off</>
+                  ? <><Volume2 className="w-4 h-4" /> {tr.pause.musicOn}</>
+                  : <><VolumeX className="w-4 h-4" /> {tr.pause.musicOff}</>
                 }
               </button>
 
@@ -282,7 +282,7 @@ export default function GameUI({
                 className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 font-bold text-sm rounded-xl transition-colors"
               >
                 <Home className="w-4 h-4" />
-                Main Menu
+                {tr.pause.mainMenu}
               </button>
             </div>
           </div>

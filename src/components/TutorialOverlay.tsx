@@ -1,41 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, X } from 'lucide-react';
+import { useLang } from '../i18n/LangContext';
 
 const TUTORIAL_KEY = 'candyflow_tutorial_done';
 
-interface TutorialStep {
-  title: string;
-  description: string;
-  icon: string;
-  animationType: 'draw' | 'fall' | 'bucket' | 'hp';
-}
+type AnimationType = 'draw' | 'fall' | 'bucket' | 'hp';
 
-const STEPS: TutorialStep[] = [
-  {
-    title: 'Draw Lines',
-    description: 'Touch and drag anywhere on screen to draw a line. Candies bounce off your lines!',
-    icon: '✏️',
-    animationType: 'draw',
-  },
-  {
-    title: 'Guide the Candies',
-    description: 'Candies fall from above. Draw clever lines to redirect them into the bucket below.',
-    icon: '🍬',
-    animationType: 'fall',
-  },
-  {
-    title: 'Fill the Bucket',
-    description: 'Collect enough candies to fill the target and complete the level. Lines fade over time!',
-    icon: '🪣',
-    animationType: 'bucket',
-  },
-  {
-    title: 'Watch Your HP',
-    description: 'Missed candies drain your HP bar. If it empties, the level is over. Stay sharp!',
-    icon: '❤️',
-    animationType: 'hp',
-  },
-];
+const STEP_ANIMATIONS: AnimationType[] = ['draw', 'fall', 'bucket', 'hp'];
+const STEP_ICONS = ['✏️', '🍬', '🪣', '❤️'];
 
 interface TutorialOverlayProps {
   onDone: () => void;
@@ -54,6 +26,16 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
   const [animating, setAnimating] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
+  const { tr } = useLang();
+  const trRef = useRef(tr);
+  trRef.current = tr;
+
+  const STEPS = [
+    { title: tr.tutorial.drawLinesTitle, description: tr.tutorial.drawLinesDesc, icon: STEP_ICONS[0], animationType: STEP_ANIMATIONS[0] },
+    { title: tr.tutorial.guideCandiesTitle, description: tr.tutorial.guideCandiesDesc, icon: STEP_ICONS[1], animationType: STEP_ANIMATIONS[1] },
+    { title: tr.tutorial.fillBucketTitle, description: tr.tutorial.fillBucketDesc, icon: STEP_ICONS[2], animationType: STEP_ANIMATIONS[2] },
+    { title: tr.tutorial.watchHpTitle, description: tr.tutorial.watchHpDesc, icon: STEP_ICONS[3], animationType: STEP_ANIMATIONS[3] },
+  ];
 
   const currentStep = STEPS[step];
 
@@ -202,7 +184,7 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
       ctx.fillStyle = 'rgba(255,255,255,0.6)';
       ctx.font = 'bold 11px Nunito, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('HP', W / 2, barY + barH + 16);
+      ctx.fillText(trRef.current.hud.hp, W / 2, barY + barH + 16);
 
       const warnAlpha = 0.5 + 0.5 * Math.sin(t * 0.15);
       ctx.fillStyle = `rgba(239, 68, 68, ${warnAlpha * 0.12})`;
@@ -279,9 +261,9 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
               className="flex items-center gap-1 px-5 py-2 bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-white font-bold text-sm rounded-xl transition-all"
             >
               {step < STEPS.length - 1 ? (
-                <>Next <ChevronRight className="w-4 h-4" /></>
+                <>{tr.tutorial.next} <ChevronRight className="w-4 h-4" /></>
               ) : (
-                'Play!'
+                tr.tutorial.play
               )}
             </button>
           </div>

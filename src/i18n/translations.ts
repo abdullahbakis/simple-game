@@ -1,4 +1,4 @@
-export type LangCode = 'en' | 'tr' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'ja' | 'zh';
+export type LangCode = 'en' | 'tr' | 'es' | 'fr' | 'de' | 'it' | 'pt' | 'ru' | 'uk' | 'ja' | 'zh';
 
 export interface Translations {
   langName: string;
@@ -19,12 +19,36 @@ export interface Translations {
   };
   levelComplete: {
     nice: string;
+    levelCompleteSubtitle: string;
+    collected: string;
+    missed: string;
+    coins: string;
     coinsEarned: string;
     nextLevel: string;
     cosmicTitle: string;
     cosmicQuote: string;
     cosmicSkinUnlocked: string;
     claimGlory: string;
+  };
+  pause: {
+    paused: string;
+    levelLabel: string;
+    continue: string;
+    musicOn: string;
+    musicOff: string;
+    mainMenu: string;
+  };
+  tutorial: {
+    drawLinesTitle: string;
+    drawLinesDesc: string;
+    guideCandiesTitle: string;
+    guideCandiesDesc: string;
+    fillBucketTitle: string;
+    fillBucketDesc: string;
+    watchHpTitle: string;
+    watchHpDesc: string;
+    next: string;
+    play: string;
   };
   gameOver: {
     oops: string;
@@ -95,12 +119,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'NICE!',
+      levelCompleteSubtitle: 'Level {level} complete',
+      collected: 'Collected',
+      missed: 'Missed',
+      coins: 'coins',
       coinsEarned: '+{n} coins earned',
       nextLevel: 'Next Level',
       cosmicTitle: 'COSMIC EMPEROR',
       cosmicQuote: '"The universe doesn\'t yield to the strong -- it yields to the relentless. You didn\'t just play the game. You mastered chaos itself."',
       cosmicSkinUnlocked: 'Cosmic Emperor Skin Unlocked',
       claimGlory: 'Claim Glory',
+    },
+    pause: {
+      paused: 'Paused',
+      levelLabel: 'Level {level}',
+      continue: 'Continue',
+      musicOn: 'Music On',
+      musicOff: 'Music Off',
+      mainMenu: 'Main Menu',
+    },
+    tutorial: {
+      drawLinesTitle: 'Draw Lines',
+      drawLinesDesc: 'Touch and drag anywhere on screen to draw a line. Candies bounce off your lines!',
+      guideCandiesTitle: 'Guide the Candies',
+      guideCandiesDesc: 'Candies fall from above. Draw clever lines to redirect them into the bucket below.',
+      fillBucketTitle: 'Fill the Bucket',
+      fillBucketDesc: 'Collect enough candies to fill the target and complete the level. Lines fade over time!',
+      watchHpTitle: 'Watch Your HP',
+      watchHpDesc: 'Missed candies drain your HP bar. If it empties, the level is over. Stay sharp!',
+      next: 'Next',
+      play: 'Play!',
     },
     gameOver: {
       oops: 'OOPS!',
@@ -170,12 +218,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'SÜPER!',
+      levelCompleteSubtitle: 'Seviye {level} tamamlandı',
+      collected: 'Toplanan',
+      missed: 'Kaçan',
+      coins: 'jeton',
       coinsEarned: '+{n} jeton kazanıldı',
       nextLevel: 'Sonraki Seviye',
       cosmicTitle: 'KOZMİK İMPARATOR',
       cosmicQuote: '"Evren güçlüye değil, kararlı olana boyun eğer. Sadece oyunu oynamadın. Kaosu ehlileştirdin."',
       cosmicSkinUnlocked: 'Kozmik İmparator Görünümü Açıldı',
       claimGlory: 'Zaferi Al',
+    },
+    pause: {
+      paused: 'Duraklatıldı',
+      levelLabel: 'Seviye {level}',
+      continue: 'Devam Et',
+      musicOn: 'Müzik Açık',
+      musicOff: 'Müzik Kapalı',
+      mainMenu: 'Ana Menü',
+    },
+    tutorial: {
+      drawLinesTitle: 'Çizgi Çiz',
+      drawLinesDesc: 'Çizgi çizmek için ekranın herhangi bir yerine dokunup sürükle. Şekerler çizgilerinden sekiyor!',
+      guideCandiesTitle: 'Şekerleri Yönlendir',
+      guideCandiesDesc: 'Şekerler yukarıdan düşüyor. Onları aşağıdaki sepete yönlendirmek için akıllıca çizgiler çiz.',
+      fillBucketTitle: 'Sepeti Doldur',
+      fillBucketDesc: 'Seviyeyi tamamlamak için hedef kadar şeker topla. Çizgiler zamanla solar!',
+      watchHpTitle: 'Canına Dikkat Et',
+      watchHpDesc: 'Kaçan şekerler can barını düşürür. Bar boşalırsa oyun biter. Dikkatli ol!',
+      next: 'İleri',
+      play: 'Oyna!',
     },
     gameOver: {
       oops: 'OPSS!',
@@ -245,12 +317,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: '¡GENIAL!',
+      levelCompleteSubtitle: 'Nivel {level} completado',
+      collected: 'Recogido',
+      missed: 'Perdido',
+      coins: 'monedas',
       coinsEarned: '+{n} monedas ganadas',
       nextLevel: 'Siguiente Nivel',
       cosmicTitle: 'EMPERADOR CÓSMICO',
       cosmicQuote: '"El universo no cede ante los fuertes, cede ante los tenaces. No solo jugaste. Dominaste el caos."',
       cosmicSkinUnlocked: 'Skin Emperador Cósmico Desbloqueado',
       claimGlory: 'Reclamar Gloria',
+    },
+    pause: {
+      paused: 'Pausado',
+      levelLabel: 'Nivel {level}',
+      continue: 'Continuar',
+      musicOn: 'Música activada',
+      musicOff: 'Música desactivada',
+      mainMenu: 'Menú principal',
+    },
+    tutorial: {
+      drawLinesTitle: 'Dibuja Líneas',
+      drawLinesDesc: '¡Toca y arrastra en cualquier lugar de la pantalla para dibujar una línea. ¡Los dulces rebotan en tus líneas!',
+      guideCandiesTitle: 'Guía los Dulces',
+      guideCandiesDesc: 'Los dulces caen desde arriba. Dibuja líneas inteligentes para redirigirlos al cubo de abajo.',
+      fillBucketTitle: 'Llena el Cubo',
+      fillBucketDesc: '¡Recoge suficientes dulces para llenar el objetivo y completar el nivel. Las líneas se desvanecen con el tiempo!',
+      watchHpTitle: 'Cuida tu Vida',
+      watchHpDesc: 'Los dulces perdidos agotan tu barra de vida. Si se vacía, el nivel termina. ¡Estate atento!',
+      next: 'Siguiente',
+      play: '¡Jugar!',
     },
     gameOver: {
       oops: '¡VAYA!',
@@ -320,12 +416,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'SUPER !',
+      levelCompleteSubtitle: 'Niveau {level} terminé',
+      collected: 'Collecté',
+      missed: 'Raté',
+      coins: 'pièces',
       coinsEarned: '+{n} pièces gagnées',
       nextLevel: 'Niveau Suivant',
       cosmicTitle: 'EMPEREUR COSMIQUE',
       cosmicQuote: '"L\'univers ne cède pas aux forts, il cède aux implacables. Tu n\'as pas seulement joué. Tu as maîtrisé le chaos."',
       cosmicSkinUnlocked: 'Skin Empereur Cosmique Débloqué',
       claimGlory: 'Réclamer la Gloire',
+    },
+    pause: {
+      paused: 'Pause',
+      levelLabel: 'Niveau {level}',
+      continue: 'Continuer',
+      musicOn: 'Musique activée',
+      musicOff: 'Musique désactivée',
+      mainMenu: 'Menu principal',
+    },
+    tutorial: {
+      drawLinesTitle: 'Dessiner des Lignes',
+      drawLinesDesc: 'Touche et fais glisser n\'importe où sur l\'écran pour tracer une ligne. Les bonbons rebondissent sur tes lignes !',
+      guideCandiesTitle: 'Guider les Bonbons',
+      guideCandiesDesc: 'Les bonbons tombent d\'en haut. Trace des lignes intelligentes pour les rediriger dans le seau ci-dessous.',
+      fillBucketTitle: 'Remplir le Seau',
+      fillBucketDesc: 'Collecte suffisamment de bonbons pour atteindre l\'objectif et terminer le niveau. Les lignes s\'estompent avec le temps !',
+      watchHpTitle: 'Surveille tes PV',
+      watchHpDesc: 'Les bonbons ratés drainent ta barre de vie. Si elle se vide, le niveau est terminé. Reste vigilant !',
+      next: 'Suivant',
+      play: 'Jouer !',
     },
     gameOver: {
       oops: 'OUPS !',
@@ -395,12 +515,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'SUPER!',
+      levelCompleteSubtitle: 'Level {level} abgeschlossen',
+      collected: 'Gesammelt',
+      missed: 'Verpasst',
+      coins: 'Münzen',
       coinsEarned: '+{n} Münzen verdient',
       nextLevel: 'Nächstes Level',
       cosmicTitle: 'KOSMISCHER KAISER',
       cosmicQuote: '"Das Universum weicht nicht den Starken – es weicht den Unerbittlichen. Du hast nicht nur gespielt. Du hast das Chaos gemeistert."',
       cosmicSkinUnlocked: 'Kosmischer Kaiser Skin freigeschaltet',
       claimGlory: 'Ruhm beanspruchen',
+    },
+    pause: {
+      paused: 'Pausiert',
+      levelLabel: 'Level {level}',
+      continue: 'Weiterspielen',
+      musicOn: 'Musik an',
+      musicOff: 'Musik aus',
+      mainMenu: 'Hauptmenü',
+    },
+    tutorial: {
+      drawLinesTitle: 'Linien Zeichnen',
+      drawLinesDesc: 'Berühre und ziehe irgendwo auf dem Bildschirm, um eine Linie zu zeichnen. Bonbons prallen von deinen Linien ab!',
+      guideCandiesTitle: 'Bonbons Führen',
+      guideCandiesDesc: 'Bonbons fallen von oben. Zeichne clevere Linien, um sie in den Eimer unten umzuleiten.',
+      fillBucketTitle: 'Eimer Füllen',
+      fillBucketDesc: 'Sammle genug Bonbons, um das Ziel zu erreichen und das Level abzuschließen. Linien verblassen mit der Zeit!',
+      watchHpTitle: 'LP im Auge Behalten',
+      watchHpDesc: 'Verpasste Bonbons leeren deine LP-Leiste. Wenn sie leer ist, ist das Level vorbei. Bleib wachsam!',
+      next: 'Weiter',
+      play: 'Spielen!',
     },
     gameOver: {
       oops: 'MIST!',
@@ -470,12 +614,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'BRAVISSIMO!',
+      levelCompleteSubtitle: 'Livello {level} completato',
+      collected: 'Raccolto',
+      missed: 'Mancato',
+      coins: 'monete',
       coinsEarned: '+{n} monete guadagnate',
       nextLevel: 'Livello Successivo',
       cosmicTitle: 'IMPERATORE COSMICO',
       cosmicQuote: '"L\'universo non cede ai forti, cede agli inesorabili. Non hai solo giocato. Hai dominato il caos."',
       cosmicSkinUnlocked: 'Skin Imperatore Cosmico Sbloccato',
       claimGlory: 'Reclama la Gloria',
+    },
+    pause: {
+      paused: 'In pausa',
+      levelLabel: 'Livello {level}',
+      continue: 'Continua',
+      musicOn: 'Musica attiva',
+      musicOff: 'Musica disattiva',
+      mainMenu: 'Menu principale',
+    },
+    tutorial: {
+      drawLinesTitle: 'Disegna Linee',
+      drawLinesDesc: 'Tocca e trascina ovunque sullo schermo per disegnare una linea. Le caramelle rimbalzano sulle tue linee!',
+      guideCandiesTitle: 'Guida le Caramelle',
+      guideCandiesDesc: 'Le caramelle cadono dall\'alto. Disegna linee intelligenti per reindirizzarle nel secchio sottostante.',
+      fillBucketTitle: 'Riempi il Secchio',
+      fillBucketDesc: 'Raccogli abbastanza caramelle per raggiungere l\'obiettivo e completare il livello. Le linee svaniscono nel tempo!',
+      watchHpTitle: 'Controlla i PV',
+      watchHpDesc: 'Le caramelle perse prosciugano la tua barra PV. Se si svuota, il livello è finito. Stai attento!',
+      next: 'Avanti',
+      play: 'Gioca!',
     },
     gameOver: {
       oops: 'OPS!',
@@ -545,12 +713,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'ÓTIMO!',
+      levelCompleteSubtitle: 'Nível {level} concluído',
+      collected: 'Coletado',
+      missed: 'Perdido',
+      coins: 'moedas',
       coinsEarned: '+{n} moedas ganhas',
       nextLevel: 'Próximo Nível',
       cosmicTitle: 'IMPERADOR CÓSMICO',
       cosmicQuote: '"O universo não cede aos fortes — cede aos implacáveis. Você não apenas jogou. Você dominou o caos."',
       cosmicSkinUnlocked: 'Skin Imperador Cósmico Desbloqueado',
       claimGlory: 'Reivindicar Glória',
+    },
+    pause: {
+      paused: 'Pausado',
+      levelLabel: 'Nível {level}',
+      continue: 'Continuar',
+      musicOn: 'Música ligada',
+      musicOff: 'Música desligada',
+      mainMenu: 'Menu principal',
+    },
+    tutorial: {
+      drawLinesTitle: 'Desenhe Linhas',
+      drawLinesDesc: 'Toque e arraste em qualquer lugar da tela para desenhar uma linha. Os doces saltam nas suas linhas!',
+      guideCandiesTitle: 'Guie os Doces',
+      guideCandiesDesc: 'Os doces caem de cima. Desenhe linhas inteligentes para redirecioná-los para o balde abaixo.',
+      fillBucketTitle: 'Encha o Balde',
+      fillBucketDesc: 'Colete doces suficientes para atingir o objetivo e completar o nível. As linhas desaparecem com o tempo!',
+      watchHpTitle: 'Observe seus PV',
+      watchHpDesc: 'Doces perdidos drenam sua barra de PV. Se esvaziar, o nível acaba. Fique atento!',
+      next: 'Próximo',
+      play: 'Jogar!',
     },
     gameOver: {
       oops: 'OPS!',
@@ -620,12 +812,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'ОТЛИЧНО!',
+      levelCompleteSubtitle: 'Уровень {level} пройден',
+      collected: 'Собрано',
+      missed: 'Пропущено',
+      coins: 'монет',
       coinsEarned: '+{n} монет получено',
       nextLevel: 'Следующий Уровень',
       cosmicTitle: 'КОСМИЧЕСКИЙ ИМПЕРАТОР',
       cosmicQuote: '"Вселенная не покоряется сильным — она покоряется неукротимым. Ты не просто сыграл. Ты покорил хаос."',
       cosmicSkinUnlocked: 'Скин Космического Императора Разблокирован',
       claimGlory: 'Принять Славу',
+    },
+    pause: {
+      paused: 'Пауза',
+      levelLabel: 'Уровень {level}',
+      continue: 'Продолжить',
+      musicOn: 'Музыка включена',
+      musicOff: 'Музыка выключена',
+      mainMenu: 'Главное меню',
+    },
+    tutorial: {
+      drawLinesTitle: 'Рисуй Линии',
+      drawLinesDesc: 'Нажми и проведи по экрану, чтобы нарисовать линию. Конфеты отскакивают от твоих линий!',
+      guideCandiesTitle: 'Направляй Конфеты',
+      guideCandiesDesc: 'Конфеты падают сверху. Рисуй умные линии, чтобы направить их в ведро внизу.',
+      fillBucketTitle: 'Заполни Ведро',
+      fillBucketDesc: 'Собери достаточно конфет для достижения цели и завершения уровня. Линии тускнеют со временем!',
+      watchHpTitle: 'Следи за ХП',
+      watchHpDesc: 'Пропущенные конфеты опустошают полоску ХП. Если она опустеет — уровень завершится. Будь внимателен!',
+      next: 'Далее',
+      play: 'Играть!',
     },
     gameOver: {
       oops: 'УПС!',
@@ -676,6 +892,105 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
   },
 
+  uk: {
+    langName: 'Українська',
+    startMenu: {
+      tagline: '100 рівнів -- Малюй лінії -- Направляй цукерки!',
+      best: 'Рекорд: рівень {n} пройдено',
+      play: 'ГРАТИ',
+      startLevel: 'СТАРТ РВ {n}',
+      selectLevel: 'Вибрати Рівень',
+      shop: 'Магазин',
+      privacyPolicy: 'Політика Конфіденційності',
+    },
+    hud: {
+      hp: 'ХП',
+      level: 'Р{n}',
+      target: 'Ціль',
+      levelTarget: 'Рівень {level} -- Ціль: {target}',
+    },
+    levelComplete: {
+      nice: 'ЧУДОВО!',
+      levelCompleteSubtitle: 'Рівень {level} пройдено',
+      collected: 'Зібрано',
+      missed: 'Пропущено',
+      coins: 'монет',
+      coinsEarned: '+{n} монет отримано',
+      nextLevel: 'Наступний Рівень',
+      cosmicTitle: 'КОСМІЧНИЙ ІМПЕРАТОР',
+      cosmicQuote: '"Всесвіт підкоряється не сильним — він підкоряється невгамовним. Ти не просто грав. Ти підкорив сам хаос."',
+      cosmicSkinUnlocked: 'Скін Космічного Імператора розблоковано',
+      claimGlory: 'Здобути Славу',
+    },
+    pause: {
+      paused: 'Пауза',
+      levelLabel: 'Рівень {level}',
+      continue: 'Продовжити',
+      musicOn: 'Музика увімкнена',
+      musicOff: 'Музика вимкнена',
+      mainMenu: 'Головне меню',
+    },
+    tutorial: {
+      drawLinesTitle: 'Малюй Лінії',
+      drawLinesDesc: 'Торкнись і проведи по екрану, щоб намалювати лінію. Цукерки відскакують від твоїх ліній!',
+      guideCandiesTitle: 'Направляй Цукерки',
+      guideCandiesDesc: 'Цукерки падають зверху. Малюй розумні лінії, щоб направити їх у кошик внизу.',
+      fillBucketTitle: 'Заповни Кошик',
+      fillBucketDesc: 'Збери достатньо цукерок, щоб досягти мети та завершити рівень. Лінії зникають з часом!',
+      watchHpTitle: 'Стеж за ХП',
+      watchHpDesc: 'Пропущені цукерки спустошують смугу ХП. Якщо вона порожня — рівень завершено. Будь уважним!',
+      next: 'Далі',
+      play: 'Грати!',
+    },
+    gameOver: {
+      oops: 'ОЙ!',
+      score: 'Рахунок: {score} / {target}',
+      reviveAd: 'Відродитися (Дивитись рекламу)',
+      reviveCoins: 'Відродитися ({n} монет)',
+      giveUp: 'Здатися',
+    },
+    shop: {
+      title: 'Магазин',
+      bank: 'Банк',
+      freeCoins: 'Безкоштовні монети',
+      special: 'Особливе',
+      unlockNextMilestone: 'Розблокувати наступний етап',
+      lineSkins: 'Скіни ліній',
+      coins: '{n} монет',
+      orBeatLevel100: 'Або пройди рівень 100',
+      equipped: 'Одягнено',
+      equip: 'Одягнути',
+      buy: 'Купити',
+      locked: 'Заблоковано',
+      iapPouch: 'Гаманець',
+      iapSack: 'Мішок',
+      iapChest: 'Скриня',
+      iapBarrel: 'Бочка',
+      iapVault: 'Сейф',
+    },
+    milestones: {
+      firstSteps: { title: 'Перші Кроки', subtitle: 'Продовжуй!' },
+      risingStar: { title: 'Зірка, що Сходить', subtitle: 'Ти вдосконалюєшся' },
+      chainArtist: { title: 'Художник Ліній', subtitle: 'Гарні навички малювання' },
+      gravityMaster: { title: 'Майстер Гравітації', subtitle: 'Кидаєш виклик тяжінню' },
+      warpNavigator: { title: 'Навігатор Варп', subtitle: 'Експерт з порталів' },
+      stormChaser: { title: 'Мисливець за Бурями', subtitle: 'ЕМІ? Не проблема' },
+      antiGravityAce: { title: 'Ас Антигравітації', subtitle: 'Що піднімається...' },
+      laserDancer: { title: 'Лазерний Танцюрист', subtitle: 'Не торкайся червоного' },
+      meteorDodger: { title: 'Ухильник від Метеорів', subtitle: 'Виживший у космосі' },
+      teslaTamer: { title: 'Приборкувач Тесла', subtitle: 'Електрика підкоряється тобі' },
+      forceBender: { title: 'Викривлювач Сил', subtitle: 'Відштовхувачі? Будь ласка.' },
+      phaseWalker: { title: 'Фазовий Мандрівник', subtitle: 'Між вимірами' },
+      ironWill: { title: 'Залізна Воля', subtitle: 'Магнетизм тебе не зупинить' },
+      orbitBreaker: { title: 'Руйнівник Орбіт', subtitle: 'Нездоланна сила' },
+      solarGuardian: { title: 'Сонячний Страж', subtitle: 'Народжений із зоряного вогню' },
+      timeBender: { title: 'Викривлювач Часу', subtitle: 'Уповільнення — твій союзник' },
+      apexPredator: { title: 'Вершинний Хижак', subtitle: 'На вершині ланцюга' },
+      voidWalker: { title: 'Мандрівник Порожнечі', subtitle: 'У безодню' },
+      livingLegend: { title: 'Жива Легенда', subtitle: 'Майже там...' },
+    },
+  },
+
   ja: {
     langName: '日本語',
     startMenu: {
@@ -695,12 +1010,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: 'すごい！',
+      levelCompleteSubtitle: 'レベル {level} クリア',
+      collected: '獲得',
+      missed: 'ミス',
+      coins: 'コイン',
       coinsEarned: '+{n} コイン獲得',
       nextLevel: '次のレベル',
       cosmicTitle: 'コズミックエンペラー',
       cosmicQuote: '「宇宙は強者ではなく、不屈の者に従う。ゲームをプレイしただけでなく、混沌そのものを制した。」',
       cosmicSkinUnlocked: 'コズミックエンペラースキン解放',
       claimGlory: '栄光を掴め',
+    },
+    pause: {
+      paused: '一時停止',
+      levelLabel: 'レベル {level}',
+      continue: '続ける',
+      musicOn: '音楽オン',
+      musicOff: '音楽オフ',
+      mainMenu: 'メインメニュー',
+    },
+    tutorial: {
+      drawLinesTitle: '線を引こう',
+      drawLinesDesc: '画面の任意の場所をタッチしてドラッグすると線を引けます。キャンディは線に当たって跳ね返ります！',
+      guideCandiesTitle: 'キャンディを誘導しよう',
+      guideCandiesDesc: 'キャンディは上から落ちてきます。うまく線を引いて下のバケツへ誘導しましょう。',
+      fillBucketTitle: 'バケツを満たそう',
+      fillBucketDesc: '目標数のキャンディを集めてレベルをクリアしよう。線は時間とともに消えていきます！',
+      watchHpTitle: 'HPに注意しよう',
+      watchHpDesc: 'キャンディを逃すとHPが減ります。なくなるとレベル終了。気を抜かないで！',
+      next: '次へ',
+      play: 'プレイ！',
     },
     gameOver: {
       oops: 'やり直し！',
@@ -770,12 +1109,36 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
     },
     levelComplete: {
       nice: '太棒了！',
+      levelCompleteSubtitle: '第 {level} 关完成',
+      collected: '收集',
+      missed: '错过',
+      coins: '金币',
       coinsEarned: '+{n} 金币已获得',
       nextLevel: '下一关',
       cosmicTitle: '宇宙皇帝',
       cosmicQuote: '"宇宙不向强者低头——它向不屈者低头。你不只是玩了游戏，你征服了混沌本身。"',
       cosmicSkinUnlocked: '宇宙皇帝皮肤已解锁',
       claimGlory: '领取荣耀',
+    },
+    pause: {
+      paused: '已暂停',
+      levelLabel: '第 {level} 关',
+      continue: '继续',
+      musicOn: '音乐开',
+      musicOff: '音乐关',
+      mainMenu: '主菜单',
+    },
+    tutorial: {
+      drawLinesTitle: '画线',
+      drawLinesDesc: '在屏幕任意位置触摸并拖动即可画线。糖果会从你的线上弹跳！',
+      guideCandiesTitle: '引导糖果',
+      guideCandiesDesc: '糖果从上方落下。巧妙地画线将它们引导到下方的桶中。',
+      fillBucketTitle: '装满桶',
+      fillBucketDesc: '收集足够多的糖果达到目标并完成关卡。线条会随时间消失！',
+      watchHpTitle: '注意血量',
+      watchHpDesc: '错过的糖果会耗尽你的血条。如果血条清空，关卡就结束了。保持警惕！',
+      next: '下一步',
+      play: '开始！',
     },
     gameOver: {
       oops: '哎呀！',
