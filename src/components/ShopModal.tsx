@@ -219,7 +219,7 @@ function SkinPreview({ skinId }: { skinId: string }) {
     starry: 'linear-gradient(90deg, #FFFACD, #FAFAD2, #FFE4B5)',
     glitch: 'linear-gradient(90deg, #FF0000, #00FF00, #0000FF)',
     toxic: 'linear-gradient(90deg, #39FF14, #7FFF00)',
-    rgb: 'linear-gradient(90deg, #FF0000, #00FF00, #0000FF)',
+    rgb: 'linear-gradient(90deg, #00E5FF, #FF1493, #00CED1, #FF69B4)',
     plasma: 'linear-gradient(90deg, #FF00FF, #FF69B4, #FF00FF)',
     'cosmic-emperor': 'linear-gradient(90deg, #FF6B9D, #FFD700, #00D4FF, #7FFF00, #FF6B9D)',
   };

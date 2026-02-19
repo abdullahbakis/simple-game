@@ -106,11 +106,9 @@ function getSkinColors(skinId: string, now: number, x: number, y: number): { hue
     case 'toxic': return { hue: (85 + Math.sin(now * 0.008 + pos * 0.01) * 15), sat: 90, light: 50 };
     case 'plasma': return { hue: (310 + Math.sin(now * 0.01 + pos * 0.02) * 25), sat: 100, light: 60 };
     case 'rgb': {
-      const breathe = Math.sin(now * 0.0015) * 0.5 + 0.5;
-      const zone = Math.floor(x / 80) % 3;
-      const baseHue = zone === 0 ? 0 : zone === 1 ? 120 : 240;
-      const hue = (baseHue + breathe * 25) % 360;
-      const light = 45 + breathe * 20;
+      const pulse = Math.sin(now * 0.004 + pos * 0.012) * 0.5 + 0.5;
+      const hue = pulse > 0.5 ? 185 + (pulse - 0.5) * 20 : 315 - pulse * 30;
+      const light = 55 + pulse * 20;
       return { hue, sat: 100, light };
     }
     case 'cosmic-emperor': {
@@ -130,6 +128,7 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
   const isMatrix = skinId === 'matrix';
   const isGlitch = skinId === 'glitch';
   const isRainbow = skinId === 'rainbow';
+  const isNeonPulse = skinId === 'rgb';
 
   for (const seg of drawing.segments) {
     ctx.save();
@@ -196,6 +195,44 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
         ctx.stroke();
       }
       ctx.shadowBlur = 0;
+      ctx.restore();
+      continue;
+    }
+
+    if (isNeonPulse) {
+      const pulse = Math.sin(now * 0.004 + seg.x1 * 0.012) * 0.5 + 0.5;
+      const hStart = pulse > 0.5 ? 185 + (pulse - 0.5) * 20 : 315 - pulse * 30;
+      const hEnd = Math.sin(now * 0.004 + seg.x2 * 0.012) * 0.5 + 0.5;
+      const hueEnd = hEnd > 0.5 ? 185 + (hEnd - 0.5) * 20 : 315 - hEnd * 30;
+      const grad = ctx.createLinearGradient(seg.x1, seg.y1, seg.x2, seg.y2);
+      grad.addColorStop(0, `hsla(${hStart}, 100%, ${55 + pulse * 20}%, 0.95)`);
+      grad.addColorStop(1, `hsla(${hueEnd}, 100%, ${55 + hEnd * 20}%, 0.95)`);
+      ctx.globalAlpha = opacity;
+      ctx.shadowColor = `hsla(${hStart}, 100%, 70%, 0.8)`;
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = lineW + 1;
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = `hsla(${hStart}, 100%, 80%, 0.4)`;
+      ctx.lineWidth = lineW * 2.5;
+      ctx.globalAlpha = opacity * 0.15;
+      ctx.strokeStyle = `hsla(${hStart}, 100%, 75%, 1)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 1.5;
+      ctx.globalAlpha = opacity * 0.7;
+      ctx.strokeStyle = `rgba(255,255,255,0.85)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
       ctx.restore();
       continue;
     }

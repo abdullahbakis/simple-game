@@ -15,6 +15,7 @@ export interface ChainSegment {
 interface StrokeGroup {
   bodies: Matter.Body[];
   liveCount: number;
+  expireAt: number;
 }
 
 export interface DrawingState {
@@ -68,10 +69,11 @@ function makeSegmentBody(
       category: CATEGORY.chain,
       mask: CATEGORY.particle,
     },
-    restitution: 0.4,
-    friction: 0,
+    restitution: 0.15,
+    friction: 0.05,
     frictionStatic: 0,
-  });
+    slop: 0.5,
+  } as Matter.IChamferableBodyDefinition);
 
   Matter.Composite.add(world, body);
   return body;
@@ -160,7 +162,9 @@ function consolidateStroke(
 
   const simplified = rdpSimplify(points, 8);
 
+  let earliestCreatedAt = segs[0].createdAt;
   for (const seg of segs) {
+    if (seg.createdAt < earliestCreatedAt) earliestCreatedAt = seg.createdAt;
     if (seg.body) {
       Matter.Composite.remove(world, seg.body);
       seg.body = null;
@@ -179,7 +183,11 @@ function consolidateStroke(
     newBodies.push(body);
   }
 
-  state.strokes.set(strokeId, { bodies: newBodies, liveCount: segs.length });
+  state.strokes.set(strokeId, {
+    bodies: newBodies,
+    liveCount: segs.length,
+    expireAt: earliestCreatedAt + GAME.chainDecayTime,
+  });
 }
 
 export function stopFreehand(state: DrawingState, world: Matter.World) {
@@ -196,6 +204,16 @@ export function updateChains(
   const toRemove: number[] = [];
   const fadeStart = GAME.chainDecayTime * 0.6;
 
+  for (const [strokeId, stroke] of state.strokes) {
+    if (now >= stroke.expireAt && stroke.bodies.length > 0) {
+      for (const b of stroke.bodies) {
+        Matter.Composite.remove(world, b);
+      }
+      stroke.bodies.length = 0;
+      state.strokes.delete(strokeId);
+    }
+  }
+
   for (let i = 0; i < state.segments.length; i++) {
     const seg = state.segments[i];
     const age = now - seg.createdAt;
@@ -203,17 +221,6 @@ export function updateChains(
     if (age >= GAME.chainDecayTime) {
       if (seg.body) {
         Matter.Composite.remove(world, seg.body);
-      } else {
-        const stroke = state.strokes.get(seg.strokeId);
-        if (stroke) {
-          stroke.liveCount--;
-          if (stroke.liveCount <= 0) {
-            for (const b of stroke.bodies) {
-              Matter.Composite.remove(world, b);
-            }
-            state.strokes.delete(seg.strokeId);
-          }
-        }
       }
       toRemove.push(i);
     } else if (age > fadeStart) {

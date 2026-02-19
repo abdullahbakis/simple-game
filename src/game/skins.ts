@@ -19,7 +19,7 @@ export const LINE_SKINS: LineSkin[] = [
   { id: 'void', name: 'Void', cost: 30000 },
   { id: 'starry', name: 'Starry', cost: 30000 },
   { id: 'glitch', name: 'Glitch', cost: 75000 },
-  { id: 'rgb', name: 'RGB Gamer', cost: 75000 },
+  { id: 'rgb', name: 'Neon Pulse', cost: 75000 },
   { id: 'plasma', name: 'Plasma', cost: 75000 },
   { id: 'cosmic-emperor', name: 'Cosmic Emperor', cost: 375000 },
 ];

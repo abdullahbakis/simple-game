@@ -161,6 +161,25 @@ export default function GameCanvas({
     };
     stateRef.current = state;
 
+    const CHAIN_COLLISION_MAX_SPEED = GAME.maxParticleSpeed * 0.6;
+    Matter.Events.on(engine, 'collisionActive', (event) => {
+      for (const pair of event.pairs) {
+        const { bodyA, bodyB } = pair;
+        let particle: Matter.Body | null = null;
+        if (bodyA.label === 'particle' && bodyB.label === 'chain') particle = bodyA;
+        else if (bodyB.label === 'particle' && bodyA.label === 'chain') particle = bodyB;
+        if (particle) {
+          const vx = particle.velocity.x;
+          const vy = particle.velocity.y;
+          const speed = Math.sqrt(vx * vx + vy * vy);
+          if (speed > CHAIN_COLLISION_MAX_SPEED) {
+            const scale = CHAIN_COLLISION_MAX_SPEED / speed;
+            Matter.Body.setVelocity(particle, { x: vx * scale, y: vy * scale });
+          }
+        }
+      }
+    });
+
     Matter.Events.on(engine, 'collisionStart', (event) => {
       if (state.ended) return;
 
