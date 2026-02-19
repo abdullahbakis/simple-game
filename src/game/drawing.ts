@@ -202,7 +202,7 @@ export function updateChains(
   now: number
 ) {
   const toRemove: number[] = [];
-  const fadeStart = GAME.chainDecayTime * 0.6;
+  const fadeStart = GAME.chainDecayTime * 0.8;
 
   const strokeBodyRemoveAt = GAME.chainDecayTime * 0.85;
 
