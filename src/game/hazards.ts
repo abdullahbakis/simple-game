@@ -160,7 +160,7 @@ export function createHazards(
   bucketCenterX: number,
   bucketTopY: number
 ): HazardState {
-  const safeTop = 120;
+  const safeTop = 220;
   const safeBottom = bucketTopY - 80;
   const usableHeight = Math.max(safeBottom - safeTop, 100);
   const margin = 110;
