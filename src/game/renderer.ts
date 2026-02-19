@@ -480,78 +480,149 @@ function renderCosmicSparkles(
 
 function renderFunnelCollector(rc: RenderContext, bucket: Bucket) {
   const { ctx, now } = rc;
-  const cx = bucket.x + GAME.bucketWidth / 2;
-  const cy = bucket.y + GAME.bucketHeight / 2;
-  const basePulse = 0.85 + Math.sin(bucket.pulsePhase) * 0.15;
+  const bw = GAME.bucketWidth;
+  const bh = GAME.bucketHeight;
+  const bx = bucket.x;
+  const by = bucket.y;
+  const cx = bx + bw / 2;
   const boost = bucket.collectPulse;
+  const pulse = 0.92 + Math.sin(bucket.pulsePhase) * 0.08;
 
   ctx.save();
 
-  const glowAlpha = 0.15 + basePulse * 0.1 + boost * 0.3;
-  const glowR = 55 + boost * 15;
-  const gGlow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
-  gGlow.addColorStop(0, `rgba(0, 212, 255, ${glowAlpha})`);
+  const glowAlpha = 0.10 + boost * 0.28;
+  const glowR = bw * 0.75 + boost * 18;
+  const gGlow = ctx.createRadialGradient(cx, by + bh * 0.6, 0, cx, by + bh * 0.6, glowR);
+  gGlow.addColorStop(0, `rgba(255, 150, 200, ${glowAlpha})`);
+  gGlow.addColorStop(0.5, `rgba(255, 100, 160, ${glowAlpha * 0.5})`);
   gGlow.addColorStop(1, 'transparent');
   ctx.fillStyle = gGlow;
   ctx.beginPath();
-  ctx.arc(cx, cy, glowR, 0, Math.PI * 2);
+  ctx.ellipse(cx, by + bh * 0.6, glowR, glowR * 0.65, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  const bw = GAME.bucketWidth * 0.8;
-  const bh = GAME.bucketHeight * 0.65;
-  const bx = cx - bw / 2;
-  const by = cy - bh / 2;
-  const r = 10;
+  const rimW = bw * 1.05;
+  const rimH = bh * 0.14;
+  const rimX = cx - rimW / 2;
+  const rimY = by;
 
+  const rimGrad = ctx.createLinearGradient(rimX, rimY, rimX, rimY + rimH);
+  rimGrad.addColorStop(0, `rgba(255, 220, 240, ${0.95 + boost * 0.05})`);
+  rimGrad.addColorStop(0.4, `rgba(255, 160, 210, 0.9)`);
+  rimGrad.addColorStop(1, `rgba(220, 80, 150, 0.85)`);
+  ctx.fillStyle = rimGrad;
+
+  const rimR = rimH * 0.45;
   ctx.beginPath();
-  ctx.moveTo(bx - 12, by);
-  ctx.lineTo(bx + bw + 12, by);
-  ctx.lineTo(bx + bw + 4, by + bh - r);
-  ctx.quadraticCurveTo(bx + bw + 4, by + bh, bx + bw + 4 - r, by + bh);
-  ctx.lineTo(bx - 4 + r, by + bh);
-  ctx.quadraticCurveTo(bx - 4, by + bh, bx - 4, by + bh - r);
+  ctx.moveTo(rimX + rimR, rimY);
+  ctx.lineTo(rimX + rimW - rimR, rimY);
+  ctx.quadraticCurveTo(rimX + rimW, rimY, rimX + rimW, rimY + rimR);
+  ctx.lineTo(rimX + rimW, rimY + rimH - rimR);
+  ctx.quadraticCurveTo(rimX + rimW, rimY + rimH, rimX + rimW - rimR, rimY + rimH);
+  ctx.lineTo(rimX + rimR, rimY + rimH);
+  ctx.quadraticCurveTo(rimX, rimY + rimH, rimX, rimY + rimH - rimR);
+  ctx.lineTo(rimX, rimY + rimR);
+  ctx.quadraticCurveTo(rimX, rimY, rimX + rimR, rimY);
   ctx.closePath();
-
-  const bucketGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
-  bucketGrad.addColorStop(0, `rgba(0, 180, 220, ${0.6 + boost * 0.3})`);
-  bucketGrad.addColorStop(1, `rgba(0, 100, 160, ${0.7 + boost * 0.2})`);
-  ctx.fillStyle = bucketGrad;
   ctx.fill();
 
-  ctx.strokeStyle = `rgba(0, 230, 255, ${0.5 + boost * 0.4})`;
-  ctx.lineWidth = 2;
-  ctx.stroke();
-
-  ctx.fillStyle = `rgba(255, 255, 255, ${0.08 + boost * 0.05})`;
-  ctx.fillRect(bx + 4, by + 3, bw * 0.3, bh - 6);
-
-  const rimY = by - 2;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
   ctx.beginPath();
-  ctx.moveTo(bx - 16, rimY);
-  ctx.lineTo(bx + bw + 16, rimY);
-  ctx.strokeStyle = `rgba(0, 230, 255, ${0.7 + boost * 0.3})`;
-  ctx.lineWidth = 3;
-  ctx.lineCap = 'round';
-  ctx.shadowColor = 'rgba(0, 212, 255, 0.5)';
-  ctx.shadowBlur = 2;
-  ctx.stroke();
-  ctx.shadowBlur = 0;
+  ctx.ellipse(cx, rimY + rimH * 0.35, rimW * 0.35, rimH * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
 
-  const ringCount = 3;
-  for (let i = 0; i < ringCount; i++) {
-    const ringR = 30 + i * 12 + boost * 5;
-    const rotation = now * 0.001 * (i % 2 === 0 ? 1 : -1) + i * 1.2;
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(rotation);
-    ctx.setLineDash([4, 8]);
-    ctx.strokeStyle = `rgba(0, 212, 255, ${0.12 - i * 0.03 + boost * 0.1})`;
-    ctx.lineWidth = 1;
+  const stripCount = 6;
+  for (let i = 0; i < stripCount; i++) {
+    const stripAngle = (i / stripCount) * Math.PI * 2 + now * 0.00025;
+    const stripX = cx + Math.cos(stripAngle) * rimW * 0.38;
+    const stripY = rimY + rimH * 0.5 + Math.sin(stripAngle) * rimH * 0.28;
+    const r = rimH * 0.18;
+    const colors = ['rgba(255,80,140,0.55)', 'rgba(255,220,60,0.55)', 'rgba(80,220,255,0.55)'];
+    ctx.fillStyle = colors[i % colors.length];
     ctx.beginPath();
-    ctx.arc(0, 0, ringR, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
+    ctx.arc(stripX, stripY, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  const bodyTopY = rimY + rimH - 2;
+  const bodyBotY = by + bh;
+  const bodyH = bodyBotY - bodyTopY;
+
+  const leftSlant = bw * 0.06;
+  const bodyGrad = ctx.createLinearGradient(bx, bodyTopY, bx, bodyBotY);
+  bodyGrad.addColorStop(0, `rgba(255, 120, 185, ${0.82 + boost * 0.12})`);
+  bodyGrad.addColorStop(0.5, `rgba(240, 70, 150, ${0.88 + boost * 0.1})`);
+  bodyGrad.addColorStop(1, `rgba(200, 40, 110, ${0.9})`);
+  ctx.fillStyle = bodyGrad;
+
+  ctx.beginPath();
+  ctx.moveTo(bx, bodyTopY);
+  ctx.lineTo(bx + bw, bodyTopY);
+  ctx.lineTo(bx + bw - leftSlant, bodyBotY);
+  ctx.lineTo(bx + leftSlant, bodyBotY);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = `rgba(255, 180, 220, ${0.5 + boost * 0.3})`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+  ctx.beginPath();
+  ctx.moveTo(bx + bw * 0.08, bodyTopY);
+  ctx.lineTo(bx + bw * 0.08 + bw * 0.22, bodyTopY);
+  ctx.lineTo(bx + bw * 0.08 + bw * 0.22 - leftSlant * 0.5, bodyBotY);
+  ctx.lineTo(bx + bw * 0.08 - leftSlant * 0.5, bodyBotY);
+  ctx.closePath();
+  ctx.fill();
+
+  const stripeColors = [
+    'rgba(255,80,140,0.6)',
+    'rgba(255,220,60,0.6)',
+    'rgba(80,200,255,0.6)',
+    'rgba(255,140,80,0.6)',
+    'rgba(140,255,120,0.6)',
+  ];
+  const stripeCount = 5;
+  const stripeW = (bw - leftSlant * 2) / stripeCount;
+  for (let i = 0; i < stripeCount; i++) {
+    const sx = bx + leftSlant + i * stripeW;
+    const sw = stripeW * 0.45;
+    const progress = (i + 0.5) / stripeCount;
+    const topOffset = 0;
+    const botOffset = leftSlant * (progress * 2 - 1);
+    ctx.fillStyle = stripeColors[i % stripeColors.length];
+    ctx.beginPath();
+    ctx.moveTo(sx + topOffset, bodyTopY + bodyH * 0.15);
+    ctx.lineTo(sx + sw + topOffset, bodyTopY + bodyH * 0.15);
+    ctx.lineTo(sx + sw + botOffset, bodyBotY - bodyH * 0.1);
+    ctx.lineTo(sx + botOffset, bodyBotY - bodyH * 0.1);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  const botW = bw - leftSlant * 2;
+  const footH = bodyH * 0.12;
+  const botGrad = ctx.createLinearGradient(bx + leftSlant, bodyBotY - footH, bx + leftSlant, bodyBotY);
+  botGrad.addColorStop(0, 'rgba(180, 30, 90, 0.0)');
+  botGrad.addColorStop(1, 'rgba(120, 20, 60, 0.7)');
+  ctx.fillStyle = botGrad;
+  ctx.fillRect(bx + leftSlant, bodyBotY - footH, botW, footH);
+
+  if (boost > 0.05) {
+    const sparkCount = 5;
+    for (let i = 0; i < sparkCount; i++) {
+      const angle = (i / sparkCount) * Math.PI * 2 + now * 0.004;
+      const dist = rimW * 0.52 + boost * 12;
+      const sx = cx + Math.cos(angle) * dist;
+      const sy = rimY + rimH * 0.5 + Math.sin(angle) * rimH * 0.4;
+      const sr = 2.5 + boost * 3;
+      const sparkColors = ['rgba(255,255,100,', 'rgba(255,120,200,', 'rgba(120,255,200,'];
+      ctx.fillStyle = sparkColors[i % sparkColors.length] + `${boost * 0.9})`;
+      ctx.beginPath();
+      ctx.arc(sx, sy, sr * pulse, 0, Math.PI * 2);
+      ctx.fill();
+    }
   }
 
   ctx.restore();

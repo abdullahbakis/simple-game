@@ -229,11 +229,6 @@ export default function GameUI({
                   <span className="text-white/50 text-sm">+</span>
                   <span className="text-amber-400 font-extrabold text-base">{coinsEarned}</span>
                   <span className="text-white/30 text-xs font-semibold">coins</span>
-                  {stats.totalMissed > 0 && (
-                    <span className="text-white/25 text-[10px] ml-1">
-                      (penalty: -{Math.min(Math.floor(stats.totalMissed * 0.5), 55)})
-                    </span>
-                  )}
                 </div>
 
                 <button
