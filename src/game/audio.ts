@@ -2,60 +2,62 @@ let audioCtx: AudioContext | null = null;
 let masterGain: GainNode | null = null;
 let musicGain: GainNode | null = null;
 let sfxGain: GainNode | null = null;
-let musicOscillators: OscillatorNode[] = [];
 let musicPlaying = false;
-let arpeggioTimeout: ReturnType<typeof setTimeout> | null = null;
+let musicStopHandle: (() => void) | null = null;
 
-const NOTES = {
-  C3: 130.81, G3: 196.00,
+const NOTE = {
   C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
   C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00, B5: 987.77,
-  C6: 1046.50,
+  C6: 1046.50, D6: 1174.66, E6: 1318.51,
 };
 
-function getAudioContext(): AudioContext {
+function getCtx(): AudioContext {
   if (!audioCtx) {
     audioCtx = new AudioContext();
+
     masterGain = audioCtx.createGain();
-    masterGain.gain.value = 0.55;
+    masterGain.gain.value = 0.6;
     masterGain.connect(audioCtx.destination);
 
     musicGain = audioCtx.createGain();
-    musicGain.gain.value = 0.45;
+    musicGain.gain.value = 0.5;
     musicGain.connect(masterGain);
 
     sfxGain = audioCtx.createGain();
-    sfxGain.gain.value = 0.7;
+    sfxGain.gain.value = 0.65;
     sfxGain.connect(masterGain);
   }
   return audioCtx;
 }
 
 export function resumeAudio() {
-  const ctx = getAudioContext();
-  if (ctx.state === 'suspended') {
-    ctx.resume();
-  }
+  const ctx = getCtx();
+  if (ctx.state === 'suspended') ctx.resume();
 }
 
-export function setMasterVolume(vol: number) {
-  getAudioContext();
-  if (masterGain) masterGain.gain.value = Math.max(0, Math.min(1, vol));
+export function setMasterVolume(v: number) {
+  getCtx();
+  if (masterGain) masterGain.gain.value = Math.max(0, Math.min(1, v));
+}
+export function setMusicVolume(v: number) {
+  getCtx();
+  if (musicGain) musicGain.gain.value = Math.max(0, Math.min(1, v));
+}
+export function setSfxVolume(v: number) {
+  getCtx();
+  if (sfxGain) sfxGain.gain.value = Math.max(0, Math.min(1, v));
 }
 
-export function setMusicVolume(vol: number) {
-  getAudioContext();
-  if (musicGain) musicGain.gain.value = Math.max(0, Math.min(1, vol));
-}
-
-export function setSfxVolume(vol: number) {
-  getAudioContext();
-  if (sfxGain) sfxGain.gain.value = Math.max(0, Math.min(1, vol));
-}
-
-function playTone(freq: number, duration: number, type: OscillatorType = 'sine', volume = 1, delay = 0) {
-  const ctx = getAudioContext();
-  if (!sfxGain) return;
+function playNote(
+  freq: number,
+  startTime: number,
+  duration: number,
+  volume: number,
+  type: OscillatorType = 'sine',
+  destination?: AudioNode
+) {
+  const ctx = getCtx();
+  const dest = destination ?? sfxGain!;
 
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
@@ -63,276 +65,276 @@ function playTone(freq: number, duration: number, type: OscillatorType = 'sine',
   osc.type = type;
   osc.frequency.value = freq;
 
-  gain.gain.value = 0;
-  gain.gain.setValueAtTime(0, ctx.currentTime + delay);
-  gain.gain.linearRampToValueAtTime(volume, ctx.currentTime + delay + 0.01);
-  gain.gain.linearRampToValueAtTime(volume * 0.7, ctx.currentTime + delay + duration * 0.3);
-  gain.gain.linearRampToValueAtTime(0, ctx.currentTime + delay + duration);
+  gain.gain.setValueAtTime(0, startTime);
+  gain.gain.linearRampToValueAtTime(volume, startTime + 0.015);
+  gain.gain.linearRampToValueAtTime(volume * 0.7, startTime + duration * 0.4);
+  gain.gain.linearRampToValueAtTime(0, startTime + duration);
 
   osc.connect(gain);
-  gain.connect(sfxGain);
-
-  osc.start(ctx.currentTime + delay);
-  osc.stop(ctx.currentTime + delay + duration + 0.05);
+  gain.connect(dest);
+  osc.start(startTime);
+  osc.stop(startTime + duration + 0.02);
 }
 
 export function playCollect() {
-  const baseFreq = 600 + Math.random() * 200;
-  playTone(baseFreq, 0.08, 'sine', 0.35);
-  playTone(baseFreq * 1.5, 0.1, 'sine', 0.2, 0.03);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  const base = 700 + Math.random() * 300;
+  playNote(base, t, 0.07, 0.22, 'sine');
+  playNote(base * 1.5, t + 0.025, 0.07, 0.12, 'sine');
 }
 
 export function playMiss() {
-  playTone(180, 0.15, 'sawtooth', 0.18);
-  playTone(140, 0.12, 'sawtooth', 0.12, 0.05);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  playNote(200, t, 0.12, 0.14, 'triangle');
+  playNote(160, t + 0.04, 0.1, 0.1, 'triangle');
 }
 
 export function playHazardKill() {
-  playTone(250, 0.08, 'square', 0.15);
-  playTone(150, 0.15, 'sawtooth', 0.12, 0.02);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  playNote(260, t, 0.06, 0.12, 'square');
+  playNote(155, t + 0.02, 0.13, 0.1, 'triangle');
 }
 
 export function playLevelComplete() {
-  const melody = [NOTES.C5, NOTES.E5, NOTES.G5, NOTES.C6];
-  melody.forEach((freq, i) => {
-    playTone(freq, 0.22, 'sine', 0.3, i * 0.1);
-    playTone(freq * 0.5, 0.28, 'triangle', 0.12, i * 0.1);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  const m = [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6];
+  m.forEach((f, i) => {
+    playNote(f, t + i * 0.11, 0.22, 0.25, 'sine');
+    playNote(f * 0.5, t + i * 0.11, 0.28, 0.1, 'triangle');
   });
 }
 
 export function playVictory() {
-  const melody = [NOTES.C5, NOTES.E5, NOTES.G5, NOTES.C6, NOTES.G5, NOTES.C6];
-  melody.forEach((freq, i) => {
-    playTone(freq, 0.28, 'sine', 0.35, i * 0.12);
-    playTone(freq * 0.5, 0.32, 'triangle', 0.15, i * 0.12);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  const m = [NOTE.C5, NOTE.E5, NOTE.G5, NOTE.C6, NOTE.E6];
+  m.forEach((f, i) => {
+    playNote(f, t + i * 0.12, 0.26, 0.28, 'sine');
+    playNote(f * 0.5, t + i * 0.12, 0.3, 0.12, 'triangle');
   });
 }
 
 export function playGameOver() {
-  const melody = [NOTES.E4, NOTES.D4, NOTES.C4, NOTES.C4 * 0.5];
-  melody.forEach((freq, i) => {
-    playTone(freq, 0.3, 'triangle', 0.25, i * 0.15);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  [NOTE.E4, NOTE.D4, NOTE.C4, NOTE.C4 * 0.5].forEach((f, i) => {
+    playNote(f, t + i * 0.16, 0.3, 0.22, 'triangle');
   });
 }
 
 export function playCountdownTick() {
-  playTone(NOTES.G4, 0.09, 'sine', 0.2);
+  const ctx = getCtx();
+  playNote(NOTE.G4, ctx.currentTime, 0.08, 0.18, 'sine');
 }
 
 export function playCountdownGo() {
-  playTone(NOTES.C5, 0.18, 'sine', 0.3);
-  playTone(NOTES.E5, 0.18, 'sine', 0.22, 0.05);
-  playTone(NOTES.G5, 0.22, 'sine', 0.18, 0.1);
+  const ctx = getCtx();
+  const t = ctx.currentTime;
+  playNote(NOTE.C5, t, 0.15, 0.25, 'sine');
+  playNote(NOTE.E5, t + 0.05, 0.15, 0.2, 'sine');
+  playNote(NOTE.G5, t + 0.1, 0.2, 0.18, 'sine');
 }
 
 export function playDraw() {
-  const freq = 400 + Math.random() * 300;
-  playTone(freq, 0.04, 'sine', 0.09);
+  const ctx = getCtx();
+  const f = 500 + Math.random() * 400;
+  playNote(f, ctx.currentTime, 0.035, 0.07, 'sine');
 }
 
-const CHORDS: number[][] = [
-  [NOTES.C3, NOTES.G3, NOTES.C4, NOTES.E4, NOTES.G4],
-  [NOTES.A4 * 0.5 * 0.9, NOTES.C4 * 0.9, NOTES.E4 * 0.9, NOTES.A4 * 0.9],
-  [NOTES.F4 * 0.5 * 0.9, NOTES.C4 * 0.9, NOTES.F4 * 0.9, NOTES.A4 * 0.9],
-  [NOTES.G3, NOTES.D4 * 0.9, NOTES.G4 * 0.9, NOTES.B4 * 0.9],
+const SCALE = [
+  NOTE.C5, NOTE.D5, NOTE.E5, NOTE.G5, NOTE.A5,
+  NOTE.C6, NOTE.D6, NOTE.E6,
 ];
+
+const MELODY_PHRASES: number[][] = [
+  [0, 2, 4, 5, 4, 2, 0, 1],
+  [4, 5, 7, 5, 4, 2, 4, 2],
+  [0, 2, 4, 2, 5, 4, 2, 0],
+  [5, 7, 5, 4, 2, 4, 5, 4],
+  [2, 4, 5, 7, 5, 4, 5, 2],
+  [4, 2, 0, 2, 4, 5, 4, 2],
+];
+
+const HARMONY_OFFSETS = [-7, -5, -4, -3, -2];
+
+function schedulePhrase(
+  ctx: AudioContext,
+  dest: AudioNode,
+  phraseIndex: number,
+  startTime: number,
+  noteDur: number,
+  noteGap: number,
+  volume: number
+): number {
+  const phrase = MELODY_PHRASES[phraseIndex % MELODY_PHRASES.length];
+
+  phrase.forEach((scaleIdx, i) => {
+    const t = startTime + i * (noteDur + noteGap);
+    const freq = SCALE[scaleIdx % SCALE.length];
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 3000;
+    filter.Q.value = 0.7;
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(volume, t + 0.02);
+    gain.gain.linearRampToValueAtTime(volume * 0.55, t + noteDur * 0.5);
+    gain.gain.linearRampToValueAtTime(0, t + noteDur);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + noteDur + 0.04);
+
+    if (i % 3 === 0) {
+      const harmOffset = HARMONY_OFFSETS[Math.floor(Math.random() * HARMONY_OFFSETS.length)];
+      const harmFreq = freq * Math.pow(2, harmOffset / 12);
+      const hosc = ctx.createOscillator();
+      const hgain = ctx.createGain();
+      hosc.type = 'sine';
+      hosc.frequency.value = harmFreq;
+      hgain.gain.setValueAtTime(0, t);
+      hgain.gain.linearRampToValueAtTime(volume * 0.4, t + 0.025);
+      hgain.gain.linearRampToValueAtTime(0, t + noteDur * 0.8);
+      hosc.connect(hgain);
+      hgain.connect(dest);
+      hosc.start(t);
+      hosc.stop(t + noteDur * 0.85);
+    }
+  });
+
+  return startTime + phrase.length * (noteDur + noteGap);
+}
+
+function scheduleBass(
+  ctx: AudioContext,
+  dest: AudioNode,
+  startTime: number,
+  beats: number,
+  beatDur: number,
+  volume: number
+) {
+  const bassNotes = [NOTE.C4 * 0.5, NOTE.G4 * 0.5, NOTE.A4 * 0.5, NOTE.F4 * 0.5];
+  for (let i = 0; i < beats; i++) {
+    const t = startTime + i * beatDur;
+    const freq = bassNotes[i % bassNotes.length];
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 500;
+    filter.Q.value = 0.5;
+
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(volume, t + 0.04);
+    gain.gain.linearRampToValueAtTime(volume * 0.4, t + beatDur * 0.5);
+    gain.gain.linearRampToValueAtTime(0, t + beatDur * 0.85);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(t);
+    osc.stop(t + beatDur);
+  }
+}
+
+function scheduleChime(
+  ctx: AudioContext,
+  dest: AudioNode,
+  time: number,
+  volume: number
+) {
+  const chimeNotes = [NOTE.C6, NOTE.E6, NOTE.G5, NOTE.A5];
+  const note = chimeNotes[Math.floor(Math.random() * chimeNotes.length)];
+
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  osc.type = 'sine';
+  osc.frequency.value = note;
+
+  gain.gain.setValueAtTime(0, time);
+  gain.gain.linearRampToValueAtTime(volume, time + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.8);
+
+  osc.connect(gain);
+  gain.connect(dest);
+  osc.start(time);
+  osc.stop(time + 0.85);
+}
 
 export function startMusic() {
   if (musicPlaying) return;
-
-  const ctx = getAudioContext();
+  const ctx = getCtx();
   if (!musicGain) return;
 
   musicPlaying = true;
 
-  let chordIndex = 0;
-  let lastChordTime = ctx.currentTime;
+  const dest = musicGain;
+  let stopped = false;
 
-  function createDrone(freq: number, gainVal = 0.07): OscillatorNode {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-    const reverb = ctx.createConvolver();
+  const BPM = 120;
+  const BEAT = 60 / BPM;
+  const NOTE_DUR = BEAT * 0.85;
+  const NOTE_GAP = BEAT * 0.15;
+  const PHRASE_BEATS = 8;
 
-    osc.type = 'sine';
-    osc.frequency.value = freq;
+  let phraseIndex = 0;
+  let nextPhraseTime = ctx.currentTime + 0.1;
 
-    filter.type = 'lowpass';
-    filter.frequency.value = 800;
-    filter.Q.value = 0.8;
+  const LOOKAHEAD = 2.5;
+  const SCHEDULE_INTERVAL = 1000;
 
-    gain.gain.value = gainVal;
+  let chimeInterval: ReturnType<typeof setInterval> | null = null;
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(musicGain!);
+  function scheduleMusicAhead() {
+    if (stopped) return;
 
-    osc.start();
-    musicOscillators.push(osc);
-
-    void reverb;
-    return osc;
-  }
-
-  function createPadLayer(freq: number): OscillatorNode {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-
-    osc.type = 'triangle';
-    osc.frequency.value = freq;
-
-    filter.type = 'lowpass';
-    filter.frequency.value = 1200;
-    filter.Q.value = 0.5;
-
-    gain.gain.value = 0.035;
-
-    const lfo = ctx.createOscillator();
-    const lfoGain = ctx.createGain();
-    lfo.frequency.value = 0.3;
-    lfoGain.gain.value = 4;
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-    lfo.start();
-    musicOscillators.push(lfo);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(musicGain!);
-
-    osc.start();
-    musicOscillators.push(osc);
-
-    return osc;
-  }
-
-  const chord = CHORDS[0];
-  const drones = chord.map((freq, i) => createDrone(freq, i === 0 ? 0.1 : 0.06));
-  chord.forEach(freq => createPadLayer(freq * 2));
-
-  function updateChord() {
-    if (!musicPlaying) return;
-
-    const now = ctx.currentTime;
-    if (now - lastChordTime > 4.5) {
-      lastChordTime = now;
-      chordIndex = (chordIndex + 1) % CHORDS.length;
-
-      drones.forEach((osc, i) => {
-        const newChord = CHORDS[chordIndex];
-        const targetFreq = newChord[Math.min(i, newChord.length - 1)];
-        osc.frequency.linearRampToValueAtTime(targetFreq, now + 2.5);
-      });
-    }
-
-    if (musicPlaying) requestAnimationFrame(updateChord);
-  }
-
-  updateChord();
-
-  const ARPEGGIO_PATTERNS = [
-    [0, 2, 1, 3, 0, 2],
-    [0, 1, 2, 1, 0, 3],
-    [2, 0, 3, 1, 2, 0],
-  ];
-  let arpPatternIndex = 0;
-  let arpStepIndex = 0;
-
-  function playArpNote() {
-    if (!musicPlaying) return;
-
-    const chord = CHORDS[chordIndex];
-    const pattern = ARPEGGIO_PATTERNS[arpPatternIndex];
-    const noteIndex = pattern[arpStepIndex] % chord.length;
-    const octaveBoost = arpStepIndex >= 3 ? 2 : 1;
-    const freq = chord[noteIndex] * octaveBoost;
-
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-
-    osc.type = 'sine';
-    osc.frequency.value = freq;
-
-    filter.type = 'bandpass';
-    filter.frequency.value = freq * 1.5;
-    filter.Q.value = 2;
-
-    gain.gain.value = 0;
-    gain.gain.setValueAtTime(0, ctx.currentTime);
-    gain.gain.linearRampToValueAtTime(0.07, ctx.currentTime + 0.04);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
-
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(musicGain!);
-
-    osc.start();
-    osc.stop(ctx.currentTime + 0.7);
-
-    arpStepIndex = (arpStepIndex + 1) % pattern.length;
-    if (arpStepIndex === 0) {
-      arpPatternIndex = (arpPatternIndex + 1) % ARPEGGIO_PATTERNS.length;
-    }
-
-    const nextDelay = 200 + Math.random() * 300;
-    if (musicPlaying) {
-      arpeggioTimeout = setTimeout(playArpNote, nextDelay);
+    while (nextPhraseTime < ctx.currentTime + LOOKAHEAD) {
+      schedulePhrase(ctx, dest, phraseIndex, nextPhraseTime, NOTE_DUR, NOTE_GAP, 0.06);
+      scheduleBass(ctx, dest, nextPhraseTime, PHRASE_BEATS, BEAT, 0.04);
+      nextPhraseTime += PHRASE_BEATS * BEAT;
+      phraseIndex++;
     }
   }
 
-  arpeggioTimeout = setTimeout(playArpNote, 800);
+  scheduleMusicAhead();
+  const scheduleTimer = setInterval(scheduleMusicAhead, SCHEDULE_INTERVAL);
 
-  function playMelodyPhrase() {
-    if (!musicPlaying) return;
-
-    const chord = CHORDS[chordIndex];
-    const melodyFreqs = [
-      chord[2] * 2,
-      chord[3 % chord.length] * 2,
-      chord[1] * 2,
-      chord[2] * 2,
-      chord[0] * 4,
-    ];
-
-    melodyFreqs.forEach((freq, i) => {
-      if (!musicPlaying) return;
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-
-      gain.gain.value = 0;
-      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.28);
-      gain.gain.linearRampToValueAtTime(0.055, ctx.currentTime + i * 0.28 + 0.06);
-      gain.gain.linearRampToValueAtTime(0.03, ctx.currentTime + i * 0.28 + 0.15);
-      gain.gain.linearRampToValueAtTime(0, ctx.currentTime + i * 0.28 + 0.26);
-
-      osc.connect(gain);
-      gain.connect(musicGain!);
-      osc.start(ctx.currentTime + i * 0.28);
-      osc.stop(ctx.currentTime + i * 0.28 + 0.3);
-    });
-
-    if (musicPlaying) {
-      setTimeout(playMelodyPhrase, 8000 + Math.random() * 4000);
+  chimeInterval = setInterval(() => {
+    if (stopped) return;
+    if (Math.random() < 0.5) {
+      const t = ctx.currentTime + Math.random() * 2;
+      scheduleChime(ctx, dest, t, 0.035);
     }
-  }
+  }, 3000);
 
-  setTimeout(playMelodyPhrase, 3000);
+  musicStopHandle = () => {
+    stopped = true;
+    clearInterval(scheduleTimer);
+    if (chimeInterval) clearInterval(chimeInterval);
+    musicStopHandle = null;
+  };
 }
 
 export function stopMusic() {
   musicPlaying = false;
-  if (arpeggioTimeout) {
-    clearTimeout(arpeggioTimeout);
-    arpeggioTimeout = null;
-  }
-  musicOscillators.forEach(osc => {
-    try { osc.stop(); } catch { }
-  });
-  musicOscillators = [];
+  if (musicStopHandle) musicStopHandle();
 }
 
 export function toggleMusic(): boolean {

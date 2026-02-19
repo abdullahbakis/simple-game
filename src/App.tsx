@@ -90,7 +90,7 @@ function AppInner() {
   const handleLevelComplete = useCallback(() => {
     setGameState('levelComplete');
     updateProgress(levelRef.current);
-    const earned = earnCoins(statsRef.current.stability);
+    const earned = earnCoins(statsRef.current.stability, statsRef.current.totalSpawned, statsRef.current.totalMissed);
     setCoins(prev => {
       const next = prev + earned;
       saveCoins(next);

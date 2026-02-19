@@ -88,10 +88,11 @@ export function saveCoins(coins: number) {
   } catch {}
 }
 
-export function earnCoins(stability: number): number {
+export function earnCoins(stability: number, totalSpawned = 0, totalMissed = 0): number {
   const base = 50;
   const bonus = stability > 0.95 ? 10 : stability > 0.85 ? 5 : 0;
-  return base + bonus;
+  const missedPenalty = totalSpawned > 0 ? Math.floor(totalMissed * 0.5) : 0;
+  return Math.max(5, base + bonus - missedPenalty);
 }
 
 export function getReviveCost(): number {

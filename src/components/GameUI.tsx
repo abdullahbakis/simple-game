@@ -53,7 +53,9 @@ export default function GameUI({
   const gravityPct = Math.min(((gravityScale - 1) / (MAX_GRAVITY - 1)) * 100, 100);
   const gravityHigh = gravityPct > 60;
 
-  const coinsEarned = gameState === 'levelComplete' ? earnCoins(stats.stability) : 0;
+  const coinsEarned = gameState === 'levelComplete'
+    ? earnCoins(stats.stability, stats.totalSpawned, stats.totalMissed)
+    : 0;
   const reviveCost = getReviveCost();
   const canAffordRevive = coins >= reviveCost;
 
@@ -206,18 +208,32 @@ export default function GameUI({
 
                 <div className="w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent" />
 
-                <div className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl"
-                  style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.15)' }}>
-                  <Coins className="w-4 h-4 text-amber-400" />
-                  <span className="text-amber-400 font-extrabold text-sm">
-                    +{coinsEarned} {tr.levelComplete.coinsEarned.replace('+{n}', '').replace('{n}', '').trim() || 'coins'}
-                  </span>
+                <div className="w-full space-y-1.5">
+                  <div className="flex items-center justify-between px-3 py-2 rounded-xl"
+                    style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                    <span className="text-white/35 text-xs font-semibold">Collected</span>
+                    <span className="text-green-400 font-extrabold text-sm">{stats.score}</span>
+                  </div>
+                  {stats.totalMissed > 0 && (
+                    <div className="flex items-center justify-between px-3 py-2 rounded-xl"
+                      style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                      <span className="text-white/35 text-xs font-semibold">Missed</span>
+                      <span className="text-red-400/80 font-extrabold text-sm">-{stats.totalMissed}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <span className="text-white/35 text-xs font-semibold">Score</span>
-                  <span className="text-white font-extrabold text-sm">{stats.score} / {config.target}</span>
+                <div className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl w-full"
+                  style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.15)' }}>
+                  <Coins className="w-4 h-4 text-amber-400" />
+                  <span className="text-white/50 text-sm">+</span>
+                  <span className="text-amber-400 font-extrabold text-base">{coinsEarned}</span>
+                  <span className="text-white/30 text-xs font-semibold">coins</span>
+                  {stats.totalMissed > 0 && (
+                    <span className="text-white/25 text-[10px] ml-1">
+                      (penalty: -{Math.min(Math.floor(stats.totalMissed * 0.5), 55)})
+                    </span>
+                  )}
                 </div>
 
                 <button
