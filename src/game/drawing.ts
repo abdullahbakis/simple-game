@@ -204,7 +204,7 @@ export function updateChains(
   const toRemove: number[] = [];
   const fadeStart = GAME.chainDecayTime * 0.8;
 
-  const strokeBodyRemoveAt = GAME.chainDecayTime * 0.85;
+  const strokeBodyRemoveAt = GAME.chainDecayTime * 0.95;
 
   for (const [strokeId, stroke] of state.strokes) {
     if (stroke.bodies.length > 0) {
