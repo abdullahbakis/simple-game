@@ -204,27 +204,37 @@ export function updateChains(
   const toRemove: number[] = [];
   const fadeStart = GAME.chainDecayTime * 0.6;
 
+  const strokeBodyRemoveAt = GAME.chainDecayTime * 0.85;
+
   for (const [strokeId, stroke] of state.strokes) {
-    if (now >= stroke.expireAt && stroke.bodies.length > 0) {
-      for (const b of stroke.bodies) {
-        Matter.Composite.remove(world, b);
+    if (stroke.bodies.length > 0) {
+      const age = now - (stroke.expireAt - GAME.chainDecayTime);
+      if (age >= strokeBodyRemoveAt) {
+        for (const b of stroke.bodies) {
+          Matter.Composite.remove(world, b);
+        }
+        stroke.bodies.length = 0;
       }
-      stroke.bodies.length = 0;
+    }
+    if (now >= stroke.expireAt) {
       state.strokes.delete(strokeId);
     }
   }
+
+  const bodyRemoveAt = GAME.chainDecayTime * 0.85;
 
   for (let i = 0; i < state.segments.length; i++) {
     const seg = state.segments[i];
     const age = now - seg.createdAt;
 
     if (age >= GAME.chainDecayTime) {
-      if (seg.body) {
-        Matter.Composite.remove(world, seg.body);
-      }
       toRemove.push(i);
     } else if (age > fadeStart) {
       seg.opacity = 1 - (age - fadeStart) / (GAME.chainDecayTime - fadeStart);
+      if (age >= bodyRemoveAt && seg.body) {
+        Matter.Composite.remove(world, seg.body);
+        seg.body = null;
+      }
     }
   }
 
