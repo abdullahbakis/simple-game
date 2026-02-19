@@ -88,9 +88,8 @@ export function saveCoins(coins: number) {
   } catch {}
 }
 
-export function earnCoins(_stability: number, totalSpawned = 0, totalMissed = 0): number {
-  const collected = Math.max(0, totalSpawned - totalMissed);
-  return Math.max(1, collected);
+export function earnCoins(_stability: number, _totalSpawned = 0, totalMissed = 0, score = 0): number {
+  return Math.max(1, score - totalMissed);
 }
 
 export function getReviveCost(): number {

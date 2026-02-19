@@ -486,142 +486,192 @@ function renderFunnelCollector(rc: RenderContext, bucket: Bucket) {
   const by = bucket.y;
   const cx = bx + bw / 2;
   const boost = bucket.collectPulse;
-  const pulse = 0.92 + Math.sin(bucket.pulsePhase) * 0.08;
+  const pulse = 0.97 + Math.sin(bucket.pulsePhase) * 0.03;
 
   ctx.save();
 
-  const glowAlpha = 0.10 + boost * 0.28;
-  const glowR = bw * 0.75 + boost * 18;
-  const gGlow = ctx.createRadialGradient(cx, by + bh * 0.6, 0, cx, by + bh * 0.6, glowR);
-  gGlow.addColorStop(0, `rgba(255, 150, 200, ${glowAlpha})`);
-  gGlow.addColorStop(0.5, `rgba(255, 100, 160, ${glowAlpha * 0.5})`);
+  // soft ambient glow
+  const glowAlpha = 0.08 + boost * 0.22;
+  const glowR = bw * 0.8 + boost * 20;
+  const gGlow = ctx.createRadialGradient(cx, by + bh * 0.55, 0, cx, by + bh * 0.55, glowR);
+  gGlow.addColorStop(0, `rgba(255, 200, 100, ${glowAlpha})`);
+  gGlow.addColorStop(0.55, `rgba(255, 120, 60, ${glowAlpha * 0.4})`);
   gGlow.addColorStop(1, 'transparent');
   ctx.fillStyle = gGlow;
   ctx.beginPath();
-  ctx.ellipse(cx, by + bh * 0.6, glowR, glowR * 0.65, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, by + bh * 0.55, glowR, glowR * 0.6, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  const rimW = bw * 1.05;
-  const rimH = bh * 0.14;
-  const rimX = cx - rimW / 2;
-  const rimY = by;
-
-  const rimGrad = ctx.createLinearGradient(rimX, rimY, rimX, rimY + rimH);
-  rimGrad.addColorStop(0, `rgba(255, 220, 240, ${0.95 + boost * 0.05})`);
-  rimGrad.addColorStop(0.4, `rgba(255, 160, 210, 0.9)`);
-  rimGrad.addColorStop(1, `rgba(220, 80, 150, 0.85)`);
-  ctx.fillStyle = rimGrad;
-
-  const rimR = rimH * 0.45;
-  ctx.beginPath();
-  ctx.moveTo(rimX + rimR, rimY);
-  ctx.lineTo(rimX + rimW - rimR, rimY);
-  ctx.quadraticCurveTo(rimX + rimW, rimY, rimX + rimW, rimY + rimR);
-  ctx.lineTo(rimX + rimW, rimY + rimH - rimR);
-  ctx.quadraticCurveTo(rimX + rimW, rimY + rimH, rimX + rimW - rimR, rimY + rimH);
-  ctx.lineTo(rimX + rimR, rimY + rimH);
-  ctx.quadraticCurveTo(rimX, rimY + rimH, rimX, rimY + rimH - rimR);
-  ctx.lineTo(rimX, rimY + rimR);
-  ctx.quadraticCurveTo(rimX, rimY, rimX + rimR, rimY);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-  ctx.beginPath();
-  ctx.ellipse(cx, rimY + rimH * 0.35, rimW * 0.35, rimH * 0.28, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  const stripCount = 6;
-  for (let i = 0; i < stripCount; i++) {
-    const stripAngle = (i / stripCount) * Math.PI * 2 + now * 0.00025;
-    const stripX = cx + Math.cos(stripAngle) * rimW * 0.38;
-    const stripY = rimY + rimH * 0.5 + Math.sin(stripAngle) * rimH * 0.28;
-    const r = rimH * 0.18;
-    const colors = ['rgba(255,80,140,0.55)', 'rgba(255,220,60,0.55)', 'rgba(80,220,255,0.55)'];
-    ctx.fillStyle = colors[i % colors.length];
-    ctx.beginPath();
-    ctx.arc(stripX, stripY, r, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  const bodyTopY = rimY + rimH - 2;
-  const bodyBotY = by + bh;
+  // --- BOWL BODY (trapezoid, narrower at bottom) ---
+  const topW = bw;
+  const botW = bw * 0.62;
+  const bodyTopY = by + bh * 0.18;
+  const bodyBotY = by + bh * 0.92;
   const bodyH = bodyBotY - bodyTopY;
+  const topL = cx - topW / 2;
+  const topR = cx + topW / 2;
+  const botL = cx - botW / 2;
+  const botR = cx + botW / 2;
 
-  const leftSlant = bw * 0.06;
-  const bodyGrad = ctx.createLinearGradient(bx, bodyTopY, bx, bodyBotY);
-  bodyGrad.addColorStop(0, `rgba(255, 120, 185, ${0.82 + boost * 0.12})`);
-  bodyGrad.addColorStop(0.5, `rgba(240, 70, 150, ${0.88 + boost * 0.1})`);
-  bodyGrad.addColorStop(1, `rgba(200, 40, 110, ${0.9})`);
+  // bowl body clip region
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(topL, bodyTopY);
+  ctx.lineTo(topR, bodyTopY);
+  ctx.lineTo(botR, bodyBotY);
+  ctx.quadraticCurveTo(cx, bodyBotY + bodyH * 0.08, botL, bodyBotY);
+  ctx.closePath();
+  ctx.clip();
+
+  // base fill — warm cream/white glass
+  const bodyGrad = ctx.createLinearGradient(topL, bodyTopY, topR, bodyBotY);
+  bodyGrad.addColorStop(0, `rgba(255, 248, 235, ${0.88 + boost * 0.08})`);
+  bodyGrad.addColorStop(0.45, `rgba(255, 235, 200, ${0.82})`);
+  bodyGrad.addColorStop(1, `rgba(240, 200, 150, ${0.78})`);
   ctx.fillStyle = bodyGrad;
+  ctx.fillRect(topL - 2, bodyTopY, topW + 4, bodyH + 10);
 
-  ctx.beginPath();
-  ctx.moveTo(bx, bodyTopY);
-  ctx.lineTo(bx + bw, bodyTopY);
-  ctx.lineTo(bx + bw - leftSlant, bodyBotY);
-  ctx.lineTo(bx + leftSlant, bodyBotY);
-  ctx.closePath();
-  ctx.fill();
-
-  ctx.strokeStyle = `rgba(255, 180, 220, ${0.5 + boost * 0.3})`;
-  ctx.lineWidth = 1.5;
-  ctx.stroke();
-
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-  ctx.beginPath();
-  ctx.moveTo(bx + bw * 0.08, bodyTopY);
-  ctx.lineTo(bx + bw * 0.08 + bw * 0.22, bodyTopY);
-  ctx.lineTo(bx + bw * 0.08 + bw * 0.22 - leftSlant * 0.5, bodyBotY);
-  ctx.lineTo(bx + bw * 0.08 - leftSlant * 0.5, bodyBotY);
-  ctx.closePath();
-  ctx.fill();
-
-  const stripeColors = [
-    'rgba(255,80,140,0.6)',
-    'rgba(255,220,60,0.6)',
-    'rgba(80,200,255,0.6)',
-    'rgba(255,140,80,0.6)',
-    'rgba(140,255,120,0.6)',
+  // diagonal candy stripes
+  const stripeData: Array<{ r: number; g: number; b: number }> = [
+    { r: 255, g: 80, b: 100 },
+    { r: 255, g: 200, b: 40 },
+    { r: 80, g: 200, b: 255 },
+    { r: 255, g: 130, b: 60 },
+    { r: 120, g: 220, b: 100 },
+    { r: 220, g: 80, b: 200 },
   ];
-  const stripeCount = 5;
-  const stripeW = (bw - leftSlant * 2) / stripeCount;
-  for (let i = 0; i < stripeCount; i++) {
-    const sx = bx + leftSlant + i * stripeW;
-    const sw = stripeW * 0.45;
-    const progress = (i + 0.5) / stripeCount;
-    const topOffset = 0;
-    const botOffset = leftSlant * (progress * 2 - 1);
-    ctx.fillStyle = stripeColors[i % stripeColors.length];
+  const stripeCount = stripeData.length;
+  const totalW = topW + bodyH * 0.8;
+  const stripeW = totalW / stripeCount;
+  for (let i = 0; i < stripeCount + 1; i++) {
+    const sxBase = topL - bodyH * 0.4 + i * stripeW;
+    const { r, g, b } = stripeData[i % stripeData.length];
+    ctx.fillStyle = `rgba(${r},${g},${b},0.28)`;
     ctx.beginPath();
-    ctx.moveTo(sx + topOffset, bodyTopY + bodyH * 0.15);
-    ctx.lineTo(sx + sw + topOffset, bodyTopY + bodyH * 0.15);
-    ctx.lineTo(sx + sw + botOffset, bodyBotY - bodyH * 0.1);
-    ctx.lineTo(sx + botOffset, bodyBotY - bodyH * 0.1);
+    ctx.moveTo(sxBase, bodyTopY);
+    ctx.lineTo(sxBase + stripeW * 0.55, bodyTopY);
+    ctx.lineTo(sxBase + stripeW * 0.55 - bodyH * 0.8, bodyBotY + 10);
+    ctx.lineTo(sxBase - bodyH * 0.8, bodyBotY + 10);
     ctx.closePath();
     ctx.fill();
   }
 
-  const botW = bw - leftSlant * 2;
-  const footH = bodyH * 0.12;
-  const botGrad = ctx.createLinearGradient(bx + leftSlant, bodyBotY - footH, bx + leftSlant, bodyBotY);
-  botGrad.addColorStop(0, 'rgba(180, 30, 90, 0.0)');
-  botGrad.addColorStop(1, 'rgba(120, 20, 60, 0.7)');
-  ctx.fillStyle = botGrad;
-  ctx.fillRect(bx + leftSlant, bodyBotY - footH, botW, footH);
+  // glass sheen — left highlight
+  const sheenGrad = ctx.createLinearGradient(topL, bodyTopY, topL + topW * 0.28, bodyTopY);
+  sheenGrad.addColorStop(0, 'rgba(255,255,255,0.32)');
+  sheenGrad.addColorStop(1, 'rgba(255,255,255,0.0)');
+  ctx.fillStyle = sheenGrad;
+  ctx.fillRect(topL, bodyTopY, topW * 0.28, bodyH);
 
+  ctx.restore();
+
+  // bowl outline
+  ctx.beginPath();
+  ctx.moveTo(topL, bodyTopY);
+  ctx.lineTo(topR, bodyTopY);
+  ctx.lineTo(botR, bodyBotY);
+  ctx.quadraticCurveTo(cx, bodyBotY + bodyH * 0.08, botL, bodyBotY);
+  ctx.closePath();
+  ctx.strokeStyle = `rgba(255, 190, 120, ${0.65 + boost * 0.3})`;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // --- RIM (thick rounded top edge) ---
+  const rimH = bh * 0.16;
+  const rimY = by + bh * 0.10;
+  const rimW = topW * 1.08;
+  const rimX = cx - rimW / 2;
+  const rimCorner = rimH * 0.5;
+
+  const rimGrad = ctx.createLinearGradient(rimX, rimY, rimX, rimY + rimH);
+  rimGrad.addColorStop(0, `rgba(255, 255, 245, ${0.97})`);
+  rimGrad.addColorStop(0.35, `rgba(255, 230, 180, 0.95)`);
+  rimGrad.addColorStop(0.7, `rgba(245, 190, 110, 0.92)`);
+  rimGrad.addColorStop(1, `rgba(220, 155, 80, 0.90)`);
+  ctx.fillStyle = rimGrad;
+  ctx.beginPath();
+  ctx.moveTo(rimX + rimCorner, rimY);
+  ctx.lineTo(rimX + rimW - rimCorner, rimY);
+  ctx.quadraticCurveTo(rimX + rimW, rimY, rimX + rimW, rimY + rimCorner);
+  ctx.lineTo(rimX + rimW, rimY + rimH - rimCorner);
+  ctx.quadraticCurveTo(rimX + rimW, rimY + rimH, rimX + rimW - rimCorner, rimY + rimH);
+  ctx.lineTo(rimX + rimCorner, rimY + rimH);
+  ctx.quadraticCurveTo(rimX, rimY + rimH, rimX, rimY + rimH - rimCorner);
+  ctx.lineTo(rimX, rimY + rimCorner);
+  ctx.quadraticCurveTo(rimX, rimY, rimX + rimCorner, rimY);
+  ctx.closePath();
+  ctx.fill();
+
+  // rim top highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(cx - rimW * 0.08, rimY + rimH * 0.3, rimW * 0.3, rimH * 0.22, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // rim outline
+  ctx.strokeStyle = `rgba(210, 145, 60, ${0.55 + boost * 0.3})`;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(rimX + rimCorner, rimY);
+  ctx.lineTo(rimX + rimW - rimCorner, rimY);
+  ctx.quadraticCurveTo(rimX + rimW, rimY, rimX + rimW, rimY + rimCorner);
+  ctx.lineTo(rimX + rimW, rimY + rimH - rimCorner);
+  ctx.quadraticCurveTo(rimX + rimW, rimY + rimH, rimX + rimW - rimCorner, rimY + rimH);
+  ctx.lineTo(rimX + rimCorner, rimY + rimH);
+  ctx.quadraticCurveTo(rimX, rimY + rimH, rimX, rimY + rimH - rimCorner);
+  ctx.lineTo(rimX, rimY + rimCorner);
+  ctx.quadraticCurveTo(rimX, rimY, rimX + rimCorner, rimY);
+  ctx.stroke();
+
+  // small candy dots on rim
+  const dotColors = ['#ff5076', '#ffcc28', '#4ecfff', '#ff8230', '#78e060', '#e050c8'];
+  const dotCount = 7;
+  for (let i = 0; i < dotCount; i++) {
+    const t = (i + 0.5) / dotCount;
+    const dotX = rimX + rimCorner + (rimW - rimCorner * 2) * t;
+    const dotY = rimY + rimH * 0.52;
+    const dotR = rimH * 0.22;
+    ctx.fillStyle = dotColors[i % dotColors.length];
+    ctx.beginPath();
+    ctx.arc(dotX, dotY, dotR, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.5)';
+    ctx.beginPath();
+    ctx.arc(dotX - dotR * 0.25, dotY - dotR * 0.3, dotR * 0.38, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // --- BOTTOM FOOT ---
+  const footW = botW * 0.72;
+  const footH2 = bh * 0.09;
+  const footY = bodyBotY + bodyH * 0.06;
+  const footGrad = ctx.createLinearGradient(cx - footW / 2, footY, cx - footW / 2, footY + footH2);
+  footGrad.addColorStop(0, `rgba(220, 160, 80, ${0.82 + boost * 0.1})`);
+  footGrad.addColorStop(1, `rgba(180, 110, 40, 0.75)`);
+  ctx.fillStyle = footGrad;
+  ctx.beginPath();
+  ctx.ellipse(cx, footY + footH2 * 0.5, footW / 2, footH2 * 0.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = `rgba(180, 120, 40, 0.5)`;
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // --- COLLECT BURST ---
   if (boost > 0.05) {
-    const sparkCount = 5;
-    for (let i = 0; i < sparkCount; i++) {
-      const angle = (i / sparkCount) * Math.PI * 2 + now * 0.004;
-      const dist = rimW * 0.52 + boost * 12;
+    const burstCount = 8;
+    for (let i = 0; i < burstCount; i++) {
+      const angle = (i / burstCount) * Math.PI * 2 + now * 0.005 * pulse;
+      const dist = rimW * 0.55 + boost * 14;
       const sx = cx + Math.cos(angle) * dist;
-      const sy = rimY + rimH * 0.5 + Math.sin(angle) * rimH * 0.4;
-      const sr = 2.5 + boost * 3;
-      const sparkColors = ['rgba(255,255,100,', 'rgba(255,120,200,', 'rgba(120,255,200,'];
-      ctx.fillStyle = sparkColors[i % sparkColors.length] + `${boost * 0.9})`;
+      const sy = rimY + rimH * 0.5 + Math.sin(angle) * rimH * 0.45;
+      const sr = 2 + boost * 4;
+      const bc = dotColors[i % dotColors.length];
+      ctx.fillStyle = bc;
+      ctx.globalAlpha = boost * 0.85;
       ctx.beginPath();
-      ctx.arc(sx, sy, sr * pulse, 0, Math.PI * 2);
+      ctx.arc(sx, sy, sr, 0, Math.PI * 2);
       ctx.fill();
+      ctx.globalAlpha = 1;
     }
   }
 

@@ -54,7 +54,7 @@ export default function GameUI({
   const gravityHigh = gravityPct > 60;
 
   const coinsEarned = gameState === 'levelComplete'
-    ? earnCoins(stats.stability, stats.totalSpawned, stats.totalMissed)
+    ? earnCoins(stats.stability, stats.totalSpawned, stats.totalMissed, stats.score)
     : 0;
   const reviveCost = getReviveCost();
   const canAffordRevive = coins >= reviveCost;
