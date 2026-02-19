@@ -41,6 +41,7 @@ const LANG_OPTIONS: { code: LangCode; flag: string }[] = [
   { code: 'it', flag: '🇮🇹' },
   { code: 'pt', flag: '🇧🇷' },
   { code: 'ru', flag: '🇷🇺' },
+  { code: 'uk', flag: '🇺🇦' },
   { code: 'ja', flag: '🇯🇵' },
   { code: 'zh', flag: '🇨🇳' },
 ];
