@@ -185,8 +185,8 @@ export default function GameCanvas({
           playCollect();
 
           const p = state.spawner.particles.find((pp) => pp.body.id === collected!.id);
+          state.collectedBodies.delete(collected.id);
           if (p) {
-            state.collectedBodies.delete(collected.id);
             removeParticle(state.spawner, state.world, p);
           }
 
@@ -300,10 +300,8 @@ export default function GameCanvas({
 
       const stuckRemoved = handleStuckParticles(state.spawner, state.world, timestamp);
       for (const p of stuckRemoved) {
-        if (!state.collectedBodies.has(p.body.id)) {
-          state.collectedBodies.delete(p.body.id);
-          removeParticle(state.spawner, state.world, p);
-        }
+        state.collectedBodies.delete(p.body.id);
+        removeParticle(state.spawner, state.world, p);
       }
 
       const activeIds = new Set(state.spawner.particles.map(p => p.body.id));

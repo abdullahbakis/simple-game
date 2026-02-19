@@ -98,14 +98,27 @@ function getSkinColors(skinId: string, now: number, x: number, y: number): { hue
     case 'electric': return { hue: 185, sat: 100, light: 70 };
     case 'love': return { hue: (340 + Math.sin(now * 0.004 + pos * 0.01) * 15), sat: 85, light: 60 };
     case 'starry': return { hue: (60 + Math.sin(now * 0.002 + pos * 0.03) * 40), sat: 30, light: 85 };
-    case 'glitch': return { hue: (now * 0.5 + Math.random() * 60) % 360, sat: 100, light: 60 };
+    case 'glitch': {
+      const band = Math.floor((x + now * 0.3) / 18) % 3;
+      const hue = band === 0 ? 0 : band === 1 ? 120 : 200;
+      return { hue, sat: 100, light: 55 };
+    }
     case 'toxic': return { hue: (85 + Math.sin(now * 0.008 + pos * 0.01) * 15), sat: 90, light: 50 };
     case 'plasma': return { hue: (310 + Math.sin(now * 0.01 + pos * 0.02) * 25), sat: 100, light: 60 };
-    case 'rgb': return { hue: (now * 0.2 + pos * 0.5) % 360, sat: 100, light: 55 };
+    case 'rgb': {
+      const breathe = Math.sin(now * 0.0015) * 0.5 + 0.5;
+      const zone = Math.floor(x / 80) % 3;
+      const baseHue = zone === 0 ? 0 : zone === 1 ? 120 : 240;
+      const hue = (baseHue + breathe * 25) % 360;
+      const light = 45 + breathe * 20;
+      return { hue, sat: 100, light };
+    }
     case 'cosmic-emperor': {
-      const cycle = (now * 0.08 + pos * 0.3) % 360;
-      const shimmer = Math.sin(now * 0.005 + pos * 0.02) * 15;
-      return { hue: cycle, sat: 85 + shimmer, light: 65 + Math.sin(now * 0.01 + pos * 0.05) * 10 };
+      const t = Math.sin(now * 0.003 + pos * 0.008);
+      const hue = t > 0 ? 45 + t * 15 : 270 + Math.abs(t) * 30;
+      const sat = 85 + Math.abs(t) * 15;
+      const light = 50 + Math.abs(t) * 20;
+      return { hue, sat, light };
     }
     default: return { hue: (now * 0.05 + pos) % 360, sat: 90, light: 70 };
   }
@@ -116,6 +129,7 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
 
   const isMatrix = skinId === 'matrix';
   const isGlitch = skinId === 'glitch';
+  const isRainbow = skinId === 'rainbow';
 
   for (const seg of drawing.segments) {
     ctx.save();
@@ -129,8 +143,61 @@ function renderCandyRibbons(ctx: CanvasRenderingContext2D, drawing: DrawingState
       opacity *= 0.6 + Math.sin(now * 0.02 + seg.x1 * 0.1) * 0.4;
       lineW = 4 + Math.sin(now * 0.015 + seg.y1 * 0.08) * 3;
     } else if (isGlitch) {
-      opacity *= Math.random() > 0.15 ? 1 : 0.2;
-      lineW = 3 + Math.random() * 6;
+      const flicker = Math.sin(now * 0.08 + seg.x1 * 0.05) > 0.25;
+      opacity *= flicker ? 1 : 0.12;
+      lineW = 5;
+    }
+
+    if (isRainbow) {
+      const hueShift = (now * 0.04) % 360;
+      const hStart = (hueShift + seg.x1 * 0.6) % 360;
+      const hEnd = (hueShift + seg.x2 * 0.6) % 360;
+      const grad = ctx.createLinearGradient(seg.x1, seg.y1, seg.x2, seg.y2);
+      grad.addColorStop(0, `hsla(${hStart}, 100%, 65%, 0.95)`);
+      grad.addColorStop(1, `hsla(${hEnd}, 100%, 65%, 0.95)`);
+      ctx.globalAlpha = opacity;
+      ctx.shadowColor = `hsla(${hStart}, 100%, 70%, 0.5)`;
+      ctx.shadowBlur = 4;
+      ctx.lineWidth = lineW;
+      ctx.strokeStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = opacity * 0.6;
+      ctx.strokeStyle = `rgba(255,255,255,0.7)`;
+      ctx.beginPath();
+      ctx.moveTo(seg.x1, seg.y1);
+      ctx.lineTo(seg.x2, seg.y2);
+      ctx.stroke();
+      ctx.restore();
+      continue;
+    }
+
+    if (isGlitch) {
+      const offsets: [number, number, string][] = [
+        [-3, 0, 'rgba(255,0,60,0.8)'],
+        [3, 0, 'rgba(0,255,200,0.8)'],
+        [0, 0, 'rgba(255,255,255,0.9)'],
+      ];
+      for (const [ox, oy, color] of offsets) {
+        const showNoise = Math.sin(now * 0.12 + seg.x1 * 0.03 + ox) > -0.6;
+        if (!showNoise) continue;
+        ctx.globalAlpha = opacity * (ox === 0 ? 1 : 0.75);
+        ctx.lineWidth = ox === 0 ? lineW : lineW - 2;
+        ctx.strokeStyle = color;
+        ctx.shadowColor = color;
+        ctx.shadowBlur = ox === 0 ? 0 : 3;
+        ctx.beginPath();
+        ctx.moveTo(seg.x1 + ox, seg.y1 + oy);
+        ctx.lineTo(seg.x2 + ox, seg.y2 + oy);
+        ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      ctx.restore();
+      continue;
     }
 
     ctx.globalAlpha = opacity;
@@ -327,34 +394,46 @@ function renderCosmicSparkles(
   seed: number,
   opacity: number
 ) {
-  for (let j = 0; j < 3; j++) {
-    const angle = seed * 1.1 + j * 2.09 + now * 0.003;
-    const dist = 4 + Math.sin(seed * 0.5 + j * 1.3) * 5;
+  const COSMIC_PALETTE = [
+    { h: 45, s: 95, l: 70 },
+    { h: 50, s: 100, l: 80 },
+    { h: 275, s: 85, l: 65 },
+    { h: 290, s: 80, l: 55 },
+    { h: 40, s: 90, l: 75 },
+  ];
+
+  for (let j = 0; j < 4; j++) {
+    const angle = seed * 1.1 + j * 1.57 + now * 0.002;
+    const dist = 4 + Math.sin(seed * 0.5 + j * 1.3) * 6;
     const px = x + Math.cos(angle) * dist;
     const py = y + Math.sin(angle) * dist;
-    const twinkle = 0.5 + 0.5 * Math.sin(now * 0.01 + seed + j * 2.1);
-    const alpha = twinkle * 0.9 * opacity;
-    const size = 0.8 + twinkle * 2;
-    const hue = (now * 0.08 + seed * 30 + j * 120) % 360;
+    const twinkle = 0.4 + 0.6 * Math.sin(now * 0.008 + seed + j * 2.1);
+    const alpha = twinkle * 0.95 * opacity;
+    const size = 0.6 + twinkle * 2.2;
+    const col = COSMIC_PALETTE[(j + Math.floor(seed * 0.1)) % COSMIC_PALETTE.length];
 
     ctx.globalAlpha = alpha;
-    ctx.fillStyle = `hsl(${hue}, 90%, 75%)`;
-    ctx.shadowColor = `hsl(${hue}, 100%, 60%)`;
-    ctx.shadowBlur = 4;
+    ctx.fillStyle = `hsl(${col.h}, ${col.s}%, ${col.l}%)`;
+    ctx.shadowColor = `hsl(${col.h}, 100%, ${col.l + 10}%)`;
+    ctx.shadowBlur = 5;
     ctx.beginPath();
     ctx.arc(px, py, size, 0, Math.PI * 2);
     ctx.fill();
 
-    if (twinkle > 0.7) {
-      ctx.globalAlpha = alpha * 0.5;
-      ctx.strokeStyle = `hsl(${hue}, 100%, 85%)`;
-      ctx.lineWidth = 0.5;
-      const sparkLen = size * 2.5;
+    if (twinkle > 0.65) {
+      ctx.globalAlpha = alpha * 0.55;
+      ctx.strokeStyle = `hsl(${col.h}, 100%, 90%)`;
+      ctx.lineWidth = 0.6;
+      const sparkLen = size * 3;
       ctx.beginPath();
       ctx.moveTo(px - sparkLen, py);
       ctx.lineTo(px + sparkLen, py);
       ctx.moveTo(px, py - sparkLen);
       ctx.lineTo(px, py + sparkLen);
+      ctx.moveTo(px - sparkLen * 0.6, py - sparkLen * 0.6);
+      ctx.lineTo(px + sparkLen * 0.6, py + sparkLen * 0.6);
+      ctx.moveTo(px + sparkLen * 0.6, py - sparkLen * 0.6);
+      ctx.lineTo(px - sparkLen * 0.6, py + sparkLen * 0.6);
       ctx.stroke();
     }
 
