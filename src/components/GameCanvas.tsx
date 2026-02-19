@@ -185,7 +185,10 @@ export default function GameCanvas({
           playCollect();
 
           const p = state.spawner.particles.find((pp) => pp.body.id === collected!.id);
-          if (p) removeParticle(state.spawner, state.world, p);
+          if (p) {
+            state.collectedBodies.delete(collected.id);
+            removeParticle(state.spawner, state.world, p);
+          }
 
           if (state.score >= state.levelConfig.target) {
             state.ended = true;
@@ -287,6 +290,7 @@ export default function GameCanvas({
           spawnHazardKillSparks(state.vfx, pos.x, pos.y, 255, 80, 40);
           playHazardKill();
         }
+        state.collectedBodies.delete(p.body.id);
         removeParticle(state.spawner, state.world, p);
       }
       if (hazardKills.length > 0) {
@@ -297,6 +301,7 @@ export default function GameCanvas({
       const stuckRemoved = handleStuckParticles(state.spawner, state.world, timestamp);
       for (const p of stuckRemoved) {
         if (!state.collectedBodies.has(p.body.id)) {
+          state.collectedBodies.delete(p.body.id);
           removeParticle(state.spawner, state.world, p);
         }
       }
@@ -313,6 +318,7 @@ export default function GameCanvas({
           spawnMissSparks(state.vfx, p.body.position.x, height - 15);
           playMiss();
         }
+        state.collectedBodies.delete(p.body.id);
         removeParticle(state.spawner, state.world, p);
       }
       if (missed.length > 0) {
