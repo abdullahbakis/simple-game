@@ -161,8 +161,8 @@ export default function GameCanvas({
     };
     stateRef.current = state;
 
-    const CHAIN_COLLISION_MAX_SPEED = GAME.maxParticleSpeed * 0.6;
-    Matter.Events.on(engine, 'collisionActive', (event) => {
+    const CHAIN_COLLISION_MAX_SPEED = GAME.maxParticleSpeed * 0.5;
+    function clampChainCollision(event: Matter.IEventCollision<Matter.Engine>) {
       for (const pair of event.pairs) {
         const { bodyA, bodyB } = pair;
         let particle: Matter.Body | null = null;
@@ -178,7 +178,9 @@ export default function GameCanvas({
           }
         }
       }
-    });
+    }
+    Matter.Events.on(engine, 'collisionStart', clampChainCollision);
+    Matter.Events.on(engine, 'collisionActive', clampChainCollision);
 
     Matter.Events.on(engine, 'collisionStart', (event) => {
       if (state.ended) return;
@@ -284,7 +286,9 @@ export default function GameCanvas({
       const delta = Math.min(timestamp - lastTime, 32);
       lastTime = timestamp;
 
-      stepEngine(state.engine, delta);
+      stepEngine(state.engine, delta, () => {
+        clampParticleVelocities(state.spawner, GAME.maxParticleSpeed);
+      });
 
       if (state.spawningStarted && !state.ended) {
         spawnParticle(state.spawner, state.world, timestamp, state.levelConfig);

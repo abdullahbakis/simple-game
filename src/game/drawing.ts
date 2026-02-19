@@ -69,10 +69,10 @@ function makeSegmentBody(
       category: CATEGORY.chain,
       mask: CATEGORY.particle,
     },
-    restitution: 0.15,
+    restitution: 0.1,
     friction: 0.05,
     frictionStatic: 0,
-    slop: 0.5,
+    slop: 1.5,
   } as Matter.IChamferableBodyDefinition);
 
   Matter.Composite.add(world, body);
