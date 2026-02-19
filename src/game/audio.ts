@@ -6,9 +6,10 @@ let musicPlaying = false;
 let musicStopHandle: (() => void) | null = null;
 
 const NOTE = {
+  C3: 130.81, G3: 196.00,
   C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
   C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00, B5: 987.77,
-  C6: 1046.50, D6: 1174.66, E6: 1318.51,
+  C6: 1046.50, D6: 1174.66, E6: 1318.51, G6: 1567.98, A6: 1760.00,
 };
 
 function getCtx(): AudioContext {
@@ -20,7 +21,7 @@ function getCtx(): AudioContext {
     masterGain.connect(audioCtx.destination);
 
     musicGain = audioCtx.createGain();
-    musicGain.gain.value = 0.5;
+    musicGain.gain.value = 0.48;
     musicGain.connect(masterGain);
 
     sfxGain = audioCtx.createGain();
@@ -145,137 +146,212 @@ export function playDraw() {
   playNote(f, ctx.currentTime, 0.035, 0.07, 'sine');
 }
 
-const SCALE = [
+// ─── CUTE MUSIC ENGINE ────────────────────────────────────────────────────────
+
+// C major pentatonic: C D E G A  — always happy, never clashes
+const PENTA = [
   NOTE.C5, NOTE.D5, NOTE.E5, NOTE.G5, NOTE.A5,
-  NOTE.C6, NOTE.D6, NOTE.E6,
+  NOTE.C6, NOTE.D6, NOTE.E6, NOTE.G6, NOTE.A6,
 ];
 
-const MELODY_PHRASES: number[][] = [
-  [0, 2, 4, 5, 4, 2, 0, 1],
-  [4, 5, 7, 5, 4, 2, 4, 2],
-  [0, 2, 4, 2, 5, 4, 2, 0],
-  [5, 7, 5, 4, 2, 4, 5, 4],
-  [2, 4, 5, 7, 5, 4, 5, 2],
-  [4, 2, 0, 2, 4, 5, 4, 2],
+// Catchy 8-step phrases — indices into PENTA
+const PHRASES: number[][] = [
+  [0, 2, 4, 5, 4, 2, 4, 5],   // bouncy skip
+  [5, 4, 2, 0, 2, 4, 5, 7],   // climbing wonder
+  [2, 4, 5, 4, 2, 0, 2, 4],   // gentle sway
+  [4, 5, 7, 5, 4, 5, 4, 2],   // playful hop
+  [0, 4, 2, 5, 4, 2, 5, 4],   // surprise twirl
+  [5, 7, 5, 4, 2, 4, 2, 0],   // winding down then up
 ];
 
-const HARMONY_OFFSETS = [-7, -5, -4, -3, -2];
+// Counter-melody (plays on beats 2, 4, 6, 8 — slight offset for depth)
+const COUNTER_PHRASES: number[][] = [
+  [4, 2, 5, 4, 5, 4, 2, 4],
+  [2, 4, 2, 5, 4, 2, 0, 2],
+  [5, 4, 2, 4, 5, 7, 5, 4],
+];
 
-function schedulePhrase(
+// Soft bell tone with long natural decay (ASMR crystal/xylophone feel)
+function scheduleBell(
   ctx: AudioContext,
   dest: AudioNode,
-  phraseIndex: number,
-  startTime: number,
-  noteDur: number,
-  noteGap: number,
-  volume: number
-): number {
-  const phrase = MELODY_PHRASES[phraseIndex % MELODY_PHRASES.length];
+  freq: number,
+  t: number,
+  vol: number
+) {
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  const filter = ctx.createBiquadFilter();
 
-  phrase.forEach((scaleIdx, i) => {
-    const t = startTime + i * (noteDur + noteGap);
-    const freq = SCALE[scaleIdx % SCALE.length];
+  filter.type = 'bandpass';
+  filter.frequency.value = freq * 2;
+  filter.Q.value = 4;
 
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    const filter = ctx.createBiquadFilter();
-    filter.type = 'lowpass';
-    filter.frequency.value = 3000;
-    filter.Q.value = 0.7;
+  osc.type = 'sine';
+  osc.frequency.value = freq;
 
-    osc.type = 'sine';
-    osc.frequency.value = freq;
+  // Add a tiny overtone for "bell-like" timbre
+  const osc2 = ctx.createOscillator();
+  const g2 = ctx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.value = freq * 2.756; // inharmonic partial = bell character
+  g2.gain.setValueAtTime(0, t);
+  g2.gain.linearRampToValueAtTime(vol * 0.18, t + 0.008);
+  g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
+  osc2.connect(g2);
+  g2.connect(dest);
+  osc2.start(t);
+  osc2.stop(t + 0.4);
 
-    gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(volume, t + 0.02);
-    gain.gain.linearRampToValueAtTime(volume * 0.55, t + noteDur * 0.5);
-    gain.gain.linearRampToValueAtTime(0, t + noteDur);
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol, t + 0.008);
+  gain.gain.exponentialRampToValueAtTime(vol * 0.3, t + 0.12);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + 1.1); // long ASMR tail
 
-    osc.connect(filter);
-    filter.connect(gain);
-    gain.connect(dest);
-    osc.start(t);
-    osc.stop(t + noteDur + 0.04);
-
-    if (i % 3 === 0) {
-      const harmOffset = HARMONY_OFFSETS[Math.floor(Math.random() * HARMONY_OFFSETS.length)];
-      const harmFreq = freq * Math.pow(2, harmOffset / 12);
-      const hosc = ctx.createOscillator();
-      const hgain = ctx.createGain();
-      hosc.type = 'sine';
-      hosc.frequency.value = harmFreq;
-      hgain.gain.setValueAtTime(0, t);
-      hgain.gain.linearRampToValueAtTime(volume * 0.4, t + 0.025);
-      hgain.gain.linearRampToValueAtTime(0, t + noteDur * 0.8);
-      hosc.connect(hgain);
-      hgain.connect(dest);
-      hosc.start(t);
-      hosc.stop(t + noteDur * 0.85);
-    }
-  });
-
-  return startTime + phrase.length * (noteDur + noteGap);
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(dest);
+  osc.start(t);
+  osc.stop(t + 1.15);
 }
 
+// Warm "glockenspiel" melody layer
+function scheduleMelody(
+  ctx: AudioContext,
+  dest: AudioNode,
+  phraseIdx: number,
+  startTime: number,
+  stepDur: number,
+  vol: number
+): number {
+  const phrase = PHRASES[phraseIdx % PHRASES.length];
+  phrase.forEach((idx, i) => {
+    const t = startTime + i * stepDur + (Math.random() * 0.008 - 0.004); // humanize
+    const freq = PENTA[idx % PENTA.length];
+    scheduleBell(ctx, dest, freq, t, vol);
+  });
+  return startTime + phrase.length * stepDur;
+}
+
+// Airy counter-melody (softer, slightly delayed)
+function scheduleCounter(
+  ctx: AudioContext,
+  dest: AudioNode,
+  phraseIdx: number,
+  startTime: number,
+  stepDur: number,
+  vol: number
+) {
+  const phrase = COUNTER_PHRASES[phraseIdx % COUNTER_PHRASES.length];
+  phrase.forEach((idx, i) => {
+    if (i % 2 === 1) {
+      const t = startTime + i * stepDur + stepDur * 0.5 + (Math.random() * 0.01);
+      const freq = PENTA[idx % PENTA.length] * 0.5; // one octave lower
+      scheduleBell(ctx, dest, freq, t, vol * 0.55);
+    }
+  });
+}
+
+// Soft thumpy bass — sine with short decay, very low filter (ASMR warmth)
 function scheduleBass(
   ctx: AudioContext,
   dest: AudioNode,
   startTime: number,
   beats: number,
   beatDur: number,
-  volume: number
+  vol: number
 ) {
-  const bassNotes = [NOTE.C4 * 0.5, NOTE.G4 * 0.5, NOTE.A4 * 0.5, NOTE.F4 * 0.5];
+  const pattern = [1, 0, 0.7, 0, 1, 0, 0.8, 0]; // on-beat emphasis
+  const bassRoot = [NOTE.C3, NOTE.G3, NOTE.C3, NOTE.G3 * 0.75];
+
   for (let i = 0; i < beats; i++) {
-    const t = startTime + i * beatDur;
-    const freq = bassNotes[i % bassNotes.length];
+    const accent = pattern[i % pattern.length];
+    if (accent === 0) continue;
+    const t = startTime + i * beatDur + (Math.random() * 0.006 - 0.003);
+    const freq = bassRoot[Math.floor(i / 2) % bassRoot.length];
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     const filter = ctx.createBiquadFilter();
     filter.type = 'lowpass';
-    filter.frequency.value = 500;
-    filter.Q.value = 0.5;
+    filter.frequency.value = 200;
+    filter.Q.value = 0.4;
 
     osc.type = 'sine';
     osc.frequency.value = freq;
 
     gain.gain.setValueAtTime(0, t);
-    gain.gain.linearRampToValueAtTime(volume, t + 0.04);
-    gain.gain.linearRampToValueAtTime(volume * 0.4, t + beatDur * 0.5);
-    gain.gain.linearRampToValueAtTime(0, t + beatDur * 0.85);
+    gain.gain.linearRampToValueAtTime(vol * accent, t + 0.025);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + beatDur * 0.7);
 
     osc.connect(filter);
     filter.connect(gain);
     gain.connect(dest);
     osc.start(t);
-    osc.stop(t + beatDur);
+    osc.stop(t + beatDur * 0.75);
   }
 }
 
-function scheduleChime(
+// Shimmery pad — soft chord drone for ASMR texture
+function schedulePad(
+  ctx: AudioContext,
+  dest: AudioNode,
+  startTime: number,
+  duration: number,
+  vol: number
+) {
+  const chordFreqs = [NOTE.C4, NOTE.E4, NOTE.G4, NOTE.C5]; // C major
+  chordFreqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'lowpass';
+    filter.frequency.value = 800;
+    filter.Q.value = 0.3;
+
+    osc.type = 'sine';
+    osc.frequency.value = freq * (1 + (Math.random() * 0.002 - 0.001)); // tiny detune
+    osc.frequency.linearRampToValueAtTime(freq * 1.001, startTime + duration);
+
+    const fadeIn = 0.4;
+    const fadeOut = 0.6;
+    gain.gain.setValueAtTime(0, startTime);
+    gain.gain.linearRampToValueAtTime(vol * (0.5 + i * 0.08), startTime + fadeIn);
+    gain.gain.setValueAtTime(vol * (0.5 + i * 0.08), startTime + duration - fadeOut);
+    gain.gain.linearRampToValueAtTime(0, startTime + duration);
+
+    osc.connect(filter);
+    filter.connect(gain);
+    gain.connect(dest);
+    osc.start(startTime);
+    osc.stop(startTime + duration + 0.1);
+  });
+}
+
+// Sparkle accent — tiny high tinkle scattered randomly (ASMR glitter)
+function scheduleSparkle(
   ctx: AudioContext,
   dest: AudioNode,
   time: number,
-  volume: number
+  vol: number
 ) {
-  const chimeNotes = [NOTE.C6, NOTE.E6, NOTE.G5, NOTE.A5];
-  const note = chimeNotes[Math.floor(Math.random() * chimeNotes.length)];
+  const sparkleFreqs = [NOTE.C6, NOTE.E6, NOTE.G6, NOTE.A6, NOTE.D6];
+  const freq = sparkleFreqs[Math.floor(Math.random() * sparkleFreqs.length)];
 
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
 
   osc.type = 'sine';
-  osc.frequency.value = note;
+  osc.frequency.value = freq;
 
   gain.gain.setValueAtTime(0, time);
-  gain.gain.linearRampToValueAtTime(volume, time + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.8);
+  gain.gain.linearRampToValueAtTime(vol, time + 0.005);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.5);
 
   osc.connect(gain);
   gain.connect(dest);
   osc.start(time);
-  osc.stop(time + 0.85);
+  osc.stop(time + 0.55);
 }
 
 export function startMusic() {
@@ -288,27 +364,42 @@ export function startMusic() {
   const dest = musicGain;
   let stopped = false;
 
-  const BPM = 120;
+  // BPM 96 — not too fast, keeps it cute and relaxed
+  const BPM = 96;
   const BEAT = 60 / BPM;
-  const NOTE_DUR = BEAT * 0.85;
-  const NOTE_GAP = BEAT * 0.15;
-  const PHRASE_BEATS = 8;
+  const STEP = BEAT * 0.5; // eighth notes for glockenspiel
+  const PHRASE_STEPS = 8;
+  const PHRASE_DUR = PHRASE_STEPS * STEP;
 
   let phraseIndex = 0;
   let nextPhraseTime = ctx.currentTime + 0.1;
 
-  const LOOKAHEAD = 2.5;
-  const SCHEDULE_INTERVAL = 1000;
+  const LOOKAHEAD = 3.0;
+  const SCHEDULE_INTERVAL = 900;
 
-  let chimeInterval: ReturnType<typeof setInterval> | null = null;
+  let sparkleInterval: ReturnType<typeof setInterval> | null = null;
 
   function scheduleMusicAhead() {
     if (stopped) return;
 
     while (nextPhraseTime < ctx.currentTime + LOOKAHEAD) {
-      schedulePhrase(ctx, dest, phraseIndex, nextPhraseTime, NOTE_DUR, NOTE_GAP, 0.06);
-      scheduleBass(ctx, dest, nextPhraseTime, PHRASE_BEATS, BEAT, 0.04);
-      nextPhraseTime += PHRASE_BEATS * BEAT;
+      const pt = nextPhraseTime;
+
+      // Main glockenspiel melody
+      scheduleMelody(ctx, dest, phraseIndex, pt, STEP, 0.055);
+
+      // Counter-melody for depth
+      scheduleCounter(ctx, dest, phraseIndex, pt, STEP, 0.04);
+
+      // Soft bass on every phrase
+      scheduleBass(ctx, dest, pt, PHRASE_STEPS * 2, BEAT, 0.045);
+
+      // Pad every 2 phrases — long ambient drone underneath
+      if (phraseIndex % 2 === 0) {
+        schedulePad(ctx, dest, pt, PHRASE_DUR * 2, 0.018);
+      }
+
+      nextPhraseTime += PHRASE_DUR;
       phraseIndex++;
     }
   }
@@ -316,18 +407,25 @@ export function startMusic() {
   scheduleMusicAhead();
   const scheduleTimer = setInterval(scheduleMusicAhead, SCHEDULE_INTERVAL);
 
-  chimeInterval = setInterval(() => {
+  // Random sparkles — ASMR glitter effect
+  sparkleInterval = setInterval(() => {
     if (stopped) return;
-    if (Math.random() < 0.5) {
-      const t = ctx.currentTime + Math.random() * 2;
-      scheduleChime(ctx, dest, t, 0.035);
+    const chance = Math.random();
+    if (chance < 0.6) {
+      const offset = Math.random() * 1.8;
+      scheduleSparkle(ctx, dest, ctx.currentTime + offset, 0.022 + Math.random() * 0.018);
     }
-  }, 3000);
+    // Sometimes a tiny cluster of 2-3 sparkles
+    if (chance < 0.2) {
+      scheduleSparkle(ctx, dest, ctx.currentTime + Math.random() * 0.8, 0.015);
+      scheduleSparkle(ctx, dest, ctx.currentTime + 0.3 + Math.random() * 0.5, 0.012);
+    }
+  }, 1800);
 
   musicStopHandle = () => {
     stopped = true;
     clearInterval(scheduleTimer);
-    if (chimeInterval) clearInterval(chimeInterval);
+    if (sparkleInterval) clearInterval(sparkleInterval);
     musicStopHandle = null;
   };
 }
