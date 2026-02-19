@@ -1,5 +1,6 @@
 import { X, Check, Lock, Tv, Unlock, Coins } from 'lucide-react';
 import { LINE_SKINS } from '../game/skins';
+import { useLang } from '../i18n/LangContext';
 
 interface ShopModalProps {
   coins: number;
@@ -14,13 +15,7 @@ interface ShopModalProps {
   onUnlockNextMilestone: () => void;
 }
 
-const IAP_PACKS = [
-  { label: 'Pouch', amount: 5000 },
-  { label: 'Sack', amount: 18000 },
-  { label: 'Chest', amount: 35000 },
-  { label: 'Barrel', amount: 80000 },
-  { label: 'Vault', amount: 200000 },
-];
+const IAP_PACK_AMOUNTS = [5000, 18000, 35000, 80000, 200000];
 
 export default function ShopModal({
   coins,
@@ -34,15 +29,24 @@ export default function ShopModal({
   nextMilestoneCost,
   onUnlockNextMilestone,
 }: ShopModalProps) {
+  const { tr } = useLang();
   const canAffordMilestone = nextMilestoneCost !== null && coins >= nextMilestoneCost;
+
+  const iapLabels = [
+    tr.shop.iapPouch,
+    tr.shop.iapSack,
+    tr.shop.iapChest,
+    tr.shop.iapBarrel,
+    tr.shop.iapVault,
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
       <div className="relative w-[90vw] max-w-md max-h-[85vh] bg-[#0E1A2E] border border-white/10 rounded-2xl overflow-hidden flex flex-col overlay-enter">
         <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
-          <h2 className="text-xl font-extrabold text-white tracking-wide">Shop</h2>
+          <h2 className="text-xl font-extrabold text-white tracking-wide">{tr.shop.title}</h2>
           <div className="flex items-center gap-3">
-            <span className="text-amber-400 font-bold text-sm">{coins.toLocaleString()} coins</span>
+            <span className="text-amber-400 font-bold text-sm">{coins.toLocaleString()} {tr.shop.coins.replace('{n}', '').trim()}</span>
             <button onClick={onClose} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
               <X className="w-4 h-4 text-white/70" />
             </button>
@@ -51,7 +55,7 @@ export default function ShopModal({
 
         <div className="flex-1 overflow-y-auto p-4 space-y-5 shop-scroll">
           <section>
-            <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">Bank</h3>
+            <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-widest mb-3">{tr.shop.bank}</h3>
             <div className="space-y-2">
               <button
                 onClick={onWatchAdForCoins}
@@ -59,21 +63,21 @@ export default function ShopModal({
               >
                 <div className="flex items-center gap-2">
                   <Tv className="w-4 h-4 text-cyan-400" />
-                  <span className="text-white font-bold text-sm">Free Coins</span>
+                  <span className="text-white font-bold text-sm">{tr.shop.freeCoins}</span>
                 </div>
                 <span className="text-cyan-400 font-extrabold text-sm">+250</span>
               </button>
 
               <div className="grid grid-cols-3 gap-1.5">
-                {IAP_PACKS.map((pack) => (
+                {IAP_PACK_AMOUNTS.map((amount, i) => (
                   <button
-                    key={pack.label}
-                    onClick={() => onPurchaseCoins(pack.amount)}
+                    key={amount}
+                    onClick={() => onPurchaseCoins(amount)}
                     className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/15 hover:bg-amber-500/20 transition-colors"
                   >
-                    <span className="text-white font-bold text-[11px]">{pack.label}</span>
+                    <span className="text-white font-bold text-[11px]">{iapLabels[i]}</span>
                     <span className="text-amber-400 font-extrabold text-[10px]">
-                      {(pack.amount / 1000).toFixed(0)}k
+                      {(amount / 1000).toFixed(0)}k
                     </span>
                   </button>
                 ))}
@@ -83,7 +87,7 @@ export default function ShopModal({
 
           {nextMilestoneCost !== null && (
             <section>
-              <h3 className="text-xs font-bold text-green-400 uppercase tracking-widest mb-3">Special</h3>
+              <h3 className="text-xs font-bold text-green-400 uppercase tracking-widest mb-3">{tr.shop.special}</h3>
               <button
                 onClick={onUnlockNextMilestone}
                 disabled={!canAffordMilestone}
@@ -96,7 +100,7 @@ export default function ShopModal({
                 <div className="flex items-center gap-2">
                   <Unlock className={`w-4 h-4 ${canAffordMilestone ? 'text-green-400' : 'text-white/20'}`} />
                   <span className={`font-bold text-sm ${canAffordMilestone ? 'text-white' : 'text-white/30'}`}>
-                    Unlock Next Milestone
+                    {tr.shop.unlockNextMilestone}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
@@ -110,7 +114,7 @@ export default function ShopModal({
           )}
 
           <section>
-            <h3 className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">Line Skins</h3>
+            <h3 className="text-xs font-bold text-amber-400 uppercase tracking-widest mb-3">{tr.shop.lineSkins}</h3>
             <div className="space-y-2">
               {LINE_SKINS.map((skin) => {
                 const owned = unlockedSkins.includes(skin.id);
@@ -148,12 +152,12 @@ export default function ShopModal({
                           <p className={`text-xs ${
                             isCosmic ? 'text-amber-300/80' : canAfford ? 'text-amber-400' : 'text-white/30'
                           }`}>
-                            {skin.cost.toLocaleString()} coins
+                            {tr.shop.coins.replace('{n}', skin.cost.toLocaleString())}
                           </p>
                         )}
                         {isCosmic && !owned && (
                           <p className="text-[9px] text-amber-400/50 mt-0.5">
-                            Or beat Level 100
+                            {tr.shop.orBeatLevel100}
                           </p>
                         )}
                       </div>
@@ -162,7 +166,7 @@ export default function ShopModal({
                     <div className="relative z-10">
                       {isSelected ? (
                         <span className={`flex items-center gap-1 text-xs font-bold ${isCosmic ? 'text-amber-300' : 'text-cyan-400'}`}>
-                          <Check className="w-3.5 h-3.5" /> Equipped
+                          <Check className="w-3.5 h-3.5" /> {tr.shop.equipped}
                         </span>
                       ) : owned ? (
                         <button
@@ -171,7 +175,7 @@ export default function ShopModal({
                             isCosmic ? 'bg-amber-500/30 hover:bg-amber-500/50' : 'bg-white/10 hover:bg-white/20'
                           }`}
                         >
-                          Equip
+                          {tr.shop.equip}
                         </button>
                       ) : canAfford ? (
                         <button
@@ -180,11 +184,11 @@ export default function ShopModal({
                             isCosmic ? 'bg-amber-500/80 hover:bg-amber-500 cosmic-btn-glow' : 'bg-amber-500/80 hover:bg-amber-500'
                           }`}
                         >
-                          Buy
+                          {tr.shop.buy}
                         </button>
                       ) : (
                         <span className="flex items-center gap-1 text-white/20 text-xs">
-                          <Lock className="w-3 h-3" /> Locked
+                          <Lock className="w-3 h-3" /> {tr.shop.locked}
                         </span>
                       )}
                     </div>

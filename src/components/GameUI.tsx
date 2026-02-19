@@ -1,6 +1,7 @@
 import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X } from 'lucide-react';
 import { GAME, getLevelConfig, MAX_GRAVITY, MAX_LEVEL } from '../game/constants';
 import { earnCoins, getReviveCost } from '../game/progress';
+import { useLang } from '../i18n/LangContext';
 import type { GameStats } from './GameCanvas';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
@@ -34,6 +35,7 @@ export default function GameUI({
   onToggleMusic,
   onReturnToMenu,
 }: GameUIProps) {
+  const { tr } = useLang();
   const config = getLevelConfig(level);
   const lossPoint = 1 - GAME.failThreshold;
   const hpPct = stats.totalSpawned >= 10
@@ -54,7 +56,9 @@ export default function GameUI({
       {countdown > 0 && gameState === 'playing' && (
         <div className="absolute inset-x-0 top-20 z-10 pointer-events-none flex flex-col items-center gap-3">
           <span className="text-cyan-200/80 text-xs uppercase tracking-widest font-bold text-center px-4">
-            Level {level} -- Target: {config.target}
+            {tr.hud.levelTarget
+              .replace('{level}', String(level))
+              .replace('{target}', String(config.target))}
           </span>
         </div>
       )}
@@ -63,7 +67,9 @@ export default function GameUI({
         <div className="flex items-center justify-between px-1 py-2">
           <div className="flex items-center gap-1 sm:gap-2">
             <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
-              <span className="text-white font-extrabold text-sm tabular-nums leading-none">L{level}</span>
+              <span className="text-white font-extrabold text-sm tabular-nums leading-none">
+                {tr.hud.level.replace('{n}', String(level))}
+              </span>
             </div>
 
             <div className="flex items-center gap-1 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
@@ -85,7 +91,9 @@ export default function GameUI({
 
           <div className="flex items-center gap-1">
             <div className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-xl px-1.5 py-1 border border-white/10">
-              <span className={`text-[10px] font-bold ${stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'}`}>HP</span>
+              <span className={`text-[10px] font-bold ${stabilityDanger ? 'text-red-400' : 'text-cyan-300/70'}`}>
+                {tr.hud.hp}
+              </span>
               <div className="w-12 h-2 bg-white/10 rounded-full overflow-hidden">
                 <div
                   className={`h-full rounded-full transition-all duration-300 ${stabilityDanger ? 'bg-red-400' : 'bg-green-400'}`}
@@ -117,27 +125,28 @@ export default function GameUI({
               <div className="text-6xl finale-crown-pulse">&#9813;</div>
             </div>
             <h2 className="text-4xl sm:text-5xl font-extrabold finale-title-gradient tracking-tight leading-tight">
-              COSMIC EMPEROR
+              {tr.levelComplete.cosmicTitle}
             </h2>
             <div className="w-16 h-0.5 bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
             <p className="text-amber-100/70 text-sm leading-relaxed italic">
-              "The universe doesn't yield to the strong -- it yields to the relentless.
-              You didn't just play the game. You mastered chaos itself."
+              {tr.levelComplete.cosmicQuote}
             </p>
             <div className="flex flex-col items-center gap-1 mt-1">
-              <p className="text-amber-400 font-bold text-sm">+{coinsEarned} coins earned</p>
+              <p className="text-amber-400 font-bold text-sm">
+                {tr.levelComplete.coinsEarned.replace('{n}', String(coinsEarned))}
+              </p>
               <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/20">
                 <span className="cosmic-preview-glow inline-block w-6 h-1.5 rounded-full" style={{
                   background: 'linear-gradient(90deg, #FF6B9D, #FFD700, #00D4FF, #7FFF00, #FF6B9D)'
                 }} />
-                <span className="text-amber-300 font-bold text-xs">Cosmic Emperor Skin Unlocked</span>
+                <span className="text-amber-300 font-bold text-xs">{tr.levelComplete.cosmicSkinUnlocked}</span>
               </div>
             </div>
             <button
               onClick={onReturnToMenu}
               className="pointer-events-auto px-10 py-3.5 font-extrabold text-lg rounded-xl text-white finale-btn mt-2"
             >
-              Claim Glory
+              {tr.levelComplete.claimGlory}
             </button>
           </div>
         </div>
@@ -146,9 +155,13 @@ export default function GameUI({
       {gameState === 'levelComplete' && level < MAX_LEVEL && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
-            <h2 className="text-5xl font-extrabold text-green-400">NICE!</h2>
-            <p className="text-amber-400 font-bold text-sm">+{coinsEarned} coins earned</p>
-            <button onClick={onNextLevel} className="pointer-events-auto px-10 py-3.5 bg-green-500 text-white font-extrabold text-lg rounded-xl">Next Level</button>
+            <h2 className="text-5xl font-extrabold text-green-400">{tr.levelComplete.nice}</h2>
+            <p className="text-amber-400 font-bold text-sm">
+              {tr.levelComplete.coinsEarned.replace('{n}', String(coinsEarned))}
+            </p>
+            <button onClick={onNextLevel} className="pointer-events-auto px-10 py-3.5 bg-green-500 text-white font-extrabold text-lg rounded-xl">
+              {tr.levelComplete.nextLevel}
+            </button>
           </div>
         </div>
       )}
@@ -156,15 +169,19 @@ export default function GameUI({
       {gameState === 'gameOver' && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-3 overlay-enter px-6 text-center w-[90vw] max-w-xs">
-            <h2 className="text-5xl font-extrabold text-red-400">OOPS!</h2>
-            <p className="text-white/50 text-xs mt-1">Score: {stats.score} / {config.target}</p>
+            <h2 className="text-5xl font-extrabold text-red-400">{tr.gameOver.oops}</h2>
+            <p className="text-white/50 text-xs mt-1">
+              {tr.gameOver.score
+                .replace('{score}', String(stats.score))
+                .replace('{target}', String(config.target))}
+            </p>
 
             <button
               onClick={onReviveAd}
               className="pointer-events-auto w-full flex items-center justify-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm rounded-xl transition-colors"
             >
               <Tv className="w-4 h-4" />
-              Revive (Watch Ad)
+              {tr.gameOver.reviveAd}
             </button>
 
             <button
@@ -177,7 +194,7 @@ export default function GameUI({
               }`}
             >
               <DollarSign className="w-4 h-4" />
-              Revive ({reviveCost.toLocaleString()} Coins)
+              {tr.gameOver.reviveCoins.replace('{n}', reviveCost.toLocaleString())}
             </button>
 
             <button
@@ -185,7 +202,7 @@ export default function GameUI({
               className="pointer-events-auto w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white/60 font-bold text-sm rounded-xl transition-colors mt-1"
             >
               <X className="w-4 h-4" />
-              Give Up
+              {tr.gameOver.giveUp}
             </button>
           </div>
         </div>

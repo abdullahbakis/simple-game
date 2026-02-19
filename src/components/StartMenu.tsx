@@ -1,6 +1,11 @@
 import { useRef, useEffect, useState } from 'react';
-import { ChevronDown, Lock, Unlock, Coins, ShoppingBag } from 'lucide-react';
+import { ChevronDown, Lock, Unlock, Coins, ShoppingBag, Globe, X } from 'lucide-react';
 import { getUnlockedMilestones, MILESTONE_NAMES, MILESTONE_LEVELS, loadProgress } from '../game/progress';
+import { useLang } from '../i18n/LangContext';
+import { TRANSLATIONS } from '../i18n/translations';
+import type { LangCode } from '../i18n/translations';
+
+const PRIVACY_POLICY_URL = 'https://example.com/privacy-policy';
 
 interface StartMenuProps {
   coins: number;
@@ -27,12 +32,28 @@ interface FloatingBlob {
   phase: number;
 }
 
+const LANG_OPTIONS: { code: LangCode; flag: string }[] = [
+  { code: 'en', flag: '🇬🇧' },
+  { code: 'tr', flag: '🇹🇷' },
+  { code: 'es', flag: '🇪🇸' },
+  { code: 'fr', flag: '🇫🇷' },
+  { code: 'de', flag: '🇩🇪' },
+  { code: 'it', flag: '🇮🇹' },
+  { code: 'pt', flag: '🇧🇷' },
+  { code: 'ru', flag: '🇷🇺' },
+  { code: 'ja', flag: '🇯🇵' },
+  { code: 'zh', flag: '🇨🇳' },
+];
+
 export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showLevelSelect, setShowLevelSelect] = useState(false);
   const [selectedLevel, setSelectedLevel] = useState(1);
+  const [showLangPicker, setShowLangPicker] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const unlockedMilestones = getUnlockedMilestones();
   const progress = loadProgress();
+  const { lang, tr, setLang } = useLang();
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -117,6 +138,8 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
     onPlay(selectedLevel);
   };
 
+  const currentLangOption = LANG_OPTIONS.find(l => l.code === lang)!;
+
   return (
     <div className="fixed inset-0 z-30">
       <canvas ref={canvasRef} className="absolute inset-0" />
@@ -128,13 +151,13 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           </h1>
 
           <p className="text-cyan-300/70 text-xs sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw]">
-            100 Levels -- Draw lines -- Guide the candies!
+            {tr.startMenu.tagline}
           </p>
 
           <div className="flex items-center gap-4">
             {progress.highestCompleted > 0 && (
               <p className="text-white/30 text-xs tracking-wider">
-                Best: Level {progress.highestCompleted} cleared
+                {tr.startMenu.best.replace('{n}', String(progress.highestCompleted))}
               </p>
             )}
             <div className="flex items-center gap-1.5">
@@ -150,7 +173,9 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
               onClick={handlePlay}
               className="px-12 py-3.5 candy-play-btn text-white font-extrabold text-xl tracking-wider rounded-2xl cursor-pointer hover:scale-105 active:scale-95 transition-transform duration-200"
             >
-              {selectedLevel === 1 ? 'PLAY' : `START LVL ${selectedLevel}`}
+              {selectedLevel === 1
+                ? tr.startMenu.play
+                : tr.startMenu.startLevel.replace('{n}', String(selectedLevel))}
             </button>
 
             <button
@@ -166,7 +191,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
               onClick={() => setShowLevelSelect(!showLevelSelect)}
               className="flex items-center gap-2 px-4 py-2 text-cyan-300/70 hover:text-cyan-300 text-sm font-semibold tracking-wide transition-colors"
             >
-              <span>Select Level</span>
+              <span>{tr.startMenu.selectLevel}</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showLevelSelect ? 'rotate-180' : ''}`} />
             </button>
           )}
@@ -226,7 +251,77 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
             />
           ))}
         </div>
+
+        <div className="absolute bottom-4 left-0 right-0 flex items-center justify-between px-5">
+          <button
+            onClick={() => setShowPrivacy(true)}
+            className="text-white/25 hover:text-white/50 text-[10px] tracking-widest uppercase font-semibold transition-colors"
+          >
+            {tr.startMenu.privacyPolicy}
+          </button>
+
+          <div className="relative">
+            <button
+              onClick={() => setShowLangPicker(!showLangPicker)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white/8 hover:bg-white/15 border border-white/10 rounded-xl transition-colors"
+            >
+              <Globe className="w-3.5 h-3.5 text-cyan-300/70" />
+              <span className="text-white/70 text-xs font-semibold">{currentLangOption.flag} {TRANSLATIONS[lang].langName}</span>
+              <ChevronDown className={`w-3 h-3 text-white/40 transition-transform ${showLangPicker ? 'rotate-180' : ''}`} />
+            </button>
+
+            {showLangPicker && (
+              <div className="absolute bottom-full right-0 mb-2 w-44 bg-[#0E1A2E] border border-white/15 rounded-xl overflow-hidden shadow-2xl z-50">
+                {LANG_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.code}
+                    onClick={() => { setLang(opt.code); setShowLangPicker(false); }}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-semibold transition-colors
+                      ${lang === opt.code
+                        ? 'bg-cyan-500/20 text-cyan-300'
+                        : 'text-white/60 hover:bg-white/8 hover:text-white'
+                      }`}
+                  >
+                    <span className="text-sm">{opt.flag}</span>
+                    <span>{TRANSLATIONS[opt.code].langName}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
+
+      {showPrivacy && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="relative w-[90vw] max-w-md bg-[#0E1A2E] border border-white/10 rounded-2xl overflow-hidden overlay-enter">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+              <h2 className="text-base font-extrabold text-white tracking-wide">
+                {tr.startMenu.privacyPolicy}
+              </h2>
+              <button
+                onClick={() => setShowPrivacy(false)}
+                className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="w-4 h-4 text-white/70" />
+              </button>
+            </div>
+            <div className="px-5 py-5 space-y-3">
+              <p className="text-white/50 text-sm leading-relaxed">
+                Your privacy matters to us. To read our full Privacy Policy, please visit the link below.
+              </p>
+              <a
+                href={PRIVACY_POLICY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center px-5 py-3 bg-cyan-600/80 hover:bg-cyan-500 text-white font-bold text-sm rounded-xl transition-colors"
+              >
+                {tr.startMenu.privacyPolicy} ↗
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

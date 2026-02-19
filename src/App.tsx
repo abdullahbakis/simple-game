@@ -12,12 +12,36 @@ import { playLevelComplete, playVictory, playGameOver, startMusic, stopMusic, re
 import { showRewardedAd } from './game/AdManager';
 import { MAX_LEVEL } from './game/constants';
 import { getMilestoneForLevel } from './game/milestones';
+import { LangProvider, useLang } from './i18n/LangContext';
+import type { Translations } from './i18n/translations';
 
 type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
 
 let toastIdCounter = 0;
 
-function App() {
+const MILESTONE_KEYS: Record<number, keyof Translations['milestones']> = {
+  5: 'firstSteps',
+  10: 'risingStar',
+  15: 'chainArtist',
+  20: 'gravityMaster',
+  25: 'warpNavigator',
+  30: 'stormChaser',
+  35: 'antiGravityAce',
+  40: 'laserDancer',
+  45: 'meteorDodger',
+  50: 'teslaTamer',
+  55: 'forceBender',
+  60: 'phaseWalker',
+  65: 'ironWill',
+  70: 'orbitBreaker',
+  75: 'solarGuardian',
+  80: 'timeBender',
+  85: 'apexPredator',
+  90: 'voidWalker',
+  95: 'livingLegend',
+};
+
+function AppInner() {
   const [level, setLevel] = useState(1);
   const [gameState, setGameState] = useState<GameState>('menu');
   const [countdown, setCountdown] = useState(3);
@@ -38,6 +62,7 @@ function App() {
   const levelRef = useRef(level);
   const statsRef = useRef(stats);
   const shownToastsRef = useRef<Set<number>>(new Set());
+  const { tr } = useLang();
 
   useEffect(() => {
     levelRef.current = level;
@@ -111,11 +136,16 @@ function App() {
     const milestone = getMilestoneForLevel(nextLevel);
     if (milestone && !shownToastsRef.current.has(nextLevel)) {
       shownToastsRef.current.add(nextLevel);
+      const key = MILESTONE_KEYS[nextLevel];
+      const translated = key ? tr.milestones[key] : null;
       setTimeout(() => {
-        showToast(milestone.title, milestone.subtitle);
+        showToast(
+          translated ? translated.title : milestone.title,
+          translated ? translated.subtitle : milestone.subtitle,
+        );
       }, 500);
     }
-  }, [showToast]);
+  }, [showToast, tr]);
 
   const doRevive = useCallback(() => {
     setGameState('playing');
@@ -272,6 +302,14 @@ function App() {
         />
       )}
     </div>
+  );
+}
+
+function App() {
+  return (
+    <LangProvider>
+      <AppInner />
+    </LangProvider>
   );
 }
 
