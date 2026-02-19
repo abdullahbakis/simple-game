@@ -33,6 +33,7 @@ import { renderFrame, renderCountdown } from '../game/renderer';
 import { GAME, getLevelConfig } from '../game/constants';
 import { initSpriteCache } from '../game/sprite-cache';
 import { tickPerformance } from '../game/performance';
+import { clearParticlePool } from '../game/particle-pool';
 import { playCollect, playMiss, playHazardKill, playCountdownTick, playCountdownGo, playDraw, resumeAudio } from '../game/audio';
 import type { LevelConfig } from '../game/constants';
 import type { Spawner } from '../game/spawner';
@@ -94,6 +95,7 @@ export default function GameCanvas({
       cancelAnimationFrame(stateRef.current.animFrame);
       Matter.Engine.clear(stateRef.current.engine);
       Matter.Composite.clear(stateRef.current.world, false);
+      clearParticlePool();
       stateRef.current = null;
     }
   }, []);
@@ -392,7 +394,7 @@ export default function GameCanvas({
 
   const handlePointerUp = useCallback(() => {
     if (stateRef.current) {
-      stopFreehand(stateRef.current.drawing);
+      stopFreehand(stateRef.current.drawing, stateRef.current.world);
     }
   }, []);
 

@@ -9,7 +9,7 @@ import type { VfxState } from './vfx';
 import { renderHazards } from './hazards-renderer';
 import { renderBackground } from './backgrounds';
 import { getBallSprite, getSpriteOffset } from './sprite-cache';
-import { getTrailLimit, shouldUseShadowBlur, disableShadows, enableShadows } from './performance';
+import { getTrailLimit, applyShadowContext, clearShadowContext } from './performance';
 
 export function renderFrame(
   rc: RenderContext,
@@ -24,8 +24,7 @@ export function renderFrame(
 ) {
   const { ctx, width, height } = rc;
 
-  const shadowsOff = !shouldUseShadowBlur();
-  if (shadowsOff) disableShadows(ctx);
+  applyShadowContext(ctx);
 
   ctx.clearRect(0, 0, width, height);
   renderBackground(rc, level);
@@ -42,7 +41,7 @@ export function renderFrame(
   renderSpawner(ctx, spawner, rc.now);
   renderVfx(ctx, vfx);
 
-  if (shadowsOff) enableShadows(ctx);
+  clearShadowContext(ctx);
 }
 
 function renderDeathZone(ctx: CanvasRenderingContext2D, w: number, h: number) {

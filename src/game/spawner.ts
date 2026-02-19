@@ -1,6 +1,7 @@
 import Matter from 'matter-js';
-import { GAME, CATEGORY, CANDY_PALETTE, screenScale } from './constants';
+import { GAME, CANDY_PALETTE, screenScale } from './constants';
 import type { LevelConfig } from './constants';
+import { acquireParticleBody, releaseParticleBody, acquireTrailPos, releaseTrailPos } from './particle-pool';
 
 export interface Particle {
   body: Matter.Body;
@@ -41,24 +42,7 @@ export function spawnParticle(
   spawner.totalSpawned++;
 
   const offsetX = (Math.random() - 0.5) * GAME.spawnerWidth;
-  const body = Matter.Bodies.circle(
-    spawner.x + offsetX,
-    spawner.y,
-    GAME.particleRadius,
-    {
-      restitution: GAME.particleRestitution,
-      friction: GAME.particleFriction,
-      frictionAir: 0.015,
-      density: 0.002,
-      label: 'particle',
-      collisionFilter: {
-        category: CATEGORY.particle,
-        mask: CATEGORY.wall | CATEGORY.chain | CATEGORY.bucket | CATEGORY.sensor | CATEGORY.obstacle,
-      },
-    }
-  );
-
-  Matter.Composite.add(world, body);
+  const body = acquireParticleBody(world, spawner.x + offsetX, spawner.y);
 
   const particle: Particle = {
     body,
@@ -73,9 +57,9 @@ export function spawnParticle(
 
 export function updateTrails(spawner: Spawner) {
   for (const p of spawner.particles) {
-    p.trail.unshift({ x: p.body.position.x, y: p.body.position.y });
+    p.trail.unshift(acquireTrailPos(p.body.position.x, p.body.position.y));
     if (p.trail.length > GAME.trailLength) {
-      p.trail.pop();
+      releaseTrailPos(p.trail.pop()!);
     }
   }
 }
@@ -85,7 +69,11 @@ export function removeParticle(
   world: Matter.World,
   particle: Particle
 ) {
-  Matter.Composite.remove(world, particle.body);
+  for (const pos of particle.trail) releaseTrailPos(pos);
+  particle.trail = [];
+
+  releaseParticleBody(world, particle.body);
+
   const idx = spawner.particles.indexOf(particle);
   if (idx !== -1) spawner.particles.splice(idx, 1);
 }
