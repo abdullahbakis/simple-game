@@ -1,7 +1,14 @@
 import type { AdProvider } from './ads/AdProvider';
 import { DevModeAdProvider } from './ads/DevModeAdProvider';
+import { AdMobProvider } from './ads/AdMobProvider';
 
-let provider: AdProvider = new DevModeAdProvider();
+function createProvider(): AdProvider {
+  const adMob = new AdMobProvider();
+  if (adMob.isAvailable()) return adMob;
+  return new DevModeAdProvider();
+}
+
+let provider: AdProvider = createProvider();
 
 export function setAdProvider(p: AdProvider): void {
   provider = p;

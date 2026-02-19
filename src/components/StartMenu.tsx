@@ -5,7 +5,7 @@ import { useLang } from '../i18n/LangContext';
 import { TRANSLATIONS } from '../i18n/translations';
 import type { LangCode } from '../i18n/translations';
 
-const PRIVACY_POLICY_URL = 'https://example.com/privacy-policy';
+const PRIVACY_POLICY_URL = '/privacy-policy.html';
 
 interface StartMenuProps {
   coins: number;

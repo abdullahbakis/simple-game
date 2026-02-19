@@ -1,6 +1,9 @@
-import { X, Check, Lock, Tv, Unlock, Coins } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { X, Check, Lock, Tv, Unlock, Coins, ShoppingCart, Loader } from 'lucide-react';
 import { LINE_SKINS } from '../game/skins';
 import { useLang } from '../i18n/LangContext';
+import { getIAPProducts, purchaseCoins, isIAPAvailable } from '../game/iap/IAPManager';
+import type { IAPProduct } from '../game/iap/IAPManager';
 
 interface ShopModalProps {
   coins: number;
@@ -14,8 +17,6 @@ interface ShopModalProps {
   nextMilestoneCost: number | null;
   onUnlockNextMilestone: () => void;
 }
-
-const IAP_PACK_AMOUNTS = [5000, 18000, 35000, 80000, 200000];
 
 export default function ShopModal({
   coins,
@@ -31,6 +32,31 @@ export default function ShopModal({
 }: ShopModalProps) {
   const { tr } = useLang();
   const canAffordMilestone = nextMilestoneCost !== null && coins >= nextMilestoneCost;
+  const [iapProducts, setIapProducts] = useState<IAPProduct[]>([]);
+  const [purchasingId, setPurchasingId] = useState<string | null>(null);
+  const [purchaseError, setPurchaseError] = useState<string | null>(null);
+  const nativeIAP = isIAPAvailable();
+
+  useEffect(() => {
+    getIAPProducts().then(setIapProducts);
+  }, []);
+
+  const handlePurchase = async (product: IAPProduct) => {
+    if (purchasingId) return;
+    setPurchasingId(product.id);
+    setPurchaseError(null);
+    await purchaseCoins(
+      product.id,
+      (coins) => {
+        onPurchaseCoins(coins);
+        setPurchasingId(null);
+      },
+      (msg) => {
+        setPurchaseError(msg);
+        setPurchasingId(null);
+      }
+    );
+  };
 
   const iapLabels = [
     tr.shop.iapPouch,
@@ -68,19 +94,36 @@ export default function ShopModal({
                 <span className="text-cyan-400 font-extrabold text-sm">+250</span>
               </button>
 
+              {purchaseError && (
+                <p className="text-red-400 text-[10px] text-center px-2">{purchaseError}</p>
+              )}
               <div className="grid grid-cols-3 gap-1.5">
-                {IAP_PACK_AMOUNTS.map((amount, i) => (
-                  <button
-                    key={amount}
-                    onClick={() => onPurchaseCoins(amount)}
-                    className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/15 hover:bg-amber-500/20 transition-colors"
-                  >
-                    <span className="text-white font-bold text-[11px]">{iapLabels[i]}</span>
-                    <span className="text-amber-400 font-extrabold text-[10px]">
-                      {(amount / 1000).toFixed(0)}k
-                    </span>
-                  </button>
-                ))}
+                {(iapProducts.length > 0 ? iapProducts : []).map((product, i) => {
+                  const isPurchasing = purchasingId === product.id;
+                  return (
+                    <button
+                      key={product.id}
+                      onClick={() => handlePurchase(product)}
+                      disabled={!!purchasingId}
+                      className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/15 hover:bg-amber-500/20 transition-colors disabled:opacity-60"
+                    >
+                      {isPurchasing ? (
+                        <Loader className="w-3 h-3 text-amber-400 animate-spin" />
+                      ) : (
+                        <>
+                          <div className="flex items-center gap-0.5">
+                            {nativeIAP && <ShoppingCart className="w-2.5 h-2.5 text-amber-300/60" />}
+                            <span className="text-white font-bold text-[11px]">{iapLabels[i]}</span>
+                          </div>
+                          <span className="text-amber-400 font-extrabold text-[10px]">
+                            {(product.coins / 1000).toFixed(0)}k
+                          </span>
+                          <span className="text-white/40 text-[9px]">{product.price}</span>
+                        </>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </section>

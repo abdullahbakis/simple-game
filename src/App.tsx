@@ -4,6 +4,7 @@ import GameUI from './components/GameUI';
 import StartMenu from './components/StartMenu';
 import ShopModal from './components/ShopModal';
 import ToastNotification from './components/ToastNotification';
+import TutorialOverlay, { isTutorialDone } from './components/TutorialOverlay';
 import type { GameStats } from './components/GameCanvas';
 import type { ToastData } from './components/ToastNotification';
 import { updateProgress, loadCoins, saveCoins, earnCoins, getReviveCost, loadProgress, MILESTONE_LEVELS, unlockMilestone } from './game/progress';
@@ -15,7 +16,7 @@ import { getMilestoneForLevel } from './game/milestones';
 import { LangProvider, useLang } from './i18n/LangContext';
 import type { Translations } from './i18n/translations';
 
-type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
+type GameState = 'menu' | 'playing' | 'paused' | 'levelComplete' | 'gameOver';
 
 let toastIdCounter = 0;
 
@@ -51,6 +52,7 @@ function AppInner() {
   const [unlockedSkins, setUnlockedSkins] = useState(getUnlockedSkins);
   const [showShop, setShowShop] = useState(false);
   const [toasts, setToasts] = useState<ToastData[]>([]);
+  const [showTutorial, setShowTutorial] = useState(!isTutorialDone());
   const [stats, setStats] = useState<GameStats>({
     score: 0,
     totalSpawned: 0,
@@ -194,6 +196,14 @@ function AppInner() {
     });
   }, []);
 
+  const handlePause = useCallback(() => {
+    setGameState('paused');
+  }, []);
+
+  const handleResume = useCallback(() => {
+    setGameState('playing');
+  }, []);
+
   const handleBuySkin = useCallback((skinId: string, cost: number) => {
     if (coins >= cost) {
       unlockSkin(skinId);
@@ -253,6 +263,7 @@ function AppInner() {
   }, [coins, getNextMilestoneCost]);
 
   const paused = gameState !== 'playing';
+  const isPaused = gameState === 'paused';
 
   return (
     <div className="fixed inset-0 bg-[#0B1628] overflow-hidden select-none">
@@ -283,10 +294,17 @@ function AppInner() {
             musicOn={musicOn}
             onToggleMusic={handleToggleMusic}
             onReturnToMenu={handleReturnToMenu}
+            isPaused={isPaused}
+            onPause={handlePause}
+            onResume={handleResume}
           />
           <ToastNotification toasts={toasts} onDismiss={dismissToast} />
         </>
       )}
+      {showTutorial && gameState === 'menu' && (
+        <TutorialOverlay onDone={() => setShowTutorial(false)} />
+      )}
+
       {showShop && (
         <ShopModal
           coins={coins}

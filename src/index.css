@@ -212,3 +212,52 @@ body {
     0 0 40px rgba(255, 215, 0, 0.15),
     inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
+
+@keyframes levelStarPop {
+  0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+  70% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes levelCompletePulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.5); opacity: 0; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  #rotate-notice {
+    display: flex !important;
+  }
+}
+
+#rotate-notice {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0B1628;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: #C8D6E8;
+  font-family: 'Nunito', sans-serif;
+  text-align: center;
+  padding: 24px;
+}
+
+#rotate-notice .rotate-icon {
+  font-size: 48px;
+  animation: rotateHint 2s ease-in-out infinite;
+}
+
+#rotate-notice p {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(200, 214, 232, 0.7);
+}
+
+@keyframes rotateHint {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-90deg); }
+}

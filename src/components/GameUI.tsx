@@ -1,10 +1,10 @@
-import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X } from 'lucide-react';
+import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X, Pause, Play, Home } from 'lucide-react';
 import { GAME, getLevelConfig, MAX_GRAVITY, MAX_LEVEL } from '../game/constants';
 import { earnCoins, getReviveCost } from '../game/progress';
 import { useLang } from '../i18n/LangContext';
 import type { GameStats } from './GameCanvas';
 
-type GameState = 'menu' | 'playing' | 'levelComplete' | 'gameOver';
+type GameState = 'menu' | 'playing' | 'paused' | 'levelComplete' | 'gameOver';
 
 interface GameUIProps {
   level: number;
@@ -19,6 +19,9 @@ interface GameUIProps {
   musicOn: boolean;
   onToggleMusic: () => void;
   onReturnToMenu?: () => void;
+  isPaused?: boolean;
+  onPause?: () => void;
+  onResume?: () => void;
 }
 
 export default function GameUI({
@@ -34,6 +37,9 @@ export default function GameUI({
   musicOn,
   onToggleMusic,
   onReturnToMenu,
+  isPaused,
+  onPause,
+  onResume,
 }: GameUIProps) {
   const { tr } = useLang();
   const config = getLevelConfig(level);
@@ -108,6 +114,12 @@ export default function GameUI({
             <button onClick={onToggleMusic} className="pointer-events-auto p-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10">
               {musicOn ? <Volume2 className="w-3.5 h-3.5 text-cyan-300" /> : <VolumeX className="w-3.5 h-3.5 text-white/40" />}
             </button>
+
+            {gameState === 'playing' && onPause && (
+              <button onClick={onPause} className="pointer-events-auto p-1.5 bg-white/10 backdrop-blur-sm rounded-lg border border-white/10">
+                <Pause className="w-3.5 h-3.5 text-white/70" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -153,15 +165,115 @@ export default function GameUI({
       )}
 
       {gameState === 'levelComplete' && level < MAX_LEVEL && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/65 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-0 overlay-enter w-[88vw] max-w-sm">
+            <div className="relative w-full rounded-2xl overflow-hidden border border-white/10"
+              style={{ background: 'linear-gradient(160deg, #0E1F35 0%, #0B1628 100%)', boxShadow: '0 0 60px rgba(0,0,0,0.5), 0 0 40px rgba(74,222,128,0.06)' }}>
+
+              <div className="absolute inset-0 pointer-events-none" style={{
+                background: 'radial-gradient(ellipse at 50% 0%, rgba(74,222,128,0.12) 0%, transparent 65%)'
+              }} />
+
+              <div className="relative flex flex-col items-center gap-4 px-6 pt-8 pb-7">
+                <div className="relative">
+                  <div className="text-6xl level-complete-star" style={{
+                    filter: 'drop-shadow(0 0 20px rgba(74,222,128,0.7))',
+                    animation: 'levelStarPop 0.5s cubic-bezier(0.175,0.885,0.32,1.275)'
+                  }}>&#10022;</div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div style={{
+                      width: 64, height: 64,
+                      borderRadius: '50%',
+                      background: 'radial-gradient(circle, rgba(74,222,128,0.15) 0%, transparent 70%)',
+                      animation: 'levelCompletePulse 1.5s ease-in-out infinite'
+                    }} />
+                  </div>
+                </div>
+
+                <div className="flex flex-col items-center gap-1">
+                  <h2 className="text-4xl font-extrabold tracking-tight" style={{
+                    background: 'linear-gradient(135deg, #4ADE80, #34D399, #6EE7B7)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    backgroundClip: 'text',
+                  }}>
+                    {tr.levelComplete.nice}
+                  </h2>
+                  <p className="text-white/30 text-xs font-semibold uppercase tracking-widest">
+                    Level {level} complete
+                  </p>
+                </div>
+
+                <div className="w-full h-px bg-gradient-to-r from-transparent via-green-400/20 to-transparent" />
+
+                <div className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl"
+                  style={{ background: 'rgba(255,193,7,0.08)', border: '1px solid rgba(255,193,7,0.15)' }}>
+                  <Coins className="w-4 h-4 text-amber-400" />
+                  <span className="text-amber-400 font-extrabold text-sm">
+                    +{coinsEarned} {tr.levelComplete.coinsEarned.replace('+{n}', '').replace('{n}', '').trim() || 'coins'}
+                  </span>
+                </div>
+
+                <div className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                  <span className="text-white/35 text-xs font-semibold">Score</span>
+                  <span className="text-white font-extrabold text-sm">{stats.score} / {config.target}</span>
+                </div>
+
+                <button
+                  onClick={onNextLevel}
+                  className="pointer-events-auto w-full py-3.5 font-extrabold text-base rounded-xl text-white transition-all active:scale-95"
+                  style={{
+                    background: 'linear-gradient(135deg, #22C55E, #16A34A)',
+                    boxShadow: '0 4px 20px rgba(34,197,94,0.35), 0 0 40px rgba(34,197,94,0.1), inset 0 1px 0 rgba(255,255,255,0.15)'
+                  }}
+                >
+                  {tr.levelComplete.nextLevel} →
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isPaused && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-md">
           <div className="flex flex-col items-center gap-4 overlay-enter px-6 text-center">
-            <h2 className="text-5xl font-extrabold text-green-400">{tr.levelComplete.nice}</h2>
-            <p className="text-amber-400 font-bold text-sm">
-              {tr.levelComplete.coinsEarned.replace('{n}', String(coinsEarned))}
+            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/20 flex items-center justify-center mb-1">
+              <Pause className="w-6 h-6 text-white/70" />
+            </div>
+            <h2 className="text-3xl font-extrabold text-white tracking-wide">Paused</h2>
+            <p className="text-white/40 text-xs uppercase tracking-widest">
+              Level {level}
             </p>
-            <button onClick={onNextLevel} className="pointer-events-auto px-10 py-3.5 bg-green-500 text-white font-extrabold text-lg rounded-xl">
-              {tr.levelComplete.nextLevel}
-            </button>
+
+            <div className="flex flex-col gap-2 w-56 mt-1">
+              <button
+                onClick={onResume}
+                className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-3 bg-cyan-600 hover:bg-cyan-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all"
+              >
+                <Play className="w-4 h-4" />
+                Continue
+              </button>
+
+              <button
+                onClick={onToggleMusic}
+                className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white/10 hover:bg-white/15 text-white/70 font-bold text-sm rounded-xl transition-colors"
+              >
+                {musicOn
+                  ? <><Volume2 className="w-4 h-4" /> Music On</>
+                  : <><VolumeX className="w-4 h-4" /> Music Off</>
+                }
+              </button>
+
+              <button
+                onClick={onReturnToMenu}
+                className="pointer-events-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-white/5 hover:bg-white/10 text-white/40 hover:text-white/60 font-bold text-sm rounded-xl transition-colors"
+              >
+                <Home className="w-4 h-4" />
+                Main Menu
+              </button>
+            </div>
           </div>
         </div>
       )}
