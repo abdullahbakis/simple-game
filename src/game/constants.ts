@@ -18,9 +18,11 @@ export const isMobile =
   window.innerWidth < 768 ||
   (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
 
+const mobileParticleBoost = isMobile ? 1.5 : 1.0;
+
 export const GAME = {
   gravity: 0.30 * screenScale,
-  particleRadius: 7 * screenScale,
+  particleRadius: 7 * screenScale * mobileParticleBoost,
   chainDecayTime: 7000,
   chainSegmentLength: 8,
   chainSegmentWidth: 18 * screenScale,

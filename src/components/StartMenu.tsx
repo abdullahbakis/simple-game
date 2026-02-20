@@ -198,7 +198,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           )}
 
           {showLevelSelect && (
-            <div className="mt-1 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-sm max-h-[40vh] overflow-y-auto shop-scroll">
+            <div className="mt-1 p-3 bg-[#0B1628] rounded-xl border border-white/10 max-w-sm max-h-[40vh] overflow-y-auto shop-scroll">
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {[...MILESTONE_LEVELS].map((lvl) => {
                   const isUnlocked = unlockedMilestones.includes(lvl);
