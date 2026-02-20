@@ -103,7 +103,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   en: {
     langName: 'English',
     startMenu: {
-      tagline: '100 Levels -- Draw lines -- Guide the candies!',
+      tagline: 'Draw Lines -- Guide the Candies -- Master the Physics!',
       best: 'Best: Level {n} cleared',
       play: 'PLAY',
       startLevel: 'START LVL {n}',
@@ -202,7 +202,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   tr: {
     langName: 'Türkçe',
     startMenu: {
-      tagline: '100 Seviye -- Çizgi çiz -- Şekerleri yönlendir!',
+      tagline: 'Çizgi Çiz -- Şekerleri Yönlendir -- Fiziğe Hükmet!',
       best: 'En iyi: Seviye {n} tamamlandı',
       play: 'OYNA',
       startLevel: 'SEV {n} BAŞLAT',
@@ -301,7 +301,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   es: {
     langName: 'Español',
     startMenu: {
-      tagline: '100 Niveles -- Dibuja líneas -- ¡Guía los caramelos!',
+      tagline: '¡Dibuja Líneas -- Guía los Caramelos -- Domina la Física!',
       best: 'Mejor: Nivel {n} completado',
       play: 'JUGAR',
       startLevel: 'INICIAR NIV {n}',
@@ -400,7 +400,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   fr: {
     langName: 'Français',
     startMenu: {
-      tagline: '100 Niveaux -- Dessinez des lignes -- Guidez les bonbons !',
+      tagline: 'Dessinez des Lignes -- Guidez les Bonbons -- Maîtrisez la Physique !',
       best: 'Meilleur : Niveau {n} complété',
       play: 'JOUER',
       startLevel: 'NIV {n} DÉMARRER',
@@ -499,7 +499,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   de: {
     langName: 'Deutsch',
     startMenu: {
-      tagline: '100 Level -- Linien zeichnen -- Bonbons führen!',
+      tagline: 'Linien Zeichnen -- Bonbons Führen -- Physik Meistern!',
       best: 'Bestleistung: Level {n} abgeschlossen',
       play: 'SPIELEN',
       startLevel: 'LEVEL {n} STARTEN',
@@ -598,7 +598,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   it: {
     langName: 'Italiano',
     startMenu: {
-      tagline: '100 Livelli -- Disegna linee -- Guida le caramelle!',
+      tagline: 'Disegna Linee -- Guida le Caramelle -- Padroneggia la Fisica!',
       best: 'Migliore: Livello {n} completato',
       play: 'GIOCA',
       startLevel: 'AVVIA LIV {n}',
@@ -697,7 +697,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   pt: {
     langName: 'Português',
     startMenu: {
-      tagline: '100 Níveis -- Desenhe linhas -- Guie os doces!',
+      tagline: 'Desenhe Linhas -- Guie os Doces -- Domine a Física!',
       best: 'Melhor: Nível {n} concluído',
       play: 'JOGAR',
       startLevel: 'INICIAR NÍV {n}',
@@ -796,7 +796,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   ru: {
     langName: 'Русский',
     startMenu: {
-      tagline: '100 уровней -- Рисуй линии -- Направляй конфеты!',
+      tagline: 'Рисуй Линии -- Направляй Конфеты -- Овладей Физикой!',
       best: 'Рекорд: уровень {n} пройден',
       play: 'ИГРАТЬ',
       startLevel: 'СТАРТ УР {n}',
@@ -895,7 +895,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   uk: {
     langName: 'Українська',
     startMenu: {
-      tagline: '100 рівнів -- Малюй лінії -- Направляй цукерки!',
+      tagline: 'Малюй Лінії -- Направляй Цукерки -- Опануй Фізику!',
       best: 'Рекорд: рівень {n} пройдено',
       play: 'ГРАТИ',
       startLevel: 'СТАРТ РВ {n}',
@@ -994,7 +994,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   ja: {
     langName: '日本語',
     startMenu: {
-      tagline: '100ステージ -- 線を引く -- キャンディを導け！',
+      tagline: '線を引け -- キャンディを導け -- 物理を極めろ！',
       best: 'ベスト：レベル {n} クリア',
       play: 'プレイ',
       startLevel: 'Lv{n} スタート',
@@ -1093,7 +1093,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   zh: {
     langName: '中文',
     startMenu: {
-      tagline: '100关卡 -- 画线条 -- 引导糖果！',
+      tagline: '画线条 -- 引导糖果 -- 掌控物理！',
       best: '最佳：第 {n} 关通过',
       play: '开始游戏',
       startLevel: '开始第 {n} 关',
