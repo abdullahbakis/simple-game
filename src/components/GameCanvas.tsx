@@ -378,10 +378,10 @@ export default function GameCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
-    return {
-      x: clientX - rect.left,
-      y: clientY - rect.top,
-    };
+    const EDGE_MARGIN = 8;
+    const x = Math.min(Math.max(clientX - rect.left, EDGE_MARGIN), rect.width - EDGE_MARGIN);
+    const y = clientY - rect.top;
+    return { x, y };
   }, []);
 
   const handlePointerDown = useCallback(

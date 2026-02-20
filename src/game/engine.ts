@@ -15,9 +15,10 @@ export function createGameEngine(width: number, height: number, gravityScale: nu
   } as Matter.IEngineDefinition);
 
   const wallThickness = 40;
+  const wallInset = 2;
 
   const leftWall = Matter.Bodies.rectangle(
-    -wallThickness / 2,
+    -(wallThickness / 2) + wallInset,
     height / 2,
     wallThickness,
     height * 2,
@@ -29,7 +30,7 @@ export function createGameEngine(width: number, height: number, gravityScale: nu
   );
 
   const rightWall = Matter.Bodies.rectangle(
-    width + wallThickness / 2,
+    width + (wallThickness / 2) - wallInset,
     height / 2,
     wallThickness,
     height * 2,
