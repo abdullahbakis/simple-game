@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, X } from 'lucide-react';
 import { useLang } from '../i18n/LangContext';
 
-const TUTORIAL_KEY = 'candyflow_tutorial_done';
+const TUTORIAL_KEY = 'neonide_tutorial_done';
 
 type AnimationType = 'draw' | 'fall' | 'bucket' | 'hp';
 

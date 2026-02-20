@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'candyflow_progress';
-const COINS_KEY = 'candyflow_coins';
+const STORAGE_KEY = 'neonide_progress';
+const COINS_KEY = 'neonide_coins';
 
 export const MILESTONE_LEVELS = [1, 4, 7, 10, 12, 16, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 90] as const;
 

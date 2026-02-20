@@ -24,8 +24,8 @@ export const LINE_SKINS: LineSkin[] = [
   { id: 'cosmic-emperor', name: 'Cosmic Emperor', cost: 375000 },
 ];
 
-const SKINS_KEY = 'candyflow_skins';
-const SELECTED_SKIN_KEY = 'candyflow_selected_skin';
+const SKINS_KEY = 'neonide_skins';
+const SELECTED_SKIN_KEY = 'neonide_selected_skin';
 
 export function getUnlockedSkins(): string[] {
   try {

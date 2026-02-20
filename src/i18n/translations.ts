@@ -1190,7 +1190,7 @@ export const TRANSLATIONS: Record<LangCode, Translations> = {
   },
 };
 
-export const LANG_STORAGE_KEY = 'candyflow_lang';
+export const LANG_STORAGE_KEY = 'neonide_lang';
 
 export function loadLang(): LangCode {
   const stored = localStorage.getItem(LANG_STORAGE_KEY);
