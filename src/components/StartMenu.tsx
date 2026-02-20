@@ -147,13 +147,9 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
 
       <div className="relative z-10 flex flex-col items-center justify-center h-full gap-5">
         <div className="flex flex-col items-center gap-3">
-          <img
-            src="/logo.png"
-            alt="Neonide"
-            className="select-none"
-            style={{ maxHeight: '120px', maxWidth: '80vw', objectFit: 'contain' }}
-            draggable={false}
-          />
+          <h1 className="text-5xl sm:text-6xl md:text-8xl font-extrabold tracking-tight select-none candy-title">
+            Neonide
+          </h1>
 
           <p className="text-cyan-300/70 text-xs sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw]">
             {tr.startMenu.tagline}

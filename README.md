@@ -1,4 +1,4 @@
-# NEONIDE
+# Candy Flow
 
 A physics-based arcade game where you draw freehand lines to guide colorful candy particles into a collector bucket. Navigate through 100 increasingly challenging levels packed with hazards, obstacles, dynamic environments, and a full economy system.
 
