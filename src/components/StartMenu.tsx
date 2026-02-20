@@ -198,7 +198,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           )}
 
           {showLevelSelect && (
-            <div className="mt-1 p-3 rounded-xl border border-white/10 max-w-sm max-h-[40vh] overflow-y-auto shop-scroll" style={{ background: 'rgba(14, 26, 46, 0.95)' }}>
+            <div className="mt-1 p-3 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 max-w-sm max-h-[40vh] overflow-y-auto shop-scroll">
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {[...MILESTONE_LEVELS].map((lvl) => {
                   const isUnlocked = unlockedMilestones.includes(lvl);
@@ -272,7 +272,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
             </button>
 
             {showLangPicker && (
-              <div className="absolute bottom-full right-0 mb-2 w-44 border border-white/15 rounded-xl overflow-hidden shadow-2xl z-50" style={{ background: '#0E1A2E' }}>
+              <div className="absolute bottom-full right-0 mb-2 w-44 bg-[#0E1A2E] border border-white/15 rounded-xl overflow-hidden shadow-2xl z-50">
                 {LANG_OPTIONS.map((opt) => (
                   <button
                     key={opt.code}
@@ -294,8 +294,8 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
       </div>
 
       {showPrivacy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.75)' }}>
-          <div className="relative w-[90vw] max-w-md border border-white/10 rounded-2xl overflow-hidden overlay-enter" style={{ background: '#0E1A2E' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="relative w-[90vw] max-w-md bg-[#0E1A2E] border border-white/10 rounded-2xl overflow-hidden overlay-enter">
             <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
               <h2 className="text-base font-extrabold text-white tracking-wide">
                 {tr.startMenu.privacyPolicy}
