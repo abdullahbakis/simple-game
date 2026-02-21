@@ -17,7 +17,7 @@ import {
   stopFreehand,
   updateChains,
 } from '../game/drawing';
-import { createBucket, addBucketToWorld, updateBucketPulse } from '../game/bucket';
+import { createBucket, addBucketToWorld, updateBucketPulse, antiWedge } from '../game/bucket';
 import { createObstacles, addObstaclesToWorld, updateObstacles, applyWindForces } from '../game/obstacles';
 import {
   createHazards,
@@ -304,6 +304,8 @@ export default function GameCanvas({
       applyHazardForces(state.hazards, state.spawner.particles);
       applyTeleporters(state.hazards, state.spawner.particles, timestamp);
       clampParticleVelocities(state.spawner, GAME.maxParticleSpeed);
+
+      antiWedge(state.bucket, state.spawner.particles);
 
       const hazardKills = findHazardKills(state.hazards, state.spawner.particles);
       for (const p of hazardKills) {

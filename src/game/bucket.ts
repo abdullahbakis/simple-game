@@ -1,11 +1,14 @@
 import Matter from 'matter-js';
 import { GAME, CATEGORY } from './constants';
+import type { Particle } from './spawner';
 
 export interface Bucket {
   walls: Matter.Body[];
   sensor: Matter.Body;
   x: number;
   y: number;
+  cornerLeft: { x: number; y: number };
+  cornerRight: { x: number; y: number };
   pulsePhase: number;
   collectPulse: number;
 }
@@ -89,6 +92,8 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
     sensor,
     x,
     y,
+    cornerLeft: { x, y },
+    cornerRight: { x: x + w, y },
     pulsePhase: 0,
     collectPulse: 0,
   };
@@ -103,5 +108,42 @@ export function updateBucketPulse(bucket: Bucket, delta: number) {
   if (bucket.pulsePhase > Math.PI * 2) bucket.pulsePhase -= Math.PI * 2;
   if (bucket.collectPulse > 0) {
     bucket.collectPulse = Math.max(0, bucket.collectPulse - delta / 200);
+  }
+}
+
+const WEDGE_RADIUS = GAME.particleRadius * 2.5 + GAME.bucketWallThickness;
+const WEDGE_SPEED_THRESHOLD = 0.8;
+const WEDGE_POP_FORCE = 0.003;
+
+export function antiWedge(bucket: Bucket, particles: Particle[]) {
+  const corners = [bucket.cornerLeft, bucket.cornerRight];
+  const cx = bucket.x + GAME.bucketWidth / 2;
+
+  for (const p of particles) {
+    const pos = p.body.position;
+    const vx = p.body.velocity.x;
+    const vy = p.body.velocity.y;
+    const speed = Math.sqrt(vx * vx + vy * vy);
+
+    if (speed > WEDGE_SPEED_THRESHOLD) continue;
+
+    for (const corner of corners) {
+      const dx = pos.x - corner.x;
+      const dy = pos.y - corner.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > WEDGE_RADIUS) continue;
+
+      const towardCenter = pos.x < cx ? 1 : -1;
+      Matter.Body.applyForce(p.body, pos, {
+        x: WEDGE_POP_FORCE * towardCenter,
+        y: -WEDGE_POP_FORCE * 1.5,
+      });
+      Matter.Body.setVelocity(p.body, {
+        x: vx + towardCenter * 2,
+        y: -3,
+      });
+      break;
+    }
   }
 }
