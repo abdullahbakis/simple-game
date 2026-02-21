@@ -113,7 +113,7 @@ export function updateBucketPulse(bucket: Bucket, delta: number) {
 
 const WEDGE_RADIUS = GAME.particleRadius * 2.5 + GAME.bucketWallThickness;
 const WEDGE_SPEED_THRESHOLD = 0.8;
-const WEDGE_POP_FORCE = 0.0005;
+const WEDGE_POP_FORCE = 0.0001;
 
 export function antiWedge(bucket: Bucket, particles: Particle[]) {
   const corners = [bucket.cornerLeft, bucket.cornerRight];
