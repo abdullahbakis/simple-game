@@ -27,7 +27,7 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
   }
 
   const y = canvasHeight - h - 30;
-  const capRadius = t / 2 + 1;
+  const capRadius = GAME.particleRadius * 1.8;
 
   const leftWall = Matter.Bodies.rectangle(x, y + h / 2, t, h, {
     isStatic: true,
@@ -52,21 +52,21 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
     restitution: 0.1,
   });
 
-  const leftCap = Matter.Bodies.circle(x, y, capRadius, {
+  const leftCap = Matter.Bodies.circle(x, y - capRadius * 0.3, capRadius, {
     isStatic: true,
-    label: 'bucketWall',
-    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 1.2,
+    label: 'bucketCap',
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle | CATEGORY.chain },
+    restitution: 1.5,
     friction: 0,
     frictionStatic: 0,
     render: { visible: false },
   });
 
-  const rightCap = Matter.Bodies.circle(x + w, y, capRadius, {
+  const rightCap = Matter.Bodies.circle(x + w, y - capRadius * 0.3, capRadius, {
     isStatic: true,
-    label: 'bucketWall',
-    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 1.2,
+    label: 'bucketCap',
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle | CATEGORY.chain },
+    restitution: 1.5,
     friction: 0,
     frictionStatic: 0,
     render: { visible: false },
