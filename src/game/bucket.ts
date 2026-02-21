@@ -137,11 +137,11 @@ export function antiWedge(bucket: Bucket, particles: Particle[]) {
       const towardCenter = pos.x < cx ? 1 : -1;
       Matter.Body.applyForce(p.body, pos, {
         x: WEDGE_POP_FORCE * towardCenter,
-        y: -WEDGE_POP_FORCE * 1.5,
+        y: -WEDGE_POP_FORCE * 0.5,
       });
       Matter.Body.setVelocity(p.body, {
-        x: vx + towardCenter * 2,
-        y: -3,
+        x: vx + towardCenter * 1,
+        y: -1,
       });
       break;
     }
