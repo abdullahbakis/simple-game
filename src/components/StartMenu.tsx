@@ -151,13 +151,13 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
             Neonide
           </h1>
 
-          <p className="text-sm sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw]" style={{ color: 'rgba(103,232,249,0.7)' }}>
+          <p className="text-sm sm:text-base tracking-[0.1em] sm:tracking-[0.25em] uppercase font-semibold text-center px-6 max-w-[90vw] text-cyan-300 text-opacity-70">
             {tr.startMenu.tagline}
           </p>
 
           <div className="flex items-center gap-4">
             {progress.highestCompleted > 0 && (
-              <p className="text-xs tracking-wider" style={{ color: 'rgba(255,255,255,0.3)' }}>
+              <p className="text-xs tracking-wider text-white text-opacity-30">
                 {tr.startMenu.best.replace('{n}', String(progress.highestCompleted))}
               </p>
             )}
@@ -181,8 +181,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
 
             <button
               onClick={onOpenShop}
-              className="p-3.5 rounded-2xl transition-colors border"
-              style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.1)' }}
+              className="p-3.5 rounded-2xl transition-colors border bg-white bg-opacity-10 border-white border-opacity-10"
             >
               <ShoppingBag className="w-5 h-5 text-amber-400" />
             </button>
@@ -191,8 +190,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           {unlockedMilestones.length > 1 && (
             <button
               onClick={() => setShowLevelSelect(!showLevelSelect)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold tracking-wide transition-colors"
-              style={{ color: 'rgba(103,232,249,0.7)' }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold tracking-wide transition-colors text-cyan-300 text-opacity-70"
             >
               <span>{tr.startMenu.selectLevel}</span>
               <ChevronDown className={`w-4 h-4 transition-transform ${showLevelSelect ? 'rotate-180' : ''}`} />
@@ -200,7 +198,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           )}
 
           {showLevelSelect && (
-            <div className="mt-1 p-3 bg-[#0B1628] rounded-xl max-w-sm max-h-[40vh] overflow-y-auto shop-scroll border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+            <div className="mt-1 p-3 bg-[#0B1628] rounded-xl max-w-sm max-h-[40vh] overflow-y-auto shop-scroll border border-white border-opacity-10">
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
                 {[...MILESTONE_LEVELS].map((lvl) => {
                   const isUnlocked = unlockedMilestones.includes(lvl);
@@ -212,20 +210,19 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
                       key={lvl}
                       onClick={() => isUnlocked && setSelectedLevel(lvl)}
                       disabled={!isUnlocked}
-                      className="relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all"
-                      style={
+                      className={`relative flex flex-col items-center gap-1 p-2 rounded-lg transition-all border ${
                         isUnlocked
                           ? isSelected
-                            ? { backgroundColor: 'rgba(6,182,212,0.3)', border: '1px solid rgba(34,211,238,0.5)', color: '#fff' }
-                            : { backgroundColor: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }
-                          : { backgroundColor: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.2)', cursor: 'not-allowed' }
-                      }
+                            ? 'bg-cyan-600 bg-opacity-30 border-cyan-400 border-opacity-50 text-white'
+                            : 'bg-white bg-opacity-5 border-white border-opacity-10 text-white text-opacity-70'
+                          : 'bg-white bg-opacity-5 border-white border-opacity-5 text-white text-opacity-20 cursor-not-allowed'
+                      }`}
                     >
                       <div className="flex items-center gap-1">
                         {isUnlocked ? (
-                          <Unlock className="w-3 h-3 text-green-400" style={{ opacity: 0.7 }} />
+                          <Unlock className="w-3 h-3 text-green-400 opacity-70" />
                         ) : (
-                          <Lock className="w-3 h-3" style={{ color: 'rgba(255,255,255,0.2)' }} />
+                          <Lock className="w-3 h-3 text-white text-opacity-20" />
                         )}
                         <span className="font-bold text-sm">{lvl}</span>
                       </div>
@@ -257,8 +254,7 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
         <div className="absolute bottom-4 left-0 right-0 flex items-center justify-between px-5">
           <button
             onClick={() => setShowPrivacy(true)}
-            className="text-[10px] tracking-widest uppercase font-semibold transition-colors"
-            style={{ color: 'rgba(255,255,255,0.25)' }}
+            className="text-[10px] tracking-widest uppercase font-semibold transition-colors text-white text-opacity-25"
           >
             {tr.startMenu.privacyPolicy}
           </button>
@@ -266,26 +262,24 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
           <div className="relative">
             <button
               onClick={() => setShowLangPicker(!showLangPicker)}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-colors border"
-              style={{ backgroundColor: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.1)' }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-colors border bg-white bg-opacity-10 border-white border-opacity-10"
             >
-              <Globe className="w-3.5 h-3.5" style={{ color: 'rgba(103,232,249,0.7)' }} />
-              <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.7)' }}>{currentLangOption.flag} {TRANSLATIONS[lang].langName}</span>
-              <ChevronDown className={`w-3 h-3 transition-transform ${showLangPicker ? 'rotate-180' : ''}`} style={{ color: 'rgba(255,255,255,0.4)' }} />
+              <Globe className="w-3.5 h-3.5 text-cyan-300 text-opacity-70" />
+              <span className="text-xs font-semibold text-white text-opacity-70">{currentLangOption.flag} {TRANSLATIONS[lang].langName}</span>
+              <ChevronDown className={`w-3 h-3 transition-transform text-white text-opacity-40 ${showLangPicker ? 'rotate-180' : ''}`} />
             </button>
 
             {showLangPicker && (
-              <div className="absolute bottom-full right-0 mb-2 w-44 bg-[#0E1A2E] rounded-xl overflow-hidden shadow-2xl z-50 border" style={{ borderColor: 'rgba(255,255,255,0.15)' }}>
+              <div className="absolute bottom-full right-0 mb-2 w-44 bg-[#0E1A2E] rounded-xl overflow-hidden shadow-2xl z-50 border border-white border-opacity-15">
                 {LANG_OPTIONS.map((opt) => (
                   <button
                     key={opt.code}
                     onClick={() => { setLang(opt.code); setShowLangPicker(false); }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-semibold transition-colors"
-                    style={
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-left text-xs font-semibold transition-colors ${
                       lang === opt.code
-                        ? { backgroundColor: 'rgba(6,182,212,0.2)', color: 'rgb(103,232,249)' }
-                        : { color: 'rgba(255,255,255,0.6)' }
-                    }
+                        ? 'bg-cyan-600 bg-opacity-20 text-cyan-300'
+                        : 'text-white text-opacity-60'
+                    }`}
                   >
                     <span className="text-sm">{opt.flag}</span>
                     <span>{TRANSLATIONS[opt.code].langName}</span>
@@ -298,30 +292,28 @@ export default function StartMenu({ coins, onPlay, onOpenShop }: StartMenuProps)
       </div>
 
       {showPrivacy && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
-          <div className="relative w-[90vw] max-w-md bg-[#0E1A2E] rounded-2xl overflow-hidden overlay-enter border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
-            <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="relative w-[90vw] max-w-md bg-[#0E1A2E] rounded-2xl overflow-hidden overlay-enter border border-white border-opacity-10">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-white border-opacity-10">
               <h2 className="text-base font-extrabold text-white tracking-wide">
                 {tr.startMenu.privacyPolicy}
               </h2>
               <button
                 onClick={() => setShowPrivacy(false)}
-                className="p-1.5 rounded-lg transition-colors"
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+                className="p-1.5 rounded-lg transition-colors bg-white bg-opacity-10"
               >
-                <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.7)' }} />
+                <X className="w-4 h-4 text-white text-opacity-70" />
               </button>
             </div>
             <div className="px-5 py-5 space-y-3">
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.5)' }}>
+              <p className="text-sm leading-relaxed text-white text-opacity-50">
                 Your privacy matters to us. To read our full Privacy Policy, please visit the link below.
               </p>
               <a
                 href={PRIVACY_POLICY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full text-center px-5 py-3 text-white font-bold text-sm rounded-xl transition-colors"
-                style={{ backgroundColor: 'rgba(8,145,178,0.8)' }}
+                className="block w-full text-center px-5 py-3 text-white font-bold text-sm rounded-xl transition-colors bg-cyan-700 bg-opacity-80"
               >
                 {tr.startMenu.privacyPolicy} ↗
               </a>

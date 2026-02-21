@@ -56,8 +56,9 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
     isStatic: true,
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 0.2,
+    restitution: 1.2,
     friction: 0,
+    frictionStatic: 0,
     render: { visible: false },
   });
 
@@ -65,8 +66,9 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
     isStatic: true,
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 0.2,
+    restitution: 1.2,
     friction: 0,
+    frictionStatic: 0,
     render: { visible: false },
   });
 
