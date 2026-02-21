@@ -24,14 +24,16 @@ export function createBucket(canvasWidth: number, canvasHeight: number): Bucket 
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
     restitution: 0.2,
-  });
+    chamfer: { radius: 5 },
+  } as Matter.IChamferableBodyDefinition);
 
   const rightWall = Matter.Bodies.rectangle(x + w, y + h / 2, t, h, {
     isStatic: true,
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
     restitution: 0.2,
-  });
+    chamfer: { radius: 5 },
+  } as Matter.IChamferableBodyDefinition);
 
   const bottom = Matter.Bodies.rectangle(x + w / 2, y + h, w + t, t, {
     isStatic: true,

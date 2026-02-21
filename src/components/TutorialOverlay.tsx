@@ -207,15 +207,15 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
   }, [step, currentStep.animationType]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.8)' }}>
       <div
         className={`
-          w-full max-w-sm mx-4 mb-8 rounded-2xl overflow-hidden border border-white/10
+          w-full max-w-sm mx-4 mb-8 rounded-2xl overflow-hidden border
           bg-[#0E1A2E] shadow-2xl
           transition-all duration-200
           ${animating ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}
         `}
-        style={{ boxShadow: '0 0 60px rgba(0,0,0,0.6), 0 0 30px rgba(0,212,255,0.05)' }}
+        style={{ borderColor: 'rgba(255,255,255,0.1)', boxShadow: '0 0 60px rgba(0,0,0,0.6), 0 0 30px rgba(0,212,255,0.05)' }}
       >
         <div className="relative">
           <canvas
@@ -225,9 +225,10 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
           />
           <button
             onClick={markDone}
-            className="absolute top-3 right-3 p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors"
+            className="absolute top-3 right-3 p-1.5 rounded-lg transition-colors"
+            style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
           >
-            <X className="w-3.5 h-3.5 text-white/50" />
+            <X className="w-3.5 h-3.5" style={{ color: 'rgba(255,255,255,0.5)' }} />
           </button>
         </div>
 
@@ -236,7 +237,7 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
             <span className="text-2xl">{currentStep.icon}</span>
             <h3 className="text-white font-extrabold text-lg tracking-tight">{currentStep.title}</h3>
           </div>
-          <p className="text-white/55 text-sm leading-relaxed mb-4">
+          <p className="text-sm leading-relaxed mb-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
             {currentStep.description}
           </p>
 
@@ -245,20 +246,21 @@ export default function TutorialOverlay({ onDone }: TutorialOverlayProps) {
               {STEPS.map((_, i) => (
                 <div
                   key={i}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    i === step
-                      ? 'w-5 bg-cyan-400'
-                      : i < step
-                      ? 'w-1.5 bg-cyan-600/50'
-                      : 'w-1.5 bg-white/15'
-                  }`}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${i === step ? 'w-5 bg-cyan-400' : 'w-1.5'}`}
+                  style={
+                    i < step
+                      ? { backgroundColor: 'rgba(8,145,178,0.5)' }
+                      : i > step
+                      ? { backgroundColor: 'rgba(255,255,255,0.15)' }
+                      : undefined
+                  }
                 />
               ))}
             </div>
 
             <button
               onClick={nextStep}
-              className="flex items-center gap-1 px-5 py-2 bg-cyan-500 hover:bg-cyan-400 active:scale-95 text-white font-bold text-sm rounded-xl transition-all"
+              className="flex items-center gap-1 px-5 py-2 bg-cyan-500 active:scale-95 text-white font-bold text-sm rounded-xl transition-all"
             >
               {step < STEPS.length - 1 ? (
                 <>{tr.tutorial.next} <ChevronRight className="w-4 h-4" /></>

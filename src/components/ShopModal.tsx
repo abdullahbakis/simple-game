@@ -67,14 +67,14 @@ export default function ShopModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-      <div className="relative w-[90vw] max-w-md max-h-[85vh] bg-[#0E1A2E] border border-white/10 rounded-2xl overflow-hidden flex flex-col overlay-enter">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+    <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: 'rgba(0,0,0,0.7)' }}>
+      <div className="relative w-[90vw] max-w-md max-h-[85vh] bg-[#0E1A2E] rounded-2xl overflow-hidden flex flex-col overlay-enter border" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
           <h2 className="text-xl font-extrabold text-white tracking-wide">{tr.shop.title}</h2>
           <div className="flex items-center gap-3">
             <span className="text-amber-400 font-bold text-sm">{coins.toLocaleString()} {tr.shop.coins.replace('{n}', '').trim()}</span>
-            <button onClick={onClose} className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-              <X className="w-4 h-4 text-white/70" />
+            <button onClick={onClose} className="p-1.5 rounded-lg transition-colors" style={{ backgroundColor: 'rgba(255,255,255,0.1)' }}>
+              <X className="w-4 h-4" style={{ color: 'rgba(255,255,255,0.7)' }} />
             </button>
           </div>
         </div>
@@ -85,7 +85,8 @@ export default function ShopModal({
             <div className="space-y-2">
               <button
                 onClick={onWatchAdForCoins}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/20 hover:bg-cyan-500/20 transition-colors"
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-colors border"
+                style={{ backgroundColor: 'rgba(6,182,212,0.1)', borderColor: 'rgba(6,182,212,0.2)' }}
               >
                 <div className="flex items-center gap-2">
                   <Tv className="w-4 h-4 text-cyan-400" />
@@ -105,20 +106,21 @@ export default function ShopModal({
                       key={product.id}
                       onClick={() => handlePurchase(product)}
                       disabled={!!purchasingId}
-                      className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/15 hover:bg-amber-500/20 transition-colors disabled:opacity-60"
+                      className="flex flex-col items-center gap-0.5 px-2 py-2.5 rounded-xl transition-colors disabled:opacity-60 border"
+                      style={{ backgroundColor: 'rgba(245,158,11,0.1)', borderColor: 'rgba(245,158,11,0.15)' }}
                     >
                       {isPurchasing ? (
                         <Loader className="w-3 h-3 text-amber-400 animate-spin" />
                       ) : (
                         <>
                           <div className="flex items-center gap-0.5">
-                            {nativeIAP && <ShoppingCart className="w-2.5 h-2.5 text-amber-300/60" />}
+                            {nativeIAP && <ShoppingCart className="w-2.5 h-2.5" style={{ color: 'rgba(252,211,77,0.6)' }} />}
                             <span className="text-white font-bold text-[11px]">{iapLabels[i]}</span>
                           </div>
                           <span className="text-amber-400 font-extrabold text-[10px]">
                             {(product.coins / 1000).toFixed(0)}k
                           </span>
-                          <span className="text-white/40 text-[9px]">{product.price}</span>
+                          <span className="text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>{product.price}</span>
                         </>
                       )}
                     </button>
@@ -134,21 +136,22 @@ export default function ShopModal({
               <button
                 onClick={onUnlockNextMilestone}
                 disabled={!canAffordMilestone}
-                className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors ${
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl border transition-colors"
+                style={
                   canAffordMilestone
-                    ? 'bg-green-500/10 border-green-500/20 hover:bg-green-500/20'
-                    : 'bg-white/3 border-white/5 cursor-not-allowed'
-                }`}
+                    ? { backgroundColor: 'rgba(34,197,94,0.1)', borderColor: 'rgba(34,197,94,0.2)' }
+                    : { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)', cursor: 'not-allowed' }
+                }
               >
                 <div className="flex items-center gap-2">
-                  <Unlock className={`w-4 h-4 ${canAffordMilestone ? 'text-green-400' : 'text-white/20'}`} />
-                  <span className={`font-bold text-sm ${canAffordMilestone ? 'text-white' : 'text-white/30'}`}>
+                  <Unlock style={{ width: 16, height: 16, color: canAffordMilestone ? 'rgb(74,222,128)' : 'rgba(255,255,255,0.2)' }} />
+                  <span className="font-bold text-sm" style={{ color: canAffordMilestone ? '#fff' : 'rgba(255,255,255,0.3)' }}>
                     {tr.shop.unlockNextMilestone}
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Coins className={`w-3 h-3 ${canAffordMilestone ? 'text-amber-400' : 'text-white/20'}`} />
-                  <span className={`font-extrabold text-sm ${canAffordMilestone ? 'text-amber-400' : 'text-white/20'}`}>
+                  <Coins style={{ width: 12, height: 12, color: canAffordMilestone ? 'rgb(251,191,36)' : 'rgba(255,255,255,0.2)' }} />
+                  <span className="font-extrabold text-sm" style={{ color: canAffordMilestone ? 'rgb(251,191,36)' : 'rgba(255,255,255,0.2)' }}>
                     {nextMilestoneCost.toLocaleString()}
                   </span>
                 </div>
@@ -165,6 +168,17 @@ export default function ShopModal({
                 const canAfford = coins >= skin.cost;
                 const isCosmic = skin.id === 'cosmic-emperor';
 
+                let cardStyle: React.CSSProperties;
+                if (isCosmic && (!owned || isSelected)) {
+                  cardStyle = {};
+                } else if (isSelected) {
+                  cardStyle = { backgroundColor: 'rgba(6,182,212,0.15)', borderColor: 'rgba(34,211,238,0.4)' };
+                } else if (owned) {
+                  cardStyle = { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)' };
+                } else {
+                  cardStyle = { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.05)' };
+                }
+
                 return (
                   <div
                     key={skin.id}
@@ -174,32 +188,31 @@ export default function ShopModal({
                         ? 'cosmic-shop-card border-amber-400/40 relative overflow-hidden'
                         : isCosmic && isSelected
                           ? 'cosmic-shop-card border-amber-400/50 relative overflow-hidden'
-                          : isSelected
-                            ? 'bg-cyan-500/15 border-cyan-400/40'
-                            : owned
-                              ? 'bg-white/5 border-white/10 hover:bg-white/8'
-                              : 'bg-white/3 border-white/5'
+                          : ''
                       }
                     `}
+                    style={(isCosmic && (!owned || isSelected)) ? undefined : cardStyle}
                   >
                     {isCosmic && <div className="cosmic-sparkle-bg absolute inset-0 pointer-events-none" />}
                     <div className="flex items-center gap-3 relative z-10">
                       <SkinPreview skinId={skin.id} />
                       <div>
                         <p className={`font-bold text-sm ${
-                          isCosmic ? 'cosmic-text-shimmer' : owned ? 'text-white' : 'text-white/50'
-                        }`}>
+                          isCosmic ? 'cosmic-text-shimmer' : owned ? 'text-white' : ''
+                        }`}
+                          style={(!isCosmic && !owned) ? { color: 'rgba(255,255,255,0.5)' } : undefined}
+                        >
                           {skin.name}
                         </p>
                         {!owned && (
-                          <p className={`text-xs ${
-                            isCosmic ? 'text-amber-300/80' : canAfford ? 'text-amber-400' : 'text-white/30'
-                          }`}>
+                          <p className={`text-xs ${isCosmic ? 'text-amber-300' : ''}`}
+                            style={(!isCosmic) ? { color: canAfford ? 'rgb(251,191,36)' : 'rgba(255,255,255,0.3)' } : { opacity: 0.8 }}
+                          >
                             {tr.shop.coins.replace('{n}', skin.cost.toLocaleString())}
                           </p>
                         )}
                         {isCosmic && !owned && (
-                          <p className="text-[9px] text-amber-400/50 mt-0.5">
+                          <p className="text-[9px] mt-0.5" style={{ color: 'rgba(251,191,36,0.5)' }}>
                             {tr.shop.orBeatLevel100}
                           </p>
                         )}
@@ -214,9 +227,8 @@ export default function ShopModal({
                       ) : owned ? (
                         <button
                           onClick={() => onSelect(skin.id)}
-                          className={`px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-colors ${
-                            isCosmic ? 'bg-amber-500/30 hover:bg-amber-500/50' : 'bg-white/10 hover:bg-white/20'
-                          }`}
+                          className="px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-colors"
+                          style={{ backgroundColor: isCosmic ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)' }}
                         >
                           {tr.shop.equip}
                         </button>
@@ -224,13 +236,14 @@ export default function ShopModal({
                         <button
                           onClick={() => onBuy(skin.id, skin.cost)}
                           className={`px-3 py-1.5 text-white text-xs font-bold rounded-lg transition-colors ${
-                            isCosmic ? 'bg-amber-500/80 hover:bg-amber-500 cosmic-btn-glow' : 'bg-amber-500/80 hover:bg-amber-500'
+                            isCosmic ? 'bg-amber-500 cosmic-btn-glow' : 'bg-amber-500'
                           }`}
+                          style={{ opacity: 0.8 }}
                         >
                           {tr.shop.buy}
                         </button>
                       ) : (
-                        <span className="flex items-center gap-1 text-white/20 text-xs">
+                        <span className="flex items-center gap-1 text-xs" style={{ color: 'rgba(255,255,255,0.2)' }}>
                           <Lock className="w-3 h-3" /> {tr.shop.locked}
                         </span>
                       )}

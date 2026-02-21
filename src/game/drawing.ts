@@ -79,6 +79,14 @@ function makeSegmentBody(
   return body;
 }
 
+const EDGE_SNAP = 30;
+
+function snapToEdge(x: number): number {
+  if (x < EDGE_SNAP) return 0;
+  if (x > window.innerWidth - EDGE_SNAP) return window.innerWidth;
+  return x;
+}
+
 export function continueFreehand(
   state: DrawingState,
   world: Matter.World,
@@ -88,26 +96,28 @@ export function continueFreehand(
 ) {
   if (!state.isDrawing) return;
 
-  const dx = x - state.lastX;
+  const snappedX = snapToEdge(x);
+
+  const dx = snappedX - state.lastX;
   const dy = y - state.lastY;
   const dist = Math.sqrt(dx * dx + dy * dy);
 
   if (dist < GAME.chainSegmentLength) return;
 
-  const body = makeSegmentBody(world, state.lastX, state.lastY, x, y);
+  const body = makeSegmentBody(world, state.lastX, state.lastY, snappedX, y);
 
   state.segments.push({
     body,
     x1: state.lastX,
     y1: state.lastY,
-    x2: x,
+    x2: snappedX,
     y2: y,
     createdAt: now,
     opacity: 1,
     strokeId: state.currentStrokeId,
   });
 
-  state.lastX = x;
+  state.lastX = snappedX;
   state.lastY = y;
 }
 
