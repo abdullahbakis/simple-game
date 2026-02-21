@@ -109,9 +109,9 @@ export function clampParticleVelocities(spawner: Spawner, maxSpeed: number) {
   }
 }
 
-const NUDGE_THRESHOLD = 1800;
-const REMOVE_THRESHOLD = 4000;
-const STUCK_SPEED = 0.5 * screenScale;
+const NUDGE_THRESHOLD = 800;
+const REMOVE_THRESHOLD = 3500;
+const STUCK_SPEED = 0.6 * screenScale;
 
 export function handleStuckParticles(
   spawner: Spawner,
@@ -140,12 +140,12 @@ export function handleStuckParticles(
     if (duration > REMOVE_THRESHOLD) {
       removed.push(p);
     } else if (duration > NUDGE_THRESHOLD) {
-      const angle = Math.random() * Math.PI * 2;
+      const nudgeAngle = Math.PI * 0.5 + (Math.random() - 0.5) * Math.PI * 0.6;
       Matter.Body.applyForce(p.body, p.body.position, {
-        x: Math.cos(angle) * 0.0006 * screenScale,
-        y: (Math.sin(angle) * 0.0004 + 0.0005) * screenScale,
+        x: Math.cos(nudgeAngle) * 0.001 * screenScale,
+        y: Math.sin(nudgeAngle) * 0.0012 * screenScale,
       });
-      p.stuckSince = now - NUDGE_THRESHOLD + 400;
+      p.stuckSince = now - NUDGE_THRESHOLD + 300;
     }
   }
 

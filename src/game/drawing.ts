@@ -69,8 +69,8 @@ function makeSegmentBody(
       category: CATEGORY.chain,
       mask: CATEGORY.particle,
     },
-    restitution: 0.1,
-    friction: 0.05,
+    restitution: 0.3,
+    friction: 0.01,
     frictionStatic: 0,
     slop: 1.5,
   } as Matter.IChamferableBodyDefinition);

@@ -27,22 +27,27 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
   }
 
   const y = canvasHeight - h - 30;
-  const capRadius = GAME.particleRadius * 1.8;
+  const capRadius = t * 0.8 + GAME.particleRadius * 0.4;
 
+  const wallChamfer = Math.min(5, t);
   const leftWall = Matter.Bodies.rectangle(x, y + h / 2, t, h, {
     isStatic: true,
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 0.2,
-    chamfer: { radius: 5 },
+    restitution: 0.3,
+    friction: 0.01,
+    frictionStatic: 0,
+    chamfer: { radius: wallChamfer },
   } as Matter.IChamferableBodyDefinition);
 
   const rightWall = Matter.Bodies.rectangle(x + w, y + h / 2, t, h, {
     isStatic: true,
     label: 'bucketWall',
     collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
-    restitution: 0.2,
-    chamfer: { radius: 5 },
+    restitution: 0.3,
+    friction: 0.01,
+    frictionStatic: 0,
+    chamfer: { radius: wallChamfer },
   } as Matter.IChamferableBodyDefinition);
 
   const bottom = Matter.Bodies.rectangle(x + w / 2, y + h, w + t, t, {
@@ -52,21 +57,21 @@ export function createBucket(canvasWidth: number, canvasHeight: number, level?: 
     restitution: 0.1,
   });
 
-  const leftCap = Matter.Bodies.circle(x, y - capRadius * 0.3, capRadius, {
+  const leftCap = Matter.Bodies.circle(x, y, capRadius, {
     isStatic: true,
     label: 'bucketCap',
-    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle | CATEGORY.chain },
-    restitution: 1.5,
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
+    restitution: 0.8,
     friction: 0,
     frictionStatic: 0,
     render: { visible: false },
   });
 
-  const rightCap = Matter.Bodies.circle(x + w, y - capRadius * 0.3, capRadius, {
+  const rightCap = Matter.Bodies.circle(x + w, y, capRadius, {
     isStatic: true,
     label: 'bucketCap',
-    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle | CATEGORY.chain },
-    restitution: 1.5,
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
+    restitution: 0.8,
     friction: 0,
     frictionStatic: 0,
     render: { visible: false },
