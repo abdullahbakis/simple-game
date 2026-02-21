@@ -10,14 +10,24 @@ export interface Bucket {
   collectPulse: number;
 }
 
-export function createBucket(canvasWidth: number, canvasHeight: number): Bucket {
-  const centerX = (canvasWidth - GAME.bucketWidth) / 2;
-  const maxOffset = canvasWidth * 0.15;
-  const x = Math.max(canvasWidth * 0.1, Math.min(canvasWidth * 0.9 - GAME.bucketWidth, centerX + (Math.random() - 0.5) * maxOffset * 2));
-  const y = canvasHeight - GAME.bucketHeight - 30;
+export function createBucket(canvasWidth: number, canvasHeight: number, level?: number): Bucket {
   const w = GAME.bucketWidth;
   const h = GAME.bucketHeight;
   const t = GAME.bucketWallThickness;
+
+  let x: number;
+  if (level !== undefined && level > 3) {
+    const minX = w + 20;
+    const maxX = canvasWidth - w - 20;
+    x = minX + Math.random() * (maxX - minX);
+  } else {
+    const centerX = (canvasWidth - w) / 2;
+    const maxOffset = canvasWidth * 0.15;
+    x = Math.max(canvasWidth * 0.1, Math.min(canvasWidth * 0.9 - w, centerX + (Math.random() - 0.5) * maxOffset * 2));
+  }
+
+  const y = canvasHeight - h - 30;
+  const capRadius = t / 2 + 1;
 
   const leftWall = Matter.Bodies.rectangle(x, y + h / 2, t, h, {
     isStatic: true,
@@ -42,6 +52,24 @@ export function createBucket(canvasWidth: number, canvasHeight: number): Bucket 
     restitution: 0.1,
   });
 
+  const leftCap = Matter.Bodies.circle(x, y, capRadius, {
+    isStatic: true,
+    label: 'bucketWall',
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
+    restitution: 0.2,
+    friction: 0,
+    render: { visible: false },
+  });
+
+  const rightCap = Matter.Bodies.circle(x + w, y, capRadius, {
+    isStatic: true,
+    label: 'bucketWall',
+    collisionFilter: { category: CATEGORY.bucket, mask: CATEGORY.particle },
+    restitution: 0.2,
+    friction: 0,
+    render: { visible: false },
+  });
+
   const sensor = Matter.Bodies.rectangle(x + w / 2, y + h * 0.5, w - t * 2, h * 0.6, {
     isStatic: true,
     isSensor: true,
@@ -50,7 +78,7 @@ export function createBucket(canvasWidth: number, canvasHeight: number): Bucket 
   });
 
   return {
-    walls: [leftWall, rightWall, bottom],
+    walls: [leftWall, rightWall, bottom, leftCap, rightCap],
     sensor,
     x,
     y,

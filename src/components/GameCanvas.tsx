@@ -118,7 +118,7 @@ export default function GameCanvas({
     const { engine, world } = createGameEngine(width, height, levelConfig.gravityScale);
     const spawner = createSpawner(width);
     const drawing = createDrawingState();
-    const bucket = createBucket(width, height);
+    const bucket = createBucket(width, height, level);
     addBucketToWorld(bucket, world);
     const obstacles = createObstacles(
       levelConfig,

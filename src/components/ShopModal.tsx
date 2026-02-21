@@ -185,13 +185,17 @@ export default function ShopModal({
                     className={`
                       flex items-center justify-between px-4 py-3 rounded-xl border transition-all
                       ${isCosmic && !owned
-                        ? 'cosmic-shop-card border-amber-400/40 relative overflow-hidden'
+                        ? 'cosmic-shop-card relative overflow-hidden'
                         : isCosmic && isSelected
-                          ? 'cosmic-shop-card border-amber-400/50 relative overflow-hidden'
+                          ? 'cosmic-shop-card relative overflow-hidden'
                           : ''
                       }
                     `}
-                    style={(isCosmic && (!owned || isSelected)) ? undefined : cardStyle}
+                    style={
+                      (isCosmic && (!owned || isSelected))
+                        ? { borderColor: isSelected ? 'rgba(251,191,36,0.5)' : 'rgba(251,191,36,0.4)' }
+                        : cardStyle
+                    }
                   >
                     {isCosmic && <div className="cosmic-sparkle-bg absolute inset-0 pointer-events-none" />}
                     <div className="flex items-center gap-3 relative z-10">

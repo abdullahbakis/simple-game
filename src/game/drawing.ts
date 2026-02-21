@@ -79,7 +79,7 @@ function makeSegmentBody(
   return body;
 }
 
-const EDGE_SNAP = 30;
+const EDGE_SNAP = 3;
 
 function snapToEdge(x: number): number {
   if (x < EDGE_SNAP) return 0;
