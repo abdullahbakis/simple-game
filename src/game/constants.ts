@@ -18,7 +18,7 @@ export const isMobile =
   window.innerWidth < 768 ||
   (('ontouchstart' in window || navigator.maxTouchPoints > 0) && window.innerWidth < 1024);
 
-const mobileParticleBoost = isMobile ? 1.3 : 1.0;
+const mobileParticleBoost = isMobile ? 1.35 : 1.0;
 
 export const GAME = {
   gravity: 0.30 * screenScale,
