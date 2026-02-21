@@ -78,7 +78,7 @@ export function getLevelConfig(level: number) {
   }
 
   const staticBarCount = hazardLifecycle(l, 2, 4, 8, 3);
-  const windZoneCount = hazardLifecycle(l, 4, 7, 12, 2);
+  const windZoneCount = hazardLifecycle(l, 3, 7, 12, 2);
   const spinnerCount = hazardLifecycle(l, 7, 10, 15, 3);
   const movingPlatformCount = hazardLifecycle(l, 10, 14, 19, 3);
 

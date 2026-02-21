@@ -2,6 +2,7 @@ import { Volume2, VolumeX, ArrowDown, Coins, Tv, DollarSign, X, Pause, Play, Hom
 import { GAME, getLevelConfig, MAX_GRAVITY, MAX_LEVEL } from '../game/constants';
 import { earnCoins, getReviveCost } from '../game/progress';
 import { useLang } from '../i18n/LangContext';
+import TutorialHint from './TutorialHint';
 import type { GameStats } from './GameCanvas';
 
 type GameState = 'menu' | 'playing' | 'paused' | 'levelComplete' | 'gameOver';
@@ -131,6 +132,10 @@ export default function GameUI({
           </div>
         </div>
       </div>
+
+      {level <= 3 && gameState === 'playing' && (
+        <TutorialHint level={level} gameState={gameState} score={stats.score} />
+      )}
 
       {gameState === 'levelComplete' && level >= MAX_LEVEL && (
         <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/80 backdrop-blur-md">

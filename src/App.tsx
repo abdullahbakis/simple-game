@@ -4,7 +4,6 @@ import GameUI from './components/GameUI';
 import StartMenu from './components/StartMenu';
 import ShopModal from './components/ShopModal';
 import ToastNotification from './components/ToastNotification';
-import TutorialOverlay, { isTutorialDone } from './components/TutorialOverlay';
 import type { GameStats } from './components/GameCanvas';
 import type { ToastData } from './components/ToastNotification';
 import { updateProgress, loadCoins, saveCoins, earnCoins, getReviveCost, loadProgress, MILESTONE_LEVELS, unlockMilestone } from './game/progress';
@@ -52,7 +51,6 @@ function AppInner() {
   const [unlockedSkins, setUnlockedSkins] = useState(getUnlockedSkins);
   const [showShop, setShowShop] = useState(false);
   const [toasts, setToasts] = useState<ToastData[]>([]);
-  const [showTutorial, setShowTutorial] = useState(!isTutorialDone());
   const [stats, setStats] = useState<GameStats>({
     score: 0,
     totalSpawned: 0,
@@ -301,10 +299,6 @@ function AppInner() {
           <ToastNotification toasts={toasts} onDismiss={dismissToast} />
         </>
       )}
-      {showTutorial && gameState === 'menu' && (
-        <TutorialOverlay onDone={() => setShowTutorial(false)} />
-      )}
-
       {showShop && (
         <ShopModal
           coins={coins}
