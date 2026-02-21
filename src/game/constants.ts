@@ -21,7 +21,7 @@ export const isMobile =
 const mobileParticleBoost = isMobile ? 1.35 : 1.0;
 
 export const GAME = {
-  gravity: 0.30 * screenScale,
+  gravity: 0.35 * screenScale,
   particleRadius: 7 * screenScale * mobileParticleBoost,
   chainDecayTime: 7000,
   chainSegmentLength: 8,
